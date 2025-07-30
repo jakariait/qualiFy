@@ -8,8 +8,8 @@ const HomePage = () => {
   return (
     <Layout>
       <ProductCarousel />
-      <Feature />
-      <ProductByFlag/>
+      {/*<Feature />*/}
+      {/*<ProductByFlag/>*/}
     </Layout>
   );
 };
