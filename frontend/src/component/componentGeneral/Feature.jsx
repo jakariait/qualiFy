@@ -15,10 +15,10 @@ const Feature = () => {
     ); // Display error message
   }
   return (
-    <div className="xl:container xl:mx-auto pb-6 px-3">
+    <div className="xl:container xl:mx-auto pb-6 pt-4 px-3">
       {FeatureStoreListLoading ? (
         <>
-          <div className={"grid grid-cols-2 md:grid-cols-4 gap-6 mb-6"}>
+          <div className={"grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"}>
             <Skeleton height={200} width={"100%"} />
             <Skeleton height={200} width={"100%"} />
             <Skeleton height={200} width={"100%"} />
@@ -27,24 +27,22 @@ const Feature = () => {
         </>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {FeatureStoreList.map((feature) => (
               <div
                 key={feature._id}
-                className="bg-white border border-gray-300 rounded-xl shadow-md py-3 flex flex-col items-center text-center hover:-translate-y-1 transition-all duration-300"
+                className="bg-white border border-gray-50 rounded-xl shadow-md  flex flex-col items-center text-center hover:-translate-y-1 transition-all duration-300"
               >
                 {/* Centering the Image */}
                 <div className="flex justify-center items-center">
                   <ImageComponent
                     imageName={feature.imgSrc}
-                    className="w-16 h-16 object-contain"
+                    className=" object-contain"
                     altName={feature.title}
                   />
                 </div>
                 {/* Title */}
-                <h3 className="mt-6 text-gray-700 text-sm ">
-                  {feature.title}
-                </h3>
+                <h3 className="mt-2  p-2">{feature.title}</h3>
               </div>
             ))}
           </div>

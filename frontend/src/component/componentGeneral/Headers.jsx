@@ -138,7 +138,7 @@ const Headers = () => {
       {/* Header Main */}
       <div
         ref={headerMainRef}
-        className={`border-b border-gray-200 bg-white ${
+        className={`accentBgColor ${
           isSticky ? "fixed top-0 left-0 right-0 z-40" : ""
         }`}
       >
@@ -155,6 +155,7 @@ const Headers = () => {
             <ImageComponent
               imageName={GeneralInfoList?.PrimaryLogo}
               className="w-20 md:w-30"
+              showSkeleton={false}
             />
           </Link>
 

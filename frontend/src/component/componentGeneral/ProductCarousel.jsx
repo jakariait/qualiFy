@@ -56,7 +56,7 @@ const ProductCarousel = () => {
     ); // Display error message
   }
   return (
-    <div className="product-carousel xl:container xl:mx-auto pb-4 px-3 relative">
+    <div className="product-carousel xl:container xl:mx-auto  px-3 relative">
       {CarouselStoreListLoading ? (
         <>
           <Skeleton height={400} width={"100%"} />
@@ -69,7 +69,7 @@ const ProductCarousel = () => {
                 <ImageComponent
                   imageName={product.imgSrc}
                   className="w-full h-full object-cover"
-                  skeletonHeight={400}
+                  skeletonHeight={300}
                   altName={GeneralInfoList?.CompanyEmail}
                 />
               </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaUser, FaLock } from "react-icons/fa";
+import { User, Lock, Eye, EyeOff } from "lucide-react"; // Lucide icons
 import { Link, useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
@@ -10,6 +10,7 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const { login, loading, error } = useAuthUserStore();
   const { syncCartToDB, loadCartFromBackend } = useCartStore();
+  const [showPassword, setShowPassword] = useState(false);
 
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -40,12 +41,12 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center bg-white px-4 mt-20 mb-20 md:m-20">
-      <div className="bg-[#EEF5F6] rounded-2xl shadow-md p-8 w-full max-w-md text-center relative">
+    <div className="flex items-center justify-center  px-4 mt-20 mb-20 md:m-20">
+      <div className="bg-[#02353c]/20 rounded-2xl shadow-md p-8 w-full max-w-md text-center relative">
         {/* Lock Icon */}
         <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
           <div className="accentBgColor p-4 rounded-full">
-            <FaLock className="primaryTextColor text-5xl" />
+            <Lock className="primaryTextColor w-8 h-8" />
           </div>
         </div>
 
@@ -63,7 +64,7 @@ const LoginForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* Email / Phone */}
           <div className="flex items-center bg-white rounded-md shadow-sm px-4 py-4">
-            <FaUser className="primaryTextColor mr-5 text-2xl " />
+            <User className="primaryTextColor mr-5 w-8 h-8 " />
             <input
               type="text"
               placeholder="Email or Phone Number"
@@ -76,15 +77,26 @@ const LoginForm = () => {
 
           {/* Password */}
           <div className="flex items-center bg-white rounded-md shadow-sm px-4 py-4">
-            <FaLock className="primaryTextColor mr-5 text-2xl " />
+            <Lock className="primaryTextColor mr-5 w-8 h-8" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               className="w-full outline-none text-sm bg-transparent"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="ml-3 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? (
+                <EyeOff className="w-6 h-6" />
+              ) : (
+                <Eye className="w-6 h-6" />
+              )}
+            </button>
           </div>
 
           {/* Remember Me & Forgot */}

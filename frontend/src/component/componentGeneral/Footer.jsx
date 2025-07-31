@@ -19,6 +19,9 @@ const Footer = () => {
   const { GeneralInfoList, GeneralInfoListLoading, GeneralInfoListError } =
     GeneralInfoStore();
 
+  const currentYear = new Date().getFullYear();
+
+
   if (GeneralInfoListError) {
     return (
       <div className="primaryTextColor container md:mx-auto text-center p-3">
@@ -146,7 +149,7 @@ const Footer = () => {
           </div>
 
           {/* Desktop Footer */}
-          <div className="hidden xl:container xl:mx-auto lg:grid lg:grid-cols-12 gap-10 py-10 px-6">
+          <div className="hidden xl:container xl:mx-auto lg:grid lg:grid-cols-12 gap-10 py-5 px-6">
             <div className="col-span-5 relative">
               <h1 className="mb-3">
                 About Us
@@ -215,7 +218,9 @@ const Footer = () => {
           </div>
 
           <div className="text-center pb-5 pt-5 flex flex-col md:flex-row items-center justify-center gap-3">
-            <p>{GeneralInfoList?.FooterCopyright}</p>
+            <p>
+              © {currentYear} {GeneralInfoList?.FooterCopyright}
+            </p>
             <p>
               Design and Developed by{" "}
               <a
