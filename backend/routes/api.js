@@ -33,6 +33,8 @@ const bkashConfigController = require("../controllers/bkashConfigController");
 const SteadfastConfigController = require("../controllers/SteadfastConfigController");
 const blogController = require("../controllers/BlogController");
 const PassWordResetController = require("../controllers/PassWordResetController");
+const teacherProfileController = require("../controllers/TeacherProfileController");
+
 
 
 const { handleCourierCheck } = require("../controllers/courierController");
@@ -101,6 +103,10 @@ const upload = multer({ storage }).fields([
     name: "userImage",
     maxCount: 1,
   },
+  {
+    name: "teachersImg",
+    maxCount: 1,
+  }
 ]);
 
 // Serve images from the 'uploads' folder as static files
@@ -723,6 +729,16 @@ router.get("/blog/:id", blogController.getBlogById);
 // Password Reset Routes
 router.post("/request-reset", PassWordResetController.requestPasswordReset);
 router.post("/reset-password", PassWordResetController.resetPasswordWithOTP);
+
+
+
+// Teachers Profile Routes
+router.post("/teacher", upload, teacherProfileController.create);
+router.get("/teacher", teacherProfileController.getAll);
+router.get("/teacher/:id", teacherProfileController.getById);
+router.put("/teacher/:id", teacherProfileController.update);
+router.delete("/teacher/:id", teacherProfileController.remove);
+
 
 
 
