@@ -34,8 +34,7 @@ const SteadfastConfigController = require("../controllers/SteadfastConfigControl
 const blogController = require("../controllers/BlogController");
 const PassWordResetController = require("../controllers/PassWordResetController");
 const teacherProfileController = require("../controllers/TeacherProfileController");
-
-
+const StudentReviewController = require("../controllers/StudentReviewController");
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
@@ -106,7 +105,7 @@ const upload = multer({ storage }).fields([
   {
     name: "teachersImg",
     maxCount: 1,
-  }
+  },
 ]);
 
 // Serve images from the 'uploads' folder as static files
@@ -724,13 +723,9 @@ router.get("/activeblog", blogController.getActiveBlogs);
 router.get("/blog/slug/:slug", blogController.getBlogBySlug);
 router.get("/blog/:id", blogController.getBlogById);
 
-
-
 // Password Reset Routes
 router.post("/request-reset", PassWordResetController.requestPasswordReset);
 router.post("/reset-password", PassWordResetController.resetPasswordWithOTP);
-
-
 
 // Teachers Profile Routes
 router.post("/teacher", upload, teacherProfileController.create);
@@ -739,7 +734,21 @@ router.get("/teacher/:id", teacherProfileController.getById);
 router.put("/teacher/:id", teacherProfileController.update);
 router.delete("/teacher/:id", teacherProfileController.remove);
 
+// Student Review Routes
+router.post(
+  "/createstudentreview",
+  upload,
+  StudentReviewController.createStudentReview
+);
 
+router.get(
+  "/getallstudentreview",
+  StudentReviewController.getAllStudentReview
+);
 
+router.delete(
+  "/deletebyidstudentreview/:id",
+  StudentReviewController.deleteByIdStudentReview
+);
 
 module.exports = router;

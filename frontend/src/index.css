@@ -185,4 +185,6 @@ html {
   scroll-behavior: smooth; /* Smooth scrolling globally */
 }
 
-
+.inner-glow {
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+}

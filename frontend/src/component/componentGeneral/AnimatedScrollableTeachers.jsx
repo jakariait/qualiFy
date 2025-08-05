@@ -58,17 +58,39 @@ const AnimatedScrollableTeachers = () => {
 
   return (
     <section className="xl:container  md:mx-auto p-3">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl md:text-4xl font-bold primaryTextColor">
-          Meet Our Instructor
-        </h2>
-        <p className="mt-3  max-w-2xl mx-auto">
-          Be guided by experienced university admission mentors who inspire success and shape future scholars.
-        </p>
+      <div className="text-center mb-10 px-4">
+        <div className="relative">
+          <h2 className="text-4xl md:text-5xl  font-extrabold  mb-6 leading-tight">
+            Meet Our{" "}
+            <span className="relative inline-block primaryTextColor">
+              Instructor
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3"
+                viewBox="0 0 200 12"
+                fill="none"
+              >
+                <path
+                  d="M2 8C2 8 50 2 100 4C150 6 198 8 198 8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  className="primaryTextColor"
+                />
+              </svg>
+            </span>
+          </h2>
+
+          <p className="text-base md:text-lg  max-w-2xl mx-auto leading-relaxed">
+            Be guided by experienced university admission mentors who inspire
+            success and shape future scholars.
+          </p>
+        </div>
       </div>
 
       {teachers.length === 0 ? (
-        <p className="text-center text-gray-500">No teacher profiles found.</p>
+        <p className="text-center ">
+          No instructor profiles found.
+        </p>
       ) : (
         <div
           ref={scrollRef}

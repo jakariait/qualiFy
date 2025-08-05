@@ -30,25 +30,43 @@ const TeachersGrid = () => {
 
   return (
     <section className="xl:container md:mx-auto p-3">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
-          Meet Our <span className="text-green-600">Faculty</span>
-        </h2>
-        <p className="mt-3 text-gray-600 max-w-2xl mx-auto">
-          Our dedicated and highly qualified educators are here to guide and
-          inspire the next generation of leaders. Learn from the best in their
-          fields.
-        </p>
+      <div className="text-center mb-10 px-4">
+        <div className="relative">
+          <h2 className="text-4xl md:text-5xl  font-extrabold  mb-6 leading-tight">
+            Meet Our{" "}
+            <span className="relative inline-block primaryTextColor">
+              Instructor
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3"
+                viewBox="0 0 200 12"
+                fill="none"
+              >
+                <path
+                  d="M2 8C2 8 50 2 100 4C150 6 198 8 198 8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  className="primaryTextColor"
+                />
+              </svg>
+            </span>
+          </h2>
+
+          <p className="text-base md:text-lg  max-w-2xl mx-auto leading-relaxed">
+            Be guided by experienced university admission mentors who inspire
+            success and shape future scholars.
+          </p>
+        </div>
       </div>
 
       {teachers.length === 0 ? (
-        <p className="text-center text-gray-500">No teacher profiles found.</p>
+        <p className="text-center ">No teacher profiles found.</p>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1  md:grid-cols-3 gap-2">
           {teachers.map((teacher) => (
             <div
               key={teacher._id}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden group"
+              className="bg-white rounded-lg shadow-md hover:shadow-2xl transition-shadow duration-300 overflow-hidden group "
             >
               <div className="relative">
                 <ImageComponent
@@ -57,18 +75,13 @@ const TeachersGrid = () => {
                   className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="p-6 text-center">
-                <h3 className="text-xl font-semibold text-gray-800">
+              <div className="py-3 text-center">
+                <h3 className="text-xl font-semibold primaryTextColor">
                   {teacher.name}
                 </h3>
-                <p className="text-green-600 font-medium mt-1">
-                  {teacher.title}
-                </p>
-                <p className="text-gray-600 mt-4 text-sm leading-relaxed">
-                  {teacher.bio.length > 120
-                    ? teacher.bio.substring(0, 120) + "..."
-                    : teacher.bio}
-                </p>
+                <p className="primaryTextColor">{teacher.teacherUniversity}</p>
+                <p className="primaryTextColor font-medium">{teacher.title}</p>
+                <p className=" mt-4 text-md">{teacher.bio}</p>
               </div>
             </div>
           ))}
