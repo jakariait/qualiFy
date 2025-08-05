@@ -138,7 +138,7 @@ const Headers = () => {
       {/* Header Main */}
       <div
         ref={headerMainRef}
-        className={`accentBgColor ${
+        className={`secondaryBgColor ${
           isSticky ? "fixed top-0 left-0 right-0 z-40" : ""
         }`}
       >
@@ -146,15 +146,15 @@ const Headers = () => {
           <div
             ref={hamburgerRef}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-2xl cursor-pointer lg:hidden"
+            className="text-2xl cursor-pointer  lg:hidden"
           >
-            <Menu />
+            <Menu className={"primaryTextColor w-8 h-8"} />
           </div>
 
           <Link to="/">
             <ImageComponent
               imageName={GeneralInfoList?.PrimaryLogo}
-              className="w-20 md:w-30"
+              className="w-20 md:w-20"
               showSkeleton={false}
             />
           </Link>
@@ -239,7 +239,7 @@ const Headers = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${
+        className={`fixed  inset-0 z-50 lg:hidden transition-opacity duration-300 ${
           isMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -251,7 +251,7 @@ const Headers = () => {
         />
         <div
           ref={menuRef}
-          className="relative bg-white w-64 h-full shadow-lg transform transition-transform"
+          className="relative secondaryBgColor w-64 h-full shadow-lg transform transition-transform"
           style={{
             transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)",
           }}
@@ -270,18 +270,6 @@ const Headers = () => {
             </div>
             <div className="space-y-2">
               <MobileMenu />
-            </div>
-            <div className="mt-4">
-              {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="primaryBgColor accentTextColor px-4 py-2 rounded-lg w-full"
-                >
-                  Log Out
-                </button>
-              ) : (
-                <Link to="/login">...</Link>
-              )}
             </div>
           </div>
         </div>

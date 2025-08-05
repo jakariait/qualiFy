@@ -42,7 +42,7 @@ const Feature = () => {
                   />
                 </div>
                 {/* Title */}
-                <h3 className="mt-2  p-2">{feature.title}</h3>
+                <h3 className="mt-2 primaryTextColor p-2">{feature.title}</h3>
               </div>
             ))}
           </div>

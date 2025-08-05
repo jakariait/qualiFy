@@ -224,7 +224,7 @@ const ContactForm = () => {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="primaryBgColor accentTextColor py-2 px-4 w-full md:w-auto rounded-md hover:bg-blue-700 transition-colors duration-200 font-medium"
+                    className="primaryBgColor accentTextColor py-2 px-4 w-full md:w-auto rounded-md cursor-pointer transition-colors duration-200 font-medium"
                   >
                     Submit Now
                   </button>
@@ -242,19 +242,6 @@ const ContactForm = () => {
               </div>
             </div>
           </div>
-
-          {/* Google Map Section */}
-          {GeneralInfoList?.GoogleMapLink && (
-            <div className="w-full h-60 md:h-96">
-              <iframe
-                className="w-full h-full border-0"
-                src={GeneralInfoList?.GoogleMapLink}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </div>
-          )}
         </>
       )}
     </div>

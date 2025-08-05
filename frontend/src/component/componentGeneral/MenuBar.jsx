@@ -1,16 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { menuItems } from "../../utils/menuItems.js";
 
 const MenuBar = () => {
-  const menuItems = [
-    { label: "Home", path: "/" },
-    { label: "Our Courses", path: "/" },
-    { label: "Books", path: "/" },
-    { label: "Free Resources", path: "/" },
-    { label: "About Us", path: "/about" },
-    { label: "Live Exam", path: "/" },
-
-  ];
 
   return (
     <nav className="p-3 xl:container xl:mx-auto">
@@ -18,7 +10,7 @@ const MenuBar = () => {
         {menuItems.map(({ label, path }, index) => (
           <li
             key={index}
-            className="px-4 py-2 font-semibold cursor-pointer primaryTextColor"
+            className="px-4 py-2 font-semibold cursor-pointer accentTextColor"
           >
             <Link
               to={path}
