@@ -176,7 +176,7 @@ const Headers = () => {
 
               {/* Cart Quantity Badge */}
               {totalQuantity > 0 && (
-                <span className="absolute top-0 right-0 -mt-2 -mr-2 primaryBgColor rounded-full h-6 w-6 flex items-center justify-center text-xs accentTextColor">
+                <span className="absolute top-0 right-0 -mt-2 -mr-2 secondaryBgColor rounded-full h-6 w-6 flex items-center justify-center text-xs accentTextColor">
                   {totalQuantity}
                 </span>
               )}

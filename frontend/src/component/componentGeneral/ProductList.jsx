@@ -1,16 +1,7 @@
-import React, { useCallback, useState } from "react";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  Typography,
-} from "@mui/material";
+import React from "react";
+import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import ImageComponent from "./ImageComponent.jsx";
-import { FaEye } from "react-icons/fa";
-import ProductGallery from "./ProductGallery.jsx";
-import ProductAddToCart from "./ProductAddToCart.jsx";
 
 // Memoize the formatted price function
 const formatPrice = (price) => {
@@ -19,14 +10,6 @@ const formatPrice = (price) => {
 };
 
 const ProductList = ({ products }) => {
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const handleOpen = (product) => {
-    setSelectedProduct(product);
-  };
-
-  const handleClose = () => {
-    setSelectedProduct(null);
-  };
   const calculateDiscountPercentage = (
     priceBeforeDiscount,
     priceAfterDiscount,
@@ -129,49 +112,8 @@ const ProductList = ({ products }) => {
                       </span>
                     )}
               </div>
-
-              {/* Quick View Button */}
-              <div className="absolute top-1 right-0 z-10 bg-white rounded-full flex justify-center items-center">
-                <button
-                  onClick={() => handleOpen(product)} // Pass the product to set the state
-                  className="p-2 cursor-pointer"
-                >
-                  <FaEye />
-                </button>
-              </div>
             </div>
           ))}
-
-          {/* Quick View Modal */}
-          {selectedProduct && (
-            <Dialog
-              open={Boolean(selectedProduct)}
-              onClose={handleClose}
-              maxWidth="md"
-              fullWidth
-            >
-              <DialogActions>
-                <Button onClick={handleClose} color="primary">
-                  Close
-                </Button>
-              </DialogActions>
-              <DialogContent>
-                <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
-                  <ProductGallery
-                    images={selectedProduct.images}
-                    discount={calculateDiscountPercentage(
-                      selectedProduct.finalPrice,
-                      selectedProduct.finalDiscount,
-                    )}
-                    zoom={false}
-                  />
-                  <div>
-                    <ProductAddToCart product={selectedProduct} />
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
         </div>
       )}
     </div>
