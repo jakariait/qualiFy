@@ -5,6 +5,7 @@ import Feature from "../component/componentGeneral/Feature.jsx";
 import UniversityPrepHeroSection from "../component/componentGeneral/UniversityPrepHeroSection.jsx";
 import AnimatedScrollableTeachers from "../component/componentGeneral/AnimatedScrollableTeachers.jsx";
 import AnimatedScrollableStudentReviews from "../component/componentGeneral/AnimatedScrollableStudentReviews.jsx";
+import AllCourses from "../component/componentGeneral/AllCourses.jsx";
 
 const HomePage = () => {
   return (
@@ -14,6 +15,7 @@ const HomePage = () => {
       <Feature />
       <AnimatedScrollableStudentReviews />
       <AnimatedScrollableTeachers />
+      <AllCourses/>
     </Layout>
   );
 };

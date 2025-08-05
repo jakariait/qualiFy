@@ -57,6 +57,9 @@ const useProductStore = create((set) => ({
     }
   },
 
+  // ✅ Reset product state
+  resetProduct: () => set({ product: null, loading: false, error: null }),
+
   // ✅ Delete a product
   deleteProduct: async (id) => {
     set({ loading: true, error: null });
