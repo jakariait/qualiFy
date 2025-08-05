@@ -23,19 +23,7 @@ import ContactRequestPage from "./pagesAdmin/ContactRequestPage.jsx";
 import AdminLogin from "./component/componentAdmin/AdminLogin.jsx";
 import ProtectedRoute from "./component/componentAdmin/ProtectedRoute.jsx";
 import NotFoundPage from "./pagesUser/NotFoundPage.jsx";
-import AddNewCategoryPage from "./pagesAdmin/AddNewCategoryPage.jsx";
-import CategoryListPage from "./pagesAdmin/CategoryListPage.jsx";
-import EditCategoryPage from "./pagesAdmin/EditCategoryPage.jsx";
-import AddNewSubCategoryPage from "./pagesAdmin/AddNewSubCategoryPage.jsx";
-import SubCategoryListPage from "./pagesAdmin/SubCategoryListPage.jsx";
-import EditSubCategoryPage from "./pagesAdmin/EditSubCategoryPage.jsx";
-import ChildCategoryListPage from "./pagesAdmin/ChildCategoryListPage.jsx";
-import AddNewChildCategoryPage from "./pagesAdmin/AddNewChildCategoryPage.jsx";
-import EditChildCategoryPage from "./pagesAdmin/EditChildCategoryPage.jsx";
-import AddNewProductSizePage from "./pagesAdmin/AddNewProductSizePage.jsx";
-import ProductSizeListPage from "./pagesAdmin/ProductSizeListPage.jsx";
-import EditProductSizePage from "./pagesAdmin/EditProductSizePage.jsx";
-import ProductFlagPage from "./pagesAdmin/ProductFlagPage.jsx";
+
 import ShopPage from "./pagesUser/ShopPage.jsx";
 import AddNewProductPage from "./pagesAdmin/AddNewProductPage.jsx";
 import ProductDetailsPage from "./pagesUser/ProductDetailsPage.jsx";
@@ -223,62 +211,6 @@ function App() {
             path="/admin/contact-request"
             element={<ContactRequestPage />}
           />
-
-          {/* Category Routes */}
-          <Route
-            path="/admin/addnewcategory"
-            element={<AddNewCategoryPage />}
-          />
-          <Route path="/admin/categorylist" element={<CategoryListPage />} />
-          <Route
-            path="/admin/edit-category/:id"
-            element={<EditCategoryPage />}
-          />
-
-          {/* SubCategory Routes */}
-          <Route
-            path="/admin/addnewsubcategory"
-            element={<AddNewSubCategoryPage />}
-          />
-          <Route
-            path="/admin/edit-subcategory/:id"
-            element={<EditSubCategoryPage />}
-          />
-          <Route
-            path="/admin/subcategorylist"
-            element={<SubCategoryListPage />}
-          />
-
-          {/* Child Category Routes */}
-          <Route
-            path="/admin/childcategorylist"
-            element={<ChildCategoryListPage />}
-          />
-          <Route
-            path="/admin/addnewchildcategory"
-            element={<AddNewChildCategoryPage />}
-          />
-          <Route
-            path="/admin/edit-child-category/:id"
-            element={<EditChildCategoryPage />}
-          />
-
-          {/* Product Size Routes */}
-          <Route
-            path="/admin/add-product-size"
-            element={<AddNewProductSizePage />}
-          />
-          <Route
-            path="/admin/product-sizes"
-            element={<ProductSizeListPage />}
-          />
-          <Route
-            path="/admin/edit-product-size/:id"
-            element={<EditProductSizePage />}
-          />
-
-          {/* Product Flag Routes */}
-          <Route path="/admin/product-flags" element={<ProductFlagPage />} />
 
           {/* Product Routes */}
           <Route path="/admin/addnewproduct" element={<AddNewProductPage />} />

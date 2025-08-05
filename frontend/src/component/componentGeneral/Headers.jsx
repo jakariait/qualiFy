@@ -138,7 +138,7 @@ const Headers = () => {
       {/* Header Main */}
       <div
         ref={headerMainRef}
-        className={`secondaryBgColor ${
+        className={`primaryBgColor ${
           isSticky ? "fixed top-0 left-0 right-0 z-40" : ""
         }`}
       >
@@ -148,13 +148,13 @@ const Headers = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-2xl cursor-pointer  lg:hidden"
           >
-            <Menu className={"primaryTextColor w-8 h-8"} />
+            <Menu className={"accentTextColor w-8 h-8"} />
           </div>
 
           <Link to="/">
             <ImageComponent
               imageName={GeneralInfoList?.PrimaryLogo}
-              className="w-20 md:w-20"
+              className="w-30 md:w-40"
               showSkeleton={false}
             />
           </Link>
@@ -172,7 +172,7 @@ const Headers = () => {
               onClick={() => setIsCartMenuOpen(!isCartMenuOpen)}
               className="relative"
             >
-              <ShoppingCart className="w-8 h-8 primaryTextColor cursor-pointer" />
+              <ShoppingCart className="w-8 h-8 accentTextColor cursor-pointer" />
 
               {/* Cart Quantity Badge */}
               {totalQuantity > 0 && (
@@ -213,7 +213,7 @@ const Headers = () => {
                           to="/user/home"
                           className="flex items-center gap-2"
                         >
-                          <User className="w-6 h-6" />
+                          <User className="w-6 h-6 " />
                           <span className="text-sm">My Account</span>
                         </Link>
                       </button>
@@ -230,7 +230,7 @@ const Headers = () => {
               </div>
             ) : (
               <Link to="/login">
-                <User className="w-8 h-8 primaryTextColor cursor-pointer" />
+                <User className="w-8 h-8 accentTextColor cursor-pointer" />
               </Link>
             )}
           </div>
@@ -251,7 +251,7 @@ const Headers = () => {
         />
         <div
           ref={menuRef}
-          className="relative secondaryBgColor w-64 h-full shadow-lg transform transition-transform"
+          className="relative primaryBgColor w-64 h-full shadow-lg transform transition-transform"
           style={{
             transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)",
           }}
@@ -265,7 +265,7 @@ const Headers = () => {
                 />
               </Link>
               <button onClick={() => setIsMenuOpen(false)}>
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6 accentTextColor" />
               </button>
             </div>
             <div className="space-y-2">

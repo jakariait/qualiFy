@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import GeneralInfoStore from "../../store/GeneralInfoStore.js";
 import { Link } from "react-router-dom";
 
@@ -14,13 +14,13 @@ import NewsletterForm from "./NewsletterForm.jsx";
 import SocialMedia from "./SocialMedia.jsx";
 import Skeleton from "react-loading-skeleton";
 import ImageComponent from "./ImageComponent.jsx";
+import QuickLinksSection from "./QuickLinksSection.jsx";
 
 const Footer = () => {
   const { GeneralInfoList, GeneralInfoListLoading, GeneralInfoListError } =
     GeneralInfoStore();
 
   const currentYear = new Date().getFullYear();
-
 
   if (GeneralInfoListError) {
     return (
@@ -43,7 +43,7 @@ const Footer = () => {
           <Skeleton height={40} width="100%" />
         </>
       ) : (
-        <div className="secondaryBgColor accentTextColor">
+        <div className="primaryBgColor accentTextColor">
           {/* Mobile Footer */}
           <div className="lg:hidden px-0 py-3">
             {/* About Us */}
@@ -169,39 +169,7 @@ const Footer = () => {
             </div>
 
             <div className="col-span-4 relative">
-              <h1 className="mb-3">
-                Quick Links
-                <span className="absolute left-0 top-6 w-15 border-b-2 border-gray-300 mt-1"></span>
-              </h1>
-              <ul>
-                <li className="hover:primaryTextColor">
-                  <Link to="/about">About</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/blog">Blog</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/contact-us">Contact</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/termofservice">Terms of Services</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/privacypolicy">Privacy Policy</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/refundpolicy">Refund Policy</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/shippinpolicy">Shipping Policy</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/track-order">Track Your Order</Link>
-                </li>
-                <li className="hover:primaryTextColor">
-                  <Link to="/faqs">FAQ</Link>
-                </li>
-              </ul>
+              <QuickLinksSection />
             </div>
 
             <div className="col-span-3 relative">
@@ -225,7 +193,7 @@ const Footer = () => {
               Design and Developed by{" "}
               <a
                 href="https://www.digiweb.digital/"
-                className="text-red-500 hover:underline"
+                className="text-green-500 hover:underline"
               >
                 DigiWeb
               </a>

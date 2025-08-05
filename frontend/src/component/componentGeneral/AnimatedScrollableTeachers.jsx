@@ -60,7 +60,7 @@ const AnimatedScrollableTeachers = () => {
     <section className="xl:container  md:mx-auto p-3">
       <div className="text-center mb-10 px-4">
         <div className="relative">
-          <h2 className="text-4xl md:text-5xl  font-extrabold  mb-6 leading-tight">
+          <h2 className="text-4xl md:text-5xl  font-extrabold   mb-6 leading-tight">
             Meet Our{" "}
             <span className="relative inline-block primaryTextColor">
               Instructor

@@ -1,5 +1,5 @@
 import React from "react";
-import {  Award } from "lucide-react";
+import { Award } from "lucide-react";
 import student from "../../assets/portrait-cheerful-male-international-indian-600nw-2071252046.webp";
 import StatsSection from "./StatsSection.jsx";
 
@@ -26,23 +26,19 @@ const UniversityPrepHeroSection = () => {
 
             {/* Main heading with gradient text */}
             <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-              <span className="secondaryTextColor">Master Your Path</span>
-              <br />
-              <span className="primaryTextColor">to Top Universities</span>
+              <span className="primaryTextColor">
+                Master Your Path to Top Universities
+              </span>
             </h1>
 
             {/* Enhanced description */}
-            <p className="text-lg lg:text-xl text-gray-600 leading-relaxed max-w-2xl">
+            <p className="text-lg lg:text-xl secondaryTextColor leading-relaxed max-w-2xl">
               Join thousands of successful students who chose PrivaTune for NSU,
-              BRAC, and other prestigious private university admissions.
-              <span className="font-semibold text-gray-800">
-                {" "}
-                Personalized coaching meets proven results.
-              </span>
+              Personalized coaching meets proven results.
             </p>
 
             {/* Stats row */}
-            <StatsSection/>
+            <StatsSection />
 
             {/* Enhanced CTA buttons */}
             <div className="flex flex-col sm:flex-row gap-4">

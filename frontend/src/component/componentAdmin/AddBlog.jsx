@@ -372,7 +372,6 @@ const AddBlog = () => {
             Create Blog
           </Button>
         </div>
-
       </form>
 
       <Snackbar

@@ -11,7 +11,6 @@ const createAbandonedCart = async (cartData) => {
   }
 };
 
-
 const deleteAbandonedCartById = async (cartId) => {
   try {
     const deletedCart = await AbandonedCart.findByIdAndDelete(cartId);
@@ -20,7 +19,6 @@ const deleteAbandonedCartById = async (cartId) => {
     throw new Error("Error deleting abandoned cart: " + error.message);
   }
 };
-
 
 const getAllAbandonedCarts = async (page = 1, limit = 10) => {
   try {
@@ -117,8 +115,6 @@ const getAllAbandonedCarts = async (page = 1, limit = 10) => {
     throw new Error("Error fetching abandoned carts: " + error.message);
   }
 };
-
-
 
 module.exports = {
   createAbandonedCart,

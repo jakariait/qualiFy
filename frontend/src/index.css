@@ -7,10 +7,10 @@
   font-style: normal;
 }
 :root {
-  --primaryColor: #00395d;
-  --secondaryColor: #449342;
-  --tertiaryColor: #b6d7a8;
-  --accentColor: #eeeeee;
+  --primaryColor: #ff4500;
+  --secondaryColor: #054074;
+  --tertiaryColor: #FFFFFF;
+  --accentColor: #b6d7a8;
 }
 /* Using CSS variables for custom classes */
 .primaryBgColor {
@@ -60,6 +60,9 @@
 
 .primaryBorderColor {
   border-color: var(--primaryColor);
+}
+.accentBorderColor {
+  border-color: var(--accentColor);
 }
 .primaryRingColor {
   outline: none;
@@ -146,11 +149,11 @@
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;             /* Chrome, Safari, Opera */
+  display: none; /* Chrome, Safari, Opera */
 }
 
 @keyframes scrollMarquee {
@@ -167,7 +170,8 @@
 }
 
 @keyframes bounce-slow {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }

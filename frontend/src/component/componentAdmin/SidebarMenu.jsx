@@ -20,7 +20,7 @@ import {
   FaShoppingBag,
   FaInfo,
   FaClipboardList,
-  FaBlog
+  FaBlog,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
@@ -38,22 +38,8 @@ import RequirePermission from "./RequirePermission.jsx";
 import { CircularProgress } from "@mui/material";
 
 export default function SidebarMenu() {
-  const { totalProductsAdmin } = useProductStore();
   const { logout } = useAuthAdminStore();
-  const { totalByStatus } = useOrderStore();
   const { loading } = useAuthAdminStore();
-  // To access delivered count
-  const pendingCount = totalByStatus.pending;
-  const approvedCount = totalByStatus.approved;
-  const intransitCount = totalByStatus.intransit;
-  const deliveredCount = totalByStatus.delivered;
-  const returnedCount = totalByStatus.returned;
-  const cancelledCount = totalByStatus.cancelled;
-
-  const totalOrders = Object.values(totalByStatus).reduce(
-    (acc, count) => acc + count,
-    0,
-  );
 
   const navigate = useNavigate();
   // Logout function to clear the admin state and navigate to login
@@ -173,37 +159,6 @@ export default function SidebarMenu() {
                 </AccordionSummary>
                 <AccordionDetails>
                   <ul className={"space-y-2 pl-4"}>
-                    <RequirePermission
-                      permission="setup_config"
-                      fallback={true}
-                    >
-                      <li>
-                        <Link to="/admin/configsetup">Setup Your Config</Link>
-                      </li>
-                    </RequirePermission>
-                    <RequirePermission
-                      permission="product_size"
-                      fallback={true}
-                    >
-                      <li>
-                        <Link to="/admin/add-product-size">
-                          Add New Product Size
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/admin/product-sizes">
-                          View All Product Size
-                        </Link>
-                      </li>
-                    </RequirePermission>
-                    <RequirePermission
-                      permission="product_flag"
-                      fallback={true}
-                    >
-                      <li>
-                        <Link to="/admin/product-flags">Product Flags</Link>
-                      </li>
-                    </RequirePermission>
                     <RequirePermission permission="scroll_text" fallback={true}>
                       <li>
                         <Link to="/admin/scroll-text">Scroll Text</Link>
@@ -234,161 +189,7 @@ export default function SidebarMenu() {
               </Accordion>
             </li>
           </RequirePermission>
-          <RequirePermission permission="category" fallback={true}>
-            <li className="space-x-2 px-2 rounded-md cursor-pointer">
-              <Accordion
-                style={{
-                  background: "transparent",
-                  boxShadow: "none",
-                  width: "100%",
-                }}
-                sx={{
-                  color: "white", // Ensures text color is white
-                  "& .MuiAccordionSummary-root": {
-                    backgroundColor: "transparent",
-                    minHeight: "auto", // Removes unnecessary padding
-                    padding: "0", // Removes default padding
-                  },
-                  "& .MuiAccordionDetails-root": {
-                    backgroundColor: "transparent",
-                    paddingLeft: "0", // Ensures no extra left padding
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: "white", // Ensures the dropdown icon is white
-                  },
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1-content"
-                  id="panel1-header"
-                  className="p-2 flex items-center"
-                >
-                  <Typography component="span">
-                    <div className="flex items-center gap-2">
-                      <FaThLarge /> <span>Category</span>
-                    </div>
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <ul className={"space-y-2 pl-4"}>
-                    <li>
-                      <Link to="/admin/addnewcategory">Add New Category</Link>
-                    </li>
-                    <li>
-                      <Link to="/admin/categorylist">View All Categories</Link>
-                    </li>
-                  </ul>
-                </AccordionDetails>
-              </Accordion>
-            </li>
-          </RequirePermission>
-          <RequirePermission permission="sub_category" fallback={true}>
-            <li className="space-x-2 px-2 rounded-md cursor-pointer">
-              <Accordion
-                style={{
-                  background: "transparent",
-                  boxShadow: "none",
-                  width: "100%",
-                }}
-                sx={{
-                  color: "white", // Ensures text color is white
-                  "& .MuiAccordionSummary-root": {
-                    backgroundColor: "transparent",
-                    minHeight: "auto", // Removes unnecessary padding
-                    padding: "0", // Removes default padding
-                  },
-                  "& .MuiAccordionDetails-root": {
-                    backgroundColor: "transparent",
-                    paddingLeft: "0", // Ensures no extra left padding
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: "white", // Ensures the dropdown icon is white
-                  },
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1-content"
-                  id="panel1-header"
-                  className="p-2 flex items-center"
-                >
-                  <Typography component="span">
-                    <div className="flex items-center gap-2">
-                      <FaBoxes /> <span>Subcategory</span>
-                    </div>
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <ul className={"space-y-2 pl-4"}>
-                    <li>
-                      <Link to="/admin/addnewsubcategory">
-                        Add New Sub Category
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/admin/subcategorylist">
-                        View All SubCategories
-                      </Link>
-                    </li>
-                  </ul>
-                </AccordionDetails>
-              </Accordion>
-            </li>
-          </RequirePermission>
-          <RequirePermission permission="child_category" fallback={true}>
-            <li className="space-x-2 px-2 rounded-md cursor-pointer">
-              <Accordion
-                style={{
-                  background: "transparent",
-                  boxShadow: "none",
-                  width: "100%",
-                }}
-                sx={{
-                  color: "white", // Ensures text color is white
-                  "& .MuiAccordionSummary-root": {
-                    backgroundColor: "transparent",
-                    minHeight: "auto", // Removes unnecessary padding
-                    padding: "0", // Removes default padding
-                  },
-                  "& .MuiAccordionDetails-root": {
-                    backgroundColor: "transparent",
-                    paddingLeft: "0", // Ensures no extra left padding
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: "white", // Ensures the dropdown icon is white
-                  },
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1-content"
-                  id="panel1-header"
-                  className="p-2 flex items-center"
-                >
-                  <Typography component="span">
-                    <div className="flex items-center gap-2">
-                      <FaList /> <span>Child Category</span>
-                    </div>
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <ul className={"space-y-2 pl-4"}>
-                    <li>
-                      <Link to="/admin/addnewchildcategory">
-                        Add New Child Category
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/admin/childcategorylist">
-                        View All Child Categories
-                      </Link>
-                    </li>
-                  </ul>
-                </AccordionDetails>
-              </Accordion>
-            </li>
-          </RequirePermission>
+
           <RequirePermission
             permission={[
               "add_products",
@@ -451,7 +252,7 @@ export default function SidebarMenu() {
                     >
                       <li>
                         <Link to="/admin/viewallproducts">
-                          View All Products({totalProductsAdmin})
+                          View All Products
                         </Link>
                       </li>
                     </RequirePermission>
@@ -500,39 +301,25 @@ export default function SidebarMenu() {
                 <AccordionDetails>
                   <ul className={"space-y-2 pl-4"}>
                     <li>
-                      <Link to="/admin/allorders">
-                        All Orders ({totalOrders})
-                      </Link>
+                      <Link to="/admin/allorders">All Orders</Link>
                     </li>
                     <li>
-                      <Link to="/admin/pendingorders">
-                        Pending Orders ({pendingCount})
-                      </Link>
+                      <Link to="/admin/pendingorders">Pending Orders</Link>
                     </li>
                     <li>
-                      <Link to="/admin/approvedorders">
-                        Approved Orders ({approvedCount})
-                      </Link>
+                      <Link to="/admin/approvedorders">Approved Orders</Link>
                     </li>
                     <li>
-                      <Link to="/admin/intransitorders">
-                        In Transit Orders ({intransitCount})
-                      </Link>
+                      <Link to="/admin/intransitorders">In Transit Orders</Link>
                     </li>
                     <li>
-                      <Link to="/admin/deliveredorders">
-                        Delivered Orders ({deliveredCount})
-                      </Link>
+                      <Link to="/admin/deliveredorders">Delivered Orders</Link>
                     </li>
                     <li>
-                      <Link to="/admin/returnedorders">
-                        Returned Orders ({returnedCount})
-                      </Link>
+                      <Link to="/admin/returnedorders">Returned Orders</Link>
                     </li>
                     <li>
-                      <Link to="/admin/cancelledorders">
-                        Cancelled Orders ({cancelledCount})
-                      </Link>
+                      <Link to="/admin/cancelledorders">Cancelled Orders</Link>
                     </li>
                   </ul>
                 </AccordionDetails>
