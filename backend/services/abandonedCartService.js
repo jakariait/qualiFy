@@ -1,6 +1,5 @@
 const AbandonedCart = require("../models/AbandonedCartModel");
 const Product = require("../models/ProductModel");
-const ProductSizeModel = require("../models/ProductSizeModel"); // Import the ProductSizeModel
 
 const createAbandonedCart = async (cartData) => {
   try {

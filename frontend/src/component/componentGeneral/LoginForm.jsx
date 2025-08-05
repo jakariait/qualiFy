@@ -42,7 +42,7 @@ const LoginForm = () => {
 
   return (
     <div className="flex items-center justify-center  px-4 mt-20 mb-20 md:m-20">
-      <div className="bg-[#02353c]/20 rounded-2xl shadow-md p-8 w-full max-w-md text-center relative">
+      <div className="secondaryBgColor rounded-2xl shadow-md p-8 w-full max-w-md text-center relative">
         {/* Lock Icon */}
         <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
           <div className="accentBgColor p-4 rounded-full">
@@ -51,7 +51,7 @@ const LoginForm = () => {
         </div>
 
         {/* Heading */}
-        <h2 className="text-2xl font-semibold m-7">Sign in</h2>
+        <h2 className="text-2xl accentTextColor font-semibold m-7">Sign in</h2>
 
         {/* Error Message from Auth */}
         {error && (
@@ -120,7 +120,7 @@ const LoginForm = () => {
         </form>
 
         {/* Register */}
-        <p className="text-sm mt-6 text-gray-600">
+        <p className="text-sm mt-6 accentTextColor">
           Don’t have any account?{" "}
           <Link to="/register">
             <button className="primaryTextColor font-medium hover:underline cursor-pointer">

@@ -7,7 +7,6 @@ const Shipping = require("../models/ShippingModel");
 const FreeDeliveryAmount = require("../models/FreeDeliveryAmount");
 const User = require("../models/UserModel");
 const Coupon = require("../models/CouponModel");
-const ProductSizeModel = require("../models/ProductSizeModel"); // Import the ProductSizeModel
 
 const createOrder = async (orderData, userId) => {
   const session = await mongoose.startSession();

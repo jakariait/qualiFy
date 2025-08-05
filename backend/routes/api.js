@@ -9,11 +9,6 @@ const colorController = require("../controllers/ColorController");
 const socialMediaLinkController = require("../controllers/SocialMediaLinkController");
 const contactController = require("../controllers/ContactController");
 const AdminController = require("../controllers/AdminController");
-const categoryController = require("../controllers/categoryController");
-const subCategoryController = require("../controllers/subCategoryController");
-const childCategoryController = require("../controllers/childCategoryController");
-const productSizeController = require("../controllers/productSizeController");
-const flagController = require("../controllers/flagController");
 const productController = require("../controllers/productController");
 const userController = require("../controllers/userController");
 const cartController = require("../controllers/cartController");
@@ -307,115 +302,8 @@ router.delete(
   userController.deleteUser,
 );
 
-// CRUD routes for Products Category
-router.get("/category", categoryController.getCategories);
-router.get("/category/:id", categoryController.getCategoryById);
-router.post(
-  "/category/",
-  adminProtect,
-  checkPermission("category"),
-  categoryController.createCategory,
-);
-router.put(
-  "/category/:id",
-  adminProtect,
-  checkPermission("category"),
-  categoryController.updateCategory,
-);
-router.delete(
-  "/category/:id",
-  adminProtect,
-  checkPermission("category"),
-  categoryController.deleteCategory,
-);
 
-// Define routes for subcategories
-router.get("/sub-category", subCategoryController.getAllSubCategories);
-router.get("/sub-category/:id", subCategoryController.getSubCategoryById);
-router.post(
-  "/sub-category",
-  adminProtect,
-  checkPermission("sub_category"),
-  subCategoryController.createSubCategory,
-);
-router.put(
-  "/sub-category/:id",
-  adminProtect,
-  checkPermission("sub_category"),
-  subCategoryController.updateSubCategory,
-);
-router.delete(
-  "/sub-category/:id",
-  adminProtect,
-  checkPermission("sub_category"),
-  subCategoryController.deleteSubCategory,
-);
 
-// Define routes for Child Categories
-router.get("/child-category", childCategoryController.getAllChildCategories);
-router.get("/child-category/:id", childCategoryController.getChildCategoryById);
-router.post(
-  "/child-category",
-  adminProtect,
-  checkPermission("child_category"),
-  childCategoryController.createChildCategory,
-);
-router.put(
-  "/child-category/:id",
-  adminProtect,
-  checkPermission("child_category"),
-  childCategoryController.updateChildCategory,
-);
-router.delete(
-  "/child-category/:id",
-  adminProtect,
-  checkPermission("child_category"),
-  childCategoryController.deleteChildCategory,
-);
-
-// Product Size Routes
-router.get("/product-sizes", productSizeController.getAllProductSizes);
-router.get("/product-sizes/:id", productSizeController.getProductSizeById);
-router.post(
-  "/product-sizes",
-  adminProtect,
-  checkPermission("product_size"),
-  productSizeController.createProductSize,
-);
-router.put(
-  "/product-sizes/:id",
-  adminProtect,
-  checkPermission("product_size"),
-  productSizeController.updateProductSize,
-);
-router.delete(
-  "/product-sizes/:id",
-  adminProtect,
-  checkPermission("product_size"),
-  productSizeController.deleteProductSize,
-);
-
-// Routes for Flags
-router.get("/flags", flagController.getAllFlags);
-router.get("/flags/:id", flagController.getFlagById);
-router.post(
-  "/flags",
-  adminProtect,
-  checkPermission("product_flag"),
-  flagController.createFlag,
-);
-router.put(
-  "/flags/:id",
-  adminProtect,
-  checkPermission("product_flag"),
-  flagController.updateFlag,
-);
-router.delete(
-  "/flags/:id",
-  adminProtect,
-  checkPermission("product_flag"),
-  flagController.deleteFlag,
-);
 
 // Routes for Products
 router.get("/products", productController.getProducts); // All Products Without Sorting

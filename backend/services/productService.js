@@ -1,8 +1,5 @@
 const ProductModel = require("../models/ProductModel");
-const FlagModel = require("../models/FlagModel");
-const CategoryModel = require("../models/CategoryModel");
-const SubCategoryModel = require("../models/SubCategoryModel");
-const ChildCategoryModel = require("../models/ChildCategoryModel");
+
 const mongoose = require("mongoose");
 
 // Create a new product
