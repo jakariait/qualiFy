@@ -2,141 +2,90 @@ const mongoose = require("mongoose");
 const CounterModel = require("./CounterModel");
 const slugify = require("slugify");
 
-const productSizeSchema = new mongoose.Schema({
-  size: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "ProductSize",
-    required: true,
-  },
-  stock: {
-    type: Number,
-    required: true,
-    default: 0,
-    min: 0,
-    validate: {
-      validator: function (value) {
-        return value >= 0; // Ensure the value is greater than or equal to 0
-      },
-      message: "Stock cannot be negative",
-    },
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0,
-    validate: {
-      validator: function (value) {
-        return value >= 0; // Ensure the value is greater than or equal to 0
-      },
-      message: "Price cannot be negative",
-    },
-  },
-  discount: {
-    type: Number,
-    min: 0,
-    validate: {
-      validator: function (value) {
-        return value >= 0; // Ensure the value is greater than or equal to 0
-      },
-      message: "Discount cannot be negative",
-    },
-  },
-});
-
 const productSchema = new mongoose.Schema(
   {
-    productId: { type: Number, unique: true, index: true }, // Auto-incremented
+    productId: { type: Number, unique: true, index: true },
     name: { type: String, trim: true, required: true },
-    slug: { type: String, trim: true, unique: true }, // Auto-generated
-    shortDesc: { type: String, trim: true },
+    slug: { type: String, trim: true, unique: true },
+    type: {
+      type: String,
+      enum: ["book", "course", "exam"],
+      required: true,
+      index: true,
+    },
+
     longDesc: { type: String, trim: true },
-    sizeChart: { type: String, trim: true },
-    shippingReturn: { type: String, trim: true },
     productCode: { type: String, trim: true },
 
-    rewardPoints: {
-      type: Number,
-      validate: {
-        validator: function (value) {
-          return value >= 0; // Ensure the value is greater than or equal to 0
-        },
-        message: "Reward points cannot be negative",
+    // Shared
+    thumbnailImage: { type: String, trim: true, required: true },
+    images: [{ type: String, trim: true }],
+    videoUrl: [{ type: String, trim: true }],
+    faqs: [
+      {
+        question: { type: String, trim: true },
+        answer: { type: String, trim: true },
       },
-    },
-    videoUrl: { type: String, trim: true },
+    ],
+
     isActive: { type: Boolean, default: true, index: true },
 
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
-    },
-    subCategory: { type: mongoose.Schema.Types.ObjectId, ref: "SubCategory" },
-    childCategory: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ChildCategory",
-    },
-
-    flags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Flag" }],
-
+    // SEO
     metaTitle: { type: String, trim: true },
     metaDescription: { type: String, trim: true },
     metaKeywords: [{ type: String, trim: true }],
-    searchTags: [{ type: String, trim: true }],
 
-    thumbnailImage: { type: String, trim: true, required: true },
-    images: [{ type: String, trim: true, required: true }],
-
-    variants: { type: [productSizeSchema], default: [] },
-
+    // Pricing
     finalPrice: {
       type: Number,
       min: 0,
-      required: function () {
-        return this.variants.length === 0; // Make finalPrice required if no variants exist
-      },
+      required: true,
       validate: {
-        validator: function (value) {
-          return value >= 0; // Ensure the value is greater than or equal to 0
-        },
+        validator: (value) => value >= 0,
         message: "Price cannot be negative",
       },
     },
-
     finalDiscount: {
       type: Number,
-
       min: 0,
-      validate: {
-        validator: function (value) {
-          return value >= 0; // Ensure the value is greater than or equal to 0
-        },
-        message: "Discount cannot be negative",
-      },
+      default: 0,
     },
     finalStock: {
       type: Number,
       min: 0,
-      required: function () {
-        return this.variants.length === 0; // Make finalPrice required if no variants exist
-      },
-      validate: {
-        validator: function (value) {
-          return value >= 0; // Ensure the value is greater than or equal to 0
-        },
-        message: "Stock cannot be negative",
-      },
+      required: true,
     },
-    purchasePrice: {
-      type: Number,
-      min: 0,
-      validate: {
-        validator: function (value) {
-          return value >= 0; // Ensure the value is greater than or equal to 0
-        },
-        message: "Purchase cannot be negative",
+
+    // Book-specific
+    author: { type: String, trim: true },
+    publisher: { type: String, trim: true },
+    previewPdf: { type: String, trim: true },
+
+    // Course-specific
+    instructors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "TeacherProfile",
       },
-    },
+    ],
+    lessons: { type: String, trim: true },
+    enrolledStudents: { type: Number, trim: true },
+    duration: { type: String, trim: true },
+    quizzes: { type: Number, trim: true },
+    modules: [
+      {
+        subject: { type: String, required: true }, // e.g., "English", "G.Math"
+        lessons: [
+          {
+            title: { type: String, required: true },
+            duration: { type: String, trim: true },
+            courseThumbnail: { type: String, trim: true },
+            videoUrl: { type: String },
+            previewable: { type: Boolean, default: false },
+          },
+        ],
+      },
+    ],
   },
   {
     timestamps: true,
@@ -146,7 +95,7 @@ const productSchema = new mongoose.Schema(
   },
 );
 
-// Auto-increment productId before validation
+// Auto-increment ID and slug
 productSchema.pre("validate", async function (next) {
   if (!this.productId) {
     try {
@@ -161,7 +110,6 @@ productSchema.pre("validate", async function (next) {
     }
   }
 
-  // Generate slug when name changes
   if (this.isModified("name") || this.isNew) {
     this.slug = `${slugify(this.name, { lower: true })}-${this.productId}`;
   }
@@ -169,32 +117,10 @@ productSchema.pre("validate", async function (next) {
   next();
 });
 
-// Pre-save hook to calculate finalPrice, finalDiscount, and finalStock
-productSchema.pre("save", function (next) {
-  if (this.variants.length > 0) {
-    // If variants exist, set finalPrice, finalDiscount, and finalStock based on variants
-    this.finalPrice =
-      this.variants.reduce((sum, v) => sum + v.price, 0) / this.variants.length;
-      this.finalDiscount =
-      this.variants.reduce((sum, v) => sum + v.discount, 0) /
-      this.variants.length;
-    this.finalStock = this.variants.reduce((total, v) => total + v.stock, 0);
-  } else {
-    // If no variants, set finalPrice, finalDiscount, and finalStock to direct product input values
-    this.finalPrice = this.finalPrice || 0; // Or set it to the product-level price if needed
-    this.finalDiscount = this.finalDiscount || 0; // Or set it to the product-level discount if needed
-    this.finalStock = this.finalStock || 0; // Or set it to the product-level stock if needed
-  }
-
-  next();
-});
-
-// Indexing for faster queries
+// Indexes
 productSchema.index({ name: 1, slug: 1 });
-productSchema.index({ category: 1 });
+productSchema.index({ type: 1 });
 productSchema.index({ name: "text" });
 
-
 const ProductModel = mongoose.model("Product", productSchema);
-
 module.exports = ProductModel;

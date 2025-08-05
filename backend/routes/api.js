@@ -306,27 +306,19 @@ router.delete(
 
 
 // Routes for Products
-router.get("/products", productController.getProducts); // All Products Without Sorting
-router.get("/getAllProducts", productController.getAllProducts); // All Products With Sorting
-router.get("/getAllProductsAdmin", productController.getAllProductsAdmin);
+router.get("/products", productController.getAllProducts); // All Products Without Sorting
 router.get("/products/:id", productController.getProductById);
 router.get("/products/slug/:slug", productController.getProductBySlug);
 
 router.post(
   "/products",
-  adminProtect,
-  checkPermission("add_products"),
+  // adminProtect,
+  // checkPermission("add_products"),
   upload,
   productController.createProduct,
 );
 
-router.put(
-  "/products/:id",
-  adminProtect,
-  checkPermission("edit_products"),
-  upload,
-  productController.updateProduct,
-);
+
 router.delete(
   "/products/:id",
   adminProtect,
@@ -334,14 +326,7 @@ router.delete(
   productController.deleteProduct,
 );
 
-router.get(
-  "/similar/:category/:productId",
-  productController.getSimilarProductsController,
-);
 
-router.get("/getProductDetails", productController.getProductDetails); // With Product ID and variants ID
-
-router.get("/homepageproducts", productController.homePageProducts); // Home Page Products By Flag
 
 // Cart Routes
 router.get("/getCart", userProtect, cartController.getCart);

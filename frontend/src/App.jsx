@@ -11,12 +11,7 @@ import ContactUsPage from "./pagesUser/ContactUsPage.jsx";
 import GeneralInfoStore from "./store/GeneralInfoStore.js";
 import CarouselStore from "./store/CarouselStore.js";
 import FeatureStore from "./store/FeatureStore.js";
-import CategoryStore from "./store/useCategoryStore.js";
-import SubCategoryStore from "./store/useSubCategoryStore.js";
 import useSocialMediaLinkStore from "./store/SocialMediaLinkStore.js";
-import useProductSizeStore from "./store/useProductSizeStore.js";
-import useFlagStore from "./store/useFlagStore.js";
-import useChildCategoryStore from "./store/useChildCategoryStore.js";
 import useProductStore from "./store/useProductStore.js";
 import useAuthUserStore from "./store/AuthUserStore.js";
 import ContactRequestPage from "./pagesAdmin/ContactRequestPage.jsx";
@@ -24,11 +19,7 @@ import AdminLogin from "./component/componentAdmin/AdminLogin.jsx";
 import ProtectedRoute from "./component/componentAdmin/ProtectedRoute.jsx";
 import NotFoundPage from "./pagesUser/NotFoundPage.jsx";
 
-import ShopPage from "./pagesUser/ShopPage.jsx";
-import AddNewProductPage from "./pagesAdmin/AddNewProductPage.jsx";
 import ProductDetailsPage from "./pagesUser/ProductDetailsPage.jsx";
-import ViewAllProductPage from "./pagesAdmin/ViewAllProductPage.jsx";
-import EditProductPage from "./pagesAdmin/EditProductPage.jsx";
 import LoginPage from "./pagesUser/LoginPage.jsx";
 import RegisterPage from "./pagesUser/RegisterPage.jsx";
 import CustomerListPage from "./pagesAdmin/CustomerListPage.jsx";
@@ -89,11 +80,6 @@ function App() {
   const { FeatureStoreListRequest } = FeatureStore();
   const { fetchColors, colors } = useColorStore(); // ✅ Extract colors
   const { fetchSocialMediaLinks } = useSocialMediaLinkStore();
-  const { fetchCategories } = CategoryStore();
-  const { fetchSubCategories } = SubCategoryStore();
-  const { fetchProductSizes } = useProductSizeStore();
-  const { fetchFlags } = useFlagStore();
-  const { fetchChildCategories } = useChildCategoryStore();
   const { fetchProducts, fetchProductsAdmin, fetchHomeProducts } =
     useProductStore();
   const { initialize } = useAuthUserStore();
@@ -107,11 +93,7 @@ function App() {
           FeatureStoreListRequest(),
           fetchColors(),
           fetchSocialMediaLinks(),
-          fetchCategories(),
-          fetchSubCategories(),
-          fetchProductSizes(),
-          fetchFlags(),
-          fetchChildCategories(),
+
           fetchProducts(),
           fetchProductsAdmin(),
           initialize(),
@@ -156,7 +138,6 @@ function App() {
       <Routes>
         {/* General User Routes */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/shop" element={<ShopPage />} />
         <Route path="/product/:slug" element={<ProductDetailsPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -213,15 +194,7 @@ function App() {
           />
 
           {/* Product Routes */}
-          <Route path="/admin/addnewproduct" element={<AddNewProductPage />} />
-          <Route
-            path="/admin/viewallproducts"
-            element={<ViewAllProductPage />}
-          />
-          <Route
-            path="/admin/edit-product/:slug"
-            element={<EditProductPage />}
-          />
+
 
           <Route path="/admin/customers" element={<CustomerListPage />} />
           {/*Delivery Charges Routes*/}

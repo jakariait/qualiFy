@@ -38,7 +38,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <CiInstagram className="text-pink-500" />
+            <CiInstagram className="text-[#833AB4]" />
           </a>
         )}
         {socialMediaLinks?.tiktok && (
