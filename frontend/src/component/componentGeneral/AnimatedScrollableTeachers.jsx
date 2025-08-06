@@ -88,9 +88,7 @@ const AnimatedScrollableTeachers = () => {
       </div>
 
       {teachers.length === 0 ? (
-        <p className="text-center ">
-          No instructor profiles found.
-        </p>
+        <p className="text-center ">No instructor profiles found.</p>
       ) : (
         <div
           ref={scrollRef}

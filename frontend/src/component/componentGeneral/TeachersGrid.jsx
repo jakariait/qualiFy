@@ -81,7 +81,7 @@ const TeachersGrid = () => {
                 </h3>
                 <p className="primaryTextColor">{teacher.teacherUniversity}</p>
                 <p className="primaryTextColor font-medium">{teacher.title}</p>
-                <p className=" mt-4 text-md">{teacher.bio}</p>
+                <p className=" mt-4 p-3 text-md">{teacher.bio}</p>
               </div>
             </div>
           ))}

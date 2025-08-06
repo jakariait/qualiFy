@@ -6,8 +6,8 @@ import Skeleton from "react-loading-skeleton";
 import { Helmet } from "react-helmet";
 import ProductAddToCart from "./ProductAddToCart.jsx";
 import SimilarProducts from "./SimilarProducts.jsx";
-import FAQSection from "./FAQSection.jsx";
 import ProductFAQ from "./ProductFAQ.jsx";
+import InstructorSection from "./InstructorSection.jsx";
 
 const ProductDetails = () => {
   const hasPushedRef = useRef(false);
@@ -35,6 +35,17 @@ const ProductDetails = () => {
     product?.finalPrice && product?.finalDiscount
       ? calculateDiscountPercentage(product.finalPrice, product.finalDiscount)
       : 0;
+
+  // Function to sanitize/remove editor-specific tags like ql-ui
+  const cleanHtml = (html) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    // Remove Quill editor-only UI elements
+    doc.querySelectorAll(".ql-ui").forEach((el) => el.remove());
+
+    return doc.body.innerHTML;
+  };
 
   useEffect(() => {
     if (!product || hasPushedRef.current) return;
@@ -132,21 +143,37 @@ const ProductDetails = () => {
             <meta property="og:url" content={window.location.href} />
           </Helmet>
 
-          <div className="flex flex-col md:flex-row pt-10 gap-8">
-            {/* Left content - flex-grow */}
+          <div className="flex flex-col-reverse md:flex-row gap-8">
+            {/* Left content - product details */}
             <div className="flex-grow relative">
-              {/* Add your product images, descriptions etc. here */}
+              {/* Description */}
+              <div
+                className="rendered-html"
+                dangerouslySetInnerHTML={{
+                  __html: cleanHtml(product.longDesc),
+                }}
+              />
+
+              {/* Instructors (if course) */}
+              {product?.type === "course" &&
+                product?.instructors?.length > 0 && (
+                  <InstructorSection
+                    instructors={product.instructors}
+                    loading={loading}
+                  />
+                )}
+
+              {/* FAQ Section */}
               <ProductFAQ faq={product?.faqs} />
             </div>
 
-            {/* Right sticky column with max-w-md */}
+            {/* Right sticky column - cart box */}
             <div
-              className="w-full max-w-sm pt-4 md:pt-0 sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
+              className="w-full max-w-sm mx-auto pt-4 md:pt-0 md:sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
               style={{ scrollbarWidth: "thin" }}
             >
               <div className="flex flex-col p-3 gap-3 bg-orange-200/50 rounded">
                 <ProductAddToCart product={product} />
-                {/* Additional content can go here */}
               </div>
             </div>
           </div>
