@@ -8,11 +8,13 @@ import ProductAddToCart from "./ProductAddToCart.jsx";
 import SimilarProducts from "./SimilarProducts.jsx";
 import ProductFAQ from "./ProductFAQ.jsx";
 import InstructorSection from "./InstructorSection.jsx";
+import LessonSection from "./LessonSection.jsx";
 
 const ProductDetails = () => {
   const hasPushedRef = useRef(false);
   const { fetchProductBySlug, product, loading, error, resetProduct } =
     useProductStore();
+
   const { GeneralInfoList } = GeneralInfoStore();
   const { slug } = useParams();
 
@@ -154,6 +156,13 @@ const ProductDetails = () => {
                 }}
               />
 
+              {/*Module Course Only*/}
+              {product?.type === "course" &&
+                Array.isArray(product.modules) &&
+                product.modules.length > 0 && (
+                  <LessonSection modules={product.modules} />
+                )}
+
               {/* Instructors (if course) */}
               {product?.type === "course" &&
                 product?.instructors?.length > 0 && (
@@ -169,7 +178,7 @@ const ProductDetails = () => {
 
             {/* Right sticky column - cart box */}
             <div
-              className="w-full max-w-sm mx-auto pt-4 md:pt-0 md:sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
+              className="w-full min-w-sm mx-auto pt-4 md:pt-0 md:sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
               style={{ scrollbarWidth: "thin" }}
             >
               <div className="flex flex-col p-3 gap-3 bg-orange-200/50 rounded">
