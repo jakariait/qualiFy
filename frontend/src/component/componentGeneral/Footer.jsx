@@ -67,7 +67,7 @@ const Footer = () => {
                   <Link to="/">
                     <ImageComponent
                       imageName={GeneralInfoList?.PrimaryLogo}
-                      className="w-20 md:w-30 "
+                      className="w-30 md:w-30 "
                     />
                   </Link>
                   <p className={"mt-5"}>{GeneralInfoList?.ShortDescription}</p>

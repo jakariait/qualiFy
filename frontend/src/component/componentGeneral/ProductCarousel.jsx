@@ -56,7 +56,7 @@ const ProductCarousel = () => {
     ); // Display error message
   }
   return (
-    <div className="product-carousel xl:container xl:mx-auto  px-3 relative">
+    <div className="product-carousel xl:container xl:mx-auto  px-3 py-2 relative">
       {CarouselStoreListLoading ? (
         <>
           <Skeleton height={400} width={"100%"} />

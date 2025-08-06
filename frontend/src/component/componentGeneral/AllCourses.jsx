@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import useProductStore from "../../store/useProductStore.js";
 import ProductList from "./ProductList.jsx";
-import { GraduationCap } from "lucide-react"; // Optional icon
 
 const AllCourses = () => {
   const { products, fetchFilteredProducts, loading } = useProductStore();
@@ -9,6 +8,7 @@ const AllCourses = () => {
   useEffect(() => {
     fetchFilteredProducts({ type: "course", isActive: "true" });
   }, []);
+
 
   return (
     <section className="xl:container md:mx-auto p-4 md:p-6">
@@ -41,7 +41,7 @@ const AllCourses = () => {
         </div>
       </div>
       {/* 📚 Course List */}
-      <ProductList products={products} />
+      <ProductList products={products}  loading={loading} />
     </section>
   );
 };
