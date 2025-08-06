@@ -9,7 +9,6 @@ const AllCourses = () => {
     fetchFilteredProducts({ type: "course", isActive: "true" });
   }, []);
 
-
   return (
     <section className="xl:container md:mx-auto p-4 md:p-6">
       <div className="text-center mb-10 px-4">
@@ -41,7 +40,7 @@ const AllCourses = () => {
         </div>
       </div>
       {/* 📚 Course List */}
-      <ProductList products={products}  loading={loading} />
+      <ProductList products={products} loading={loading} />
     </section>
   );
 };

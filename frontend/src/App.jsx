@@ -73,6 +73,7 @@ import BlogsPage from "./pagesUser/BlogsPage.jsx";
 import BlogDetailsPage from "./pagesUser/BlogDetailsPage.jsx";
 import ForgetPasswordPage from "./pagesUser/ForgetPasswordPage.jsx";
 import ResetPasswordPage from "./pagesUser/ResetPasswordPage.jsx";
+import AllCoursesPage from "./pagesUser/AllCoursesPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -138,6 +139,7 @@ function App() {
       <Routes>
         {/* General User Routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/courses" element={<AllCoursesPage />} />
         <Route path="/product/:slug" element={<ProductDetailsPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />

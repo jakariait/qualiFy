@@ -77,10 +77,23 @@ const deleteProduct = async (productId) => {
 	}
 };
 
+
+const getSimilarProductsByType = async (type, excludeId) => {
+	return ProductModel.find({
+		type,
+		_id: { $ne: excludeId },
+		isActive: true,
+	})
+		.limit(9)
+		.sort({ createdAt: -1 });
+};
+
+
 module.exports = {
 	createProduct,
 	getFilteredProducts,
 	getProductBySlug,
 	getProductById,
 	deleteProduct,
+	getSimilarProductsByType
 };

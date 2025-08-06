@@ -310,6 +310,9 @@ router.get("/products", productController.getAllProducts); // All Products Witho
 router.get("/products/:id", productController.getProductById);
 router.get("/products/slug/:slug", productController.getProductBySlug);
 
+// Similar products by type, excluding current one
+router.get("/similar/:type/:id", productController.getSimilarProducts);
+
 router.post(
   "/products",
   // adminProtect,

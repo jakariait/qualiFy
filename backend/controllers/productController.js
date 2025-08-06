@@ -130,10 +130,33 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// ✅ Get similar products by type excluding a specific product
+const getSimilarProducts = async (req, res) => {
+  try {
+    const { id, type } = req.params;
+
+    const similarProducts = await productService.getSimilarProductsByType(type, id);
+
+    res.status(200).json({
+      success: true,
+      message: "✅ Similar products retrieved successfully!",
+      data: similarProducts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch similar products",
+      error: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   createProduct,
   getProductBySlug,
   getAllProducts,
   getProductById,
   deleteProduct,
+  getSimilarProducts
 };

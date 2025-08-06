@@ -15,11 +15,9 @@ const productSchema = new mongoose.Schema(
     },
 
     longDesc: { type: String, trim: true },
-    productCode: { type: String, trim: true },
 
     // Shared
     thumbnailImage: { type: String, trim: true, required: true },
-    images: [{ type: String, trim: true }],
     videoUrl: [{ type: String, trim: true }],
     faqs: [
       {
@@ -72,6 +70,7 @@ const productSchema = new mongoose.Schema(
     enrolledStudents: { type: Number, trim: true },
     duration: { type: String, trim: true },
     quizzes: { type: Number, trim: true },
+    classStartDate: { type: String, trim: true },
     modules: [
       {
         subject: { type: String, required: true }, // e.g., "English", "G.Math"
