@@ -60,9 +60,9 @@ const ProductAddToCart = ({ product }) => {
 
   return (
     <div>
-      <div className="flex flex-col gap-3 pt-4">
+      <div className="flex  flex-col gap-3 pt-4">
         {/* Product Image */}
-        <ImageComponent imageName={product.thumbnailImage} />
+        <ImageComponent imageName={product.thumbnailImage} className={" w-full object-cover"} />
 
         {/* Product Name */}
         <h2 className="text-xl primaryTextColor">{product.name}</h2>

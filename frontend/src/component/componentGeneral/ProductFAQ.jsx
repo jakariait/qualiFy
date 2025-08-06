@@ -12,7 +12,7 @@ const ProductFAQ = ({ faq = [] }) => {
   return (
     <div>
       <div>
-        <h2 className="text-xl md:text-2xl font-bold mb-4  primaryTextColor">
+        <h2 className="text-xl md:text-2xl font-bold mb-4 mt-10 primaryTextColor">
           FAQs
         </h2>
         <div className="space-y-4 text-gray-100">

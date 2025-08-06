@@ -30,7 +30,7 @@ const InstructorSection = ({ instructors = [], loading }) => {
         </span>
       </h2>
 
-      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-2 lg:grid-cols-2 xl:grid-cols-3">
         {loading
           ? skeletonCards.map((_, index) => (
               <div

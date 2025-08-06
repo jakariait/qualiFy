@@ -79,8 +79,6 @@ const productSchema = new mongoose.Schema(
             title: { type: String, required: true },
             duration: { type: String, trim: true },
             courseThumbnail: { type: String, trim: true },
-            videoUrl: { type: String },
-            previewable: { type: Boolean, default: false },
           },
         ],
       },

@@ -9,6 +9,7 @@ import SimilarProducts from "./SimilarProducts.jsx";
 import ProductFAQ from "./ProductFAQ.jsx";
 import InstructorSection from "./InstructorSection.jsx";
 import LessonSection from "./LessonSection.jsx";
+import YouTubeVideoSection from "./YouTubeVideoSection.jsx";
 
 const ProductDetails = () => {
   const hasPushedRef = useRef(false);
@@ -172,13 +173,17 @@ const ProductDetails = () => {
                   />
                 )}
 
+              {/*YoutubeVideoSection*/}
+              <YouTubeVideoSection videos={product.videoUrl} />
+
+
               {/* FAQ Section */}
               <ProductFAQ faq={product?.faqs} />
             </div>
 
             {/* Right sticky column - cart box */}
             <div
-              className="w-full min-w-sm mx-auto pt-4 md:pt-0 md:sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
+              className="w-full md:min-w-[300px] lg:w-[800px]  mx-auto pt-4 md:pt-0 md:sticky top-44 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
               style={{ scrollbarWidth: "thin" }}
             >
               <div className="flex flex-col p-3 gap-3 bg-orange-200/50 rounded">
