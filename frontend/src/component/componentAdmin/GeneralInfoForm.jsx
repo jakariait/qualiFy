@@ -285,60 +285,60 @@ export default function GeneralInfoForm() {
           fullWidth
           margin="normal"
         />
-        <TextField
-          label="Google Map Link"
-          variant="outlined"
-          name="GoogleMapLink"
-          value={formData.GoogleMapLink}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Play Store Link"
-          variant="outlined"
-          name="PlayStoreLink"
-          value={formData.PlayStoreLink}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="App Store Link"
-          variant="outlined"
-          name="AppStoreLink"
-          value={formData.AppStoreLink}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Trade License"
-          variant="outlined"
-          name="TradeLicense"
-          value={formData.TradeLicense}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="TIN Number"
-          variant="outlined"
-          name="TINNumber"
-          value={formData.TINNumber}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="BIN Number"
-          variant="outlined"
-          name="BINNumber"
-          value={formData.BINNumber}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
+        {/*<TextField*/}
+        {/*  label="Google Map Link"*/}
+        {/*  variant="outlined"*/}
+        {/*  name="GoogleMapLink"*/}
+        {/*  value={formData.GoogleMapLink}*/}
+        {/*  onChange={handleChange}*/}
+        {/*  fullWidth*/}
+        {/*  margin="normal"*/}
+        {/*/>*/}
+        {/*<TextField*/}
+        {/*  label="Play Store Link"*/}
+        {/*  variant="outlined"*/}
+        {/*  name="PlayStoreLink"*/}
+        {/*  value={formData.PlayStoreLink}*/}
+        {/*  onChange={handleChange}*/}
+        {/*  fullWidth*/}
+        {/*  margin="normal"*/}
+        {/*/>*/}
+        {/*<TextField*/}
+        {/*  label="App Store Link"*/}
+        {/*  variant="outlined"*/}
+        {/*  name="AppStoreLink"*/}
+        {/*  value={formData.AppStoreLink}*/}
+        {/*  onChange={handleChange}*/}
+        {/*  fullWidth*/}
+        {/*  margin="normal"*/}
+        {/*/>*/}
+        {/*<TextField*/}
+        {/*  label="Trade License"*/}
+        {/*  variant="outlined"*/}
+        {/*  name="TradeLicense"*/}
+        {/*  value={formData.TradeLicense}*/}
+        {/*  onChange={handleChange}*/}
+        {/*  fullWidth*/}
+        {/*  margin="normal"*/}
+        {/*/>*/}
+        {/*<TextField*/}
+        {/*  label="TIN Number"*/}
+        {/*  variant="outlined"*/}
+        {/*  name="TINNumber"*/}
+        {/*  value={formData.TINNumber}*/}
+        {/*  onChange={handleChange}*/}
+        {/*  fullWidth*/}
+        {/*  margin="normal"*/}
+        {/*/>*/}
+        {/*<TextField*/}
+        {/*  label="BIN Number"*/}
+        {/*  variant="outlined"*/}
+        {/*  name="BINNumber"*/}
+        {/*  value={formData.BINNumber}*/}
+        {/*  onChange={handleChange}*/}
+        {/*  fullWidth*/}
+        {/*  margin="normal"*/}
+        {/*/>*/}
         <TextField
           label="Footer Copyright"
           variant="outlined"

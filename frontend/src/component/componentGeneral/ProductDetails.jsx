@@ -146,7 +146,7 @@ const ProductDetails = () => {
             <meta property="og:url" content={window.location.href} />
           </Helmet>
 
-          <div className="flex flex-col-reverse md:flex-row gap-8">
+          <div className="flex flex-col-reverse md:flex-row md:items-start md:gap-8">
             {/* Left content - product details */}
             <div className="flex-grow relative">
               {/* Description */}
@@ -174,8 +174,11 @@ const ProductDetails = () => {
                 )}
 
               {/*YoutubeVideoSection*/}
-              <YouTubeVideoSection videos={product.videoUrl} />
-
+              {product?.type === "course" &&
+                Array.isArray(product.videoUrl) &&
+                product.videoUrl.length > 0 && (
+                  <YouTubeVideoSection videos={product.videoUrl} />
+                )}
 
               {/* FAQ Section */}
               <ProductFAQ faq={product?.faqs} />
@@ -183,7 +186,7 @@ const ProductDetails = () => {
 
             {/* Right sticky column - cart box */}
             <div
-              className="w-full md:min-w-[300px] lg:w-[800px]  mx-auto pt-4 md:pt-0 md:sticky top-44 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
+              className="w-full md:w-[350px] lg:w-[400px] xl:w-[420px] shrink-0 pt-4 md:pt-0 md:sticky top-44 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
               style={{ scrollbarWidth: "thin" }}
             >
               <div className="flex flex-col p-3 gap-3 bg-orange-200/50 rounded">

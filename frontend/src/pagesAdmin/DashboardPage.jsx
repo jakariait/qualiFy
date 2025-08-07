@@ -9,6 +9,8 @@ import MonthlyOrderStatusRatioChart from "../component/componentAdmin/MonthlyOrd
 import RequirePermission from "../component/componentAdmin/RequirePermission.jsx";
 
 import useOrderStore from "../store/useOrderStore.js";
+import StudentReviwUpload from "../component/componentAdmin/StudentReviwUpload.jsx";
+import ProductCRUD from "../component/componentAdmin/ProductCRUD.jsx";
 
 const DashboardPage = ({ pageDetails, title }) => {
 
@@ -44,6 +46,7 @@ const DashboardPage = ({ pageDetails, title }) => {
     <LayoutAdmin>
       <div>
         <Breadcrumb title={"Dashboard"} pageDetails={"WEBSITE CONFIG"} />
+        <ProductCRUD/>
 
         <RequirePermission permission="dashboard">
           <div className={"flex flex-col gap-8"}>

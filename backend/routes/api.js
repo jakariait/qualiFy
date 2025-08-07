@@ -315,8 +315,8 @@ router.get("/similar/:type/:id", productController.getSimilarProducts);
 
 router.post(
   "/products",
-  // adminProtect,
-  // checkPermission("add_products"),
+  adminProtect,
+  checkPermission("add_products"),
   upload,
   productController.createProduct,
 );
@@ -607,7 +607,7 @@ router.post("/reset-password", PassWordResetController.resetPasswordWithOTP);
 router.post("/teacher", upload, teacherProfileController.create);
 router.get("/teacher", teacherProfileController.getAll);
 router.get("/teacher/:id", teacherProfileController.getById);
-router.put("/teacher/:id", teacherProfileController.update);
+router.put("/teacher/:id",upload, teacherProfileController.update);
 router.delete("/teacher/:id", teacherProfileController.remove);
 
 // Student Review Routes

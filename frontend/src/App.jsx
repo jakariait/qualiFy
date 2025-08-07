@@ -74,6 +74,9 @@ import BlogDetailsPage from "./pagesUser/BlogDetailsPage.jsx";
 import ForgetPasswordPage from "./pagesUser/ForgetPasswordPage.jsx";
 import ResetPasswordPage from "./pagesUser/ResetPasswordPage.jsx";
 import AllCoursesPage from "./pagesUser/AllCoursesPage.jsx";
+import AllBooksPage from "./pagesUser/AllBooksPage.jsx";
+import StudentReviewPage from "./pagesAdmin/StudentReviewPage.jsx";
+import InstructorInfoPage from "./pagesAdmin/InstructorInfoPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -140,6 +143,7 @@ function App() {
         {/* General User Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/courses" element={<AllCoursesPage />} />
+        <Route path="/books" element={<AllBooksPage />} />
         <Route path="/product/:slug" element={<ProductDetailsPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -180,6 +184,9 @@ function App() {
         {/* Protected Admin Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/admin/general-info" element={<GeneralInfoPage />} />
+          <Route path="/admin/student-review" element={<StudentReviewPage />} />
+          <Route path="/admin/instructor" element={<InstructorInfoPage />} />
+
           <Route
             path="/admin/subscribed-users"
             element={<SubscribedUsersPage />}
@@ -196,7 +203,6 @@ function App() {
           />
 
           {/* Product Routes */}
-
 
           <Route path="/admin/customers" element={<CustomerListPage />} />
           {/*Delivery Charges Routes*/}

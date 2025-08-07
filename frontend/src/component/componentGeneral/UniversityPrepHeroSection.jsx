@@ -76,8 +76,8 @@ const UniversityPrepHeroSection = () => {
           </div>
 
           {/* Right side: Modern visual element */}
-          <div className="flex-1 relative">
-            <div className="relative w-full max-w-lg mx-auto">
+          <div className="hidden md:flex flex-1 relative">
+            <div className="relative w-full max-w-lg  mx-auto">
               {/* Main card replaced with image */}
               <div className="relative rounded-3xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                 <img

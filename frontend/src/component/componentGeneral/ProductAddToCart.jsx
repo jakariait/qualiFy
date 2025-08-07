@@ -10,9 +10,33 @@ import {
   Clock,
   HelpCircle,
   Calendar,
+  User,
+  Book,
 } from "lucide-react";
+import {
+  Button,
+  Alert,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const ProductAddToCart = ({ product }) => {
+  const [openPdf, setOpenPdf] = useState(false);
+
+  const handleOpenPdf = () => {
+    if (product?.previewPdf) {
+      setOpenPdf(true);
+    } else {
+    }
+  };
+
+  const handleClosePdf = () => {
+    setOpenPdf(false);
+  };
+
   const [quantity, setQuantity] = useState(1);
   const MAX_QUANTITY = 5;
   const { addToCart } = useCartStore();
@@ -62,7 +86,10 @@ const ProductAddToCart = ({ product }) => {
     <div>
       <div className="flex  flex-col gap-3 pt-4">
         {/* Product Image */}
-        <ImageComponent imageName={product.thumbnailImage} className={" w-full object-cover"} />
+        <ImageComponent
+          imageName={product.thumbnailImage}
+          className={" w-full object-cover"}
+        />
 
         {/* Product Name */}
         <h2 className="text-xl primaryTextColor">{product.name}</h2>
@@ -173,6 +200,39 @@ const ProductAddToCart = ({ product }) => {
         </div>
       </div>
 
+      {/*Only for Book*/}
+      {product.type === "book" && (
+        <div className="mt-2 p-2 primaryTextColor flex justify-between items-center gap-1">
+          {/* Author */}
+          {product.author && (
+            <div className="flex items-center gap-1">
+              <User className="w-4 h-4 text-purple-600" />
+              <span>Author: {product.author}</span>
+            </div>
+          )}
+
+          {/* Publication */}
+          {product.publisher && (
+            <div className="flex items-center gap-1">
+              <Book className="w-4 h-4 text-yellow-600" />
+              <span>Publication: {product.publisher}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {product.type === "book" && product.previewPdf && (
+        <div className="mb-4">
+          {/* Read eBook Button */}
+          <button
+            className="primaryBgColor accentTextColor cursor-pointer px-3 py-2 rounded w-full"
+            onClick={handleOpenPdf}
+          >
+            Read The Book
+          </button>
+        </div>
+      )}
+
       {/* Extra Info for Course */}
       {product.type === "course" && (
         <div className="mt-4 p-2 secondaryTextColor flex flex-col gap-1">
@@ -208,6 +268,28 @@ const ProductAddToCart = ({ product }) => {
           )}
         </div>
       )}
+
+      {/* Modal PDF Preview */}
+      <Dialog open={openPdf} onClose={handleClosePdf} fullWidth maxWidth="md">
+        <DialogTitle className="flex justify-between items-center">
+          <span>{product.name}</span>
+          <IconButton onClick={handleClosePdf}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <div className="w-full h-[80vh]">
+            <iframe
+              src={`http://localhost:5050/uploads/${product.previewPdf}`}
+              title="eBook Preview"
+              width="100%"
+              height="100%"
+              className="rounded-lg border"
+              style={{ border: "none" }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

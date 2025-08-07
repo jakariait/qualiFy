@@ -5,8 +5,6 @@ import {
   FaSearch,
   FaCog,
   FaThLarge,
-  FaBoxes,
-  FaList,
   FaTags,
   FaCreditCard,
   FaUsers,
@@ -21,6 +19,8 @@ import {
   FaInfo,
   FaClipboardList,
   FaBlog,
+  FaComments,
+  FaChalkboardTeacher,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
@@ -30,8 +30,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import useProductStore from "../../store/useProductStore.js";
-import useOrderStore from "../../store/useOrderStore.js";
+
 import React from "react";
 import RequirePermission from "./RequirePermission.jsx";
 
@@ -72,6 +71,19 @@ export default function SidebarMenu() {
       {/* Website Config */}
       <div>
         <ul className="space-y-1">
+          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+            <Link
+              to="/admin/student-review"
+              className={"flex items-center gap-2"}
+            >
+              <FaComments /> <span>Student Review</span>
+            </Link>
+          </li>
+          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+            <Link to="/admin/instructor" className={"flex items-center gap-2"}>
+              <FaChalkboardTeacher /> <span>Instructor</span>
+            </Link>
+          </li>
           <RequirePermission permission="website_theme_color" fallback={true}>
             <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
               <Link
@@ -105,6 +117,11 @@ export default function SidebarMenu() {
             </Link>
           </RequirePermission>
         </ul>
+        <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+          <Link to="/admin/product-service" className={"flex items-center gap-2"}>
+            <FaTags /> <span>Manage Products & Service</span>
+          </Link>
+        </li>
       </div>
 
       {/* E-Commerce Modules */}
@@ -190,77 +207,8 @@ export default function SidebarMenu() {
             </li>
           </RequirePermission>
 
-          <RequirePermission
-            permission={[
-              "add_products",
-              "delete_products",
-              "view_products",
-              "edit_products",
-            ]}
-            match="any"
-            fallback={true}
-          >
-            <li className="space-x-2 px-2 rounded-md cursor-pointer">
-              <Accordion
-                style={{
-                  background: "transparent",
-                  boxShadow: "none",
-                  width: "100%",
-                }}
-                sx={{
-                  color: "white", // Ensures text color is white
-                  "& .MuiAccordionSummary-root": {
-                    backgroundColor: "transparent",
-                    minHeight: "auto", // Removes unnecessary padding
-                    padding: "0", // Removes default padding
-                  },
-                  "& .MuiAccordionDetails-root": {
-                    backgroundColor: "transparent",
-                    paddingLeft: "0", // Ensures no extra left padding
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: "white", // Ensures the dropdown icon is white
-                  },
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1-content"
-                  id="panel1-header"
-                  className="p-2 flex items-center"
-                >
-                  <Typography component="span">
-                    <div className="flex items-center gap-2">
-                      <FaTags /> <span>Manage Products</span>
-                    </div>
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <ul className={"space-y-2 pl-4"}>
-                    <RequirePermission
-                      permission="add_products"
-                      fallback={true}
-                    >
-                      <li>
-                        <Link to="/admin/addnewproduct">Add New Product</Link>
-                      </li>
-                    </RequirePermission>
 
-                    <RequirePermission
-                      permission="view_products"
-                      fallback={true}
-                    >
-                      <li>
-                        <Link to="/admin/viewallproducts">
-                          View All Products
-                        </Link>
-                      </li>
-                    </RequirePermission>
-                  </ul>
-                </AccordionDetails>
-              </Accordion>
-            </li>
-          </RequirePermission>
+
 
           <RequirePermission permission="view_orders" fallback={true}>
             <li className="space-x-2 px-2 rounded-md cursor-pointer">

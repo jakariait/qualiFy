@@ -154,7 +154,7 @@ const Headers = () => {
           <Link to="/">
             <ImageComponent
               imageName={GeneralInfoList?.PrimaryLogo}
-              className="w-30 md:w-40"
+              className="w-30 md:w-40 mt-1"
               showSkeleton={false}
             />
           </Link>

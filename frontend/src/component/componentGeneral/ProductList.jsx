@@ -2,7 +2,7 @@ import React from "react";
 import { Typography, Skeleton } from "@mui/material";
 import { Link } from "react-router-dom";
 import ImageComponent from "./ImageComponent.jsx";
-import { BookOpen, GraduationCap } from "lucide-react";
+import { GraduationCap, BookOpen, User, Book } from "lucide-react";
 
 const formatPrice = (price) => {
   if (isNaN(price)) return price;
@@ -51,6 +51,29 @@ const ProductList = ({ products, loading }) => {
                   skeletonHeight={250}
                 />
               </Link>
+
+              {/*Only for Book*/}
+              {product.type === "book" && (
+                <div className="mt-2 p-2 primaryTextColor flex justify-between items-center gap-1">
+
+                  {/* Author */}
+                  {product.author && (
+                    <div className="flex items-center gap-1">
+                      <User className="w-4 h-4 text-purple-600" />
+                      <span>Author: {product.author}</span>
+                    </div>
+                  )}
+
+                  {/* Publication */}
+                  {product.publisher && (
+                    <div className="flex items-center gap-1">
+                      <Book className="w-4 h-4 text-yellow-600" />
+                      <span>Publication: {product.publisher}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               {/*Only for course*/}
               {product.type === "course" && (

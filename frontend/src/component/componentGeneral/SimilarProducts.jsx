@@ -29,26 +29,9 @@ const SimilarProducts = ({ type, productId }) => {
     }
   }, [type, productId]);
 
-  if (loading || error || similarProducts.length === 0) {
-    return (
-      <div className="xl:container xl:mx-auto md:p-3 mt-8">
-        <h1 className="text-2xl font-semibold primaryTextColor mb-4">
-          You may also like
-        </h1>
-
-        {loading && <ProductList products={[]} loading={true} />}
-        {error && (
-          <p className="text-center text-red-600 py-10">
-            Failed to load similar products: {error}
-          </p>
-        )}
-        {!loading && !error && similarProducts.length === 0 && (
-          <p className="text-center text-gray-500 py-10">
-            No similar products found.
-          </p>
-        )}
-      </div>
-    );
+  // ⛔ Don't render anything if there's no error, not loading, and no products
+  if (!loading && !error && similarProducts.length === 0) {
+    return null;
   }
 
   return (
@@ -58,46 +41,59 @@ const SimilarProducts = ({ type, productId }) => {
           <>
             Explore More{" "}
             <span className="relative inline-block primaryTextColor">
-        Courses
-        <svg
-          className="absolute -bottom-2 left-0 w-full h-3"
-          viewBox="0 0 200 12"
-          fill="none"
-        >
-          <path
-            d="M2 8C2 8 50 2 100 4C150 6 198 8 198 8"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            className="primaryTextColor"
-          />
-        </svg>
-      </span>
+              Courses
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3"
+                viewBox="0 0 200 12"
+                fill="none"
+              >
+                <path
+                  d="M2 8C2 8 50 2 100 4C150 6 198 8 198 8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  className="primaryTextColor"
+                />
+              </svg>
+            </span>
           </>
         ) : (
           <>
             You May Also{" "}
             <span className="relative inline-block primaryTextColor">
-        Like
-        <svg
-          className="absolute -bottom-2 left-0 w-full h-3"
-          viewBox="0 0 200 12"
-          fill="none"
-        >
-          <path
-            d="M2 8C2 8 50 2 100 4C150 6 198 8 198 8"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            className="primaryTextColor"
-          />
-        </svg>
-      </span>
+              Like
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3"
+                viewBox="0 0 200 12"
+                fill="none"
+              >
+                <path
+                  d="M2 8C2 8 50 2 100 4C150 6 198 8 198 8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  className="primaryTextColor"
+                />
+              </svg>
+            </span>
           </>
         )}
       </h2>
 
-      <ProductList products={similarProducts} loading={loading} />
+      {/* Show loading skeleton */}
+      {loading && <ProductList products={[]} loading={true} />}
+
+      {/* Show error message */}
+      {error && (
+        <p className="text-center text-red-600 py-10">
+          Failed to load similar products: {error}
+        </p>
+      )}
+
+      {/* Show product list if data exists */}
+      {!loading && !error && similarProducts.length > 0 && (
+        <ProductList products={similarProducts} loading={false} />
+      )}
     </div>
   );
 };
