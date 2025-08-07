@@ -5,16 +5,45 @@ const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
 
-    // Handle thumbnail upload
+    // Handle thumbnailImage upload
     if (req.files?.thumbnailImage) {
       productData.thumbnailImage = req.files.thumbnailImage[0].filename;
     }
 
-    // Handle additional images
-    if (req.files?.images) {
-      productData.images = req.files.images.map((file) => file.filename);
+    // Handle previewPdf upload
+    if (req.files?.previewPdf) {
+      productData.previewPdf = req.files.previewPdf[0].filename;
     }
 
+    // Handle courseThumbnail(s) inside modules
+    if (req.files?.courseThumbnails && productData.modules) {
+      const courseThumbnails = req.files.courseThumbnails.map((f) => f.filename);
+
+      let parsedModules = typeof productData.modules === "string"
+        ? JSON.parse(productData.modules)
+        : productData.modules;
+
+      parsedModules = parsedModules.map((module, moduleIdx) => ({
+        ...module,
+        lessons: module.lessons.map((lesson, lessonIdx) => ({
+          ...lesson,
+          courseThumbnail: courseThumbnails.shift() || lesson.courseThumbnail || "",
+        })),
+      }));
+
+      productData.modules = parsedModules;
+    }
+
+    // Handle optional nested JSON fields
+    if (typeof productData.instructors === "string") {
+      productData.instructors = JSON.parse(productData.instructors);
+    }
+
+    if (typeof productData.faqs === "string") {
+      productData.faqs = JSON.parse(productData.faqs);
+    }
+
+    // Create the product
     const product = await productService.createProduct(productData);
 
     res.status(201).json({
@@ -23,6 +52,7 @@ const createProduct = async (req, res) => {
       data: product,
     });
   } catch (error) {
+    console.error("Error creating product:", error);
     res.status(400).json({
       success: false,
       message: "Failed to create product. Please try again!",
@@ -30,6 +60,84 @@ const createProduct = async (req, res) => {
     });
   }
 };
+
+
+// ✅ Update a product by ID
+const updateProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const productData = { ...req.body };
+
+    // Handle thumbnailImage upload
+    if (req.files?.thumbnailImage) {
+      productData.thumbnailImage = req.files.thumbnailImage[0].filename;
+    }
+
+    // Handle previewPdf upload
+    if (req.files?.previewPdf) {
+      productData.previewPdf = req.files.previewPdf[0].filename;
+    }
+
+    // Handle courseThumbnail(s) inside modules
+    if (req.files?.courseThumbnails && productData.modules) {
+      const courseThumbnails = req.files.courseThumbnails.map((f) => f.filename);
+
+      let parsedModules =
+        typeof productData.modules === "string"
+          ? JSON.parse(productData.modules)
+          : productData.modules;
+
+      parsedModules = parsedModules.map((module) => ({
+        ...module,
+        lessons: module.lessons.map((lesson) => ({
+          ...lesson,
+          courseThumbnail: courseThumbnails.shift() || lesson.courseThumbnail || "",
+        })),
+      }));
+
+      productData.modules = parsedModules;
+    } else if (typeof productData.modules === "string") {
+      // Parse modules even if no files were uploaded
+      productData.modules = JSON.parse(productData.modules);
+    }
+
+    // Handle optional nested JSON fields
+    if (typeof productData.instructors === "string") {
+      productData.instructors = JSON.parse(productData.instructors);
+    }
+
+    if (typeof productData.faqs === "string") {
+      productData.faqs = JSON.parse(productData.faqs);
+    }
+
+    // Call the service to update the product
+    const updatedProduct = await productService.updateProduct(productId, productData);
+
+    if (!updatedProduct) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully!",
+      data: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(400).json({
+      success: false,
+      message: "Failed to update product. Please try again!",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
 
 // ✅ Get all products (with optional filtering: type, isActive)
 const getAllProducts = async (req, res) => {
@@ -158,5 +266,6 @@ module.exports = {
   getAllProducts,
   getProductById,
   deleteProduct,
-  getSimilarProducts
+  getSimilarProducts,
+  updateProduct
 };

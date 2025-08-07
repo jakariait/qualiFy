@@ -51,7 +51,6 @@ const productSchema = new mongoose.Schema(
     finalStock: {
       type: Number,
       min: 0,
-      required: true,
     },
 
     // Book-specific
@@ -73,10 +72,10 @@ const productSchema = new mongoose.Schema(
     classStartDate: { type: String, trim: true },
     modules: [
       {
-        subject: { type: String, required: true }, // e.g., "English", "G.Math"
+        subject: { type: String }, // e.g., "English", "G.Math"
         lessons: [
           {
-            title: { type: String, required: true },
+            title: { type: String },
             duration: { type: String, trim: true },
             courseThumbnail: { type: String, trim: true },
           },

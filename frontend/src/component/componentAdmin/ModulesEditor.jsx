@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2, PlusCircle, Upload } from "lucide-react";
+import { Trash2, PlusCircle, Upload, XCircle } from "lucide-react";
 
 const ModulesEditor = ({ modules, setModules }) => {
   const addModule = () => {
@@ -48,7 +48,13 @@ const ModulesEditor = ({ modules, setModules }) => {
   const handleFileChange = (moduleIdx, lessonIdx, file) => {
     const updated = [...modules];
     updated[moduleIdx].lessons[lessonIdx].courseThumbnailFile = file;
-    // Optionally reset courseThumbnail string if uploading new file
+    updated[moduleIdx].lessons[lessonIdx].courseThumbnail = "";
+    setModules(updated);
+  };
+
+  const handleRemoveImage = (moduleIdx, lessonIdx) => {
+    const updated = [...modules];
+    updated[moduleIdx].lessons[lessonIdx].courseThumbnailFile = null;
     updated[moduleIdx].lessons[lessonIdx].courseThumbnail = "";
     setModules(updated);
   };
@@ -59,13 +65,14 @@ const ModulesEditor = ({ modules, setModules }) => {
 
       {modules.map((module, mIdx) => (
         <div key={mIdx} className="mb-6 rounded-lg shadow-md bg-gray-50 p-4">
+          {/* Module Subject */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <input
               type="text"
               placeholder="Subject"
               value={module.subject}
               onChange={(e) => updateModuleSubject(mIdx, e.target.value)}
-              className="px-4 py-2 border rounded-md flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 bg-gray-50 shadow rounded-md flex-grow focus:outline-none"
               required
             />
             <Trash2
@@ -80,14 +87,10 @@ const ModulesEditor = ({ modules, setModules }) => {
           {/* Lessons */}
           <div className="mt-4">
             {module.lessons.map((lesson, lIdx) => {
-              // Prepare preview URL for uploaded file or existing thumbnail
               const previewUrl = lesson.courseThumbnailFile
                 ? URL.createObjectURL(lesson.courseThumbnailFile)
                 : lesson.courseThumbnail
-                  ? `${import.meta.env.VITE_API_URL.replace(
-                    "/api",
-                    ""
-                  )}/uploads/${lesson.courseThumbnail}`
+                  ? `${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${lesson.courseThumbnail}`
                   : null;
 
               return (
@@ -95,6 +98,7 @@ const ModulesEditor = ({ modules, setModules }) => {
                   key={lIdx}
                   className="flex flex-col md:flex-row md:items-center gap-4 bg-white shadow-sm p-3 rounded-md mb-3"
                 >
+                  {/* Title */}
                   <input
                     type="text"
                     placeholder="Lesson Title"
@@ -102,9 +106,11 @@ const ModulesEditor = ({ modules, setModules }) => {
                     onChange={(e) =>
                       updateLessonField(mIdx, lIdx, "title", e.target.value)
                     }
-                    className="px-4 py-2 border rounded-md flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-2 bg-gray-50 shadow rounded-md flex-grow focus:outline-none"
                     required
                   />
+
+                  {/* Duration */}
                   <input
                     type="text"
                     placeholder="Duration"
@@ -112,16 +118,28 @@ const ModulesEditor = ({ modules, setModules }) => {
                     onChange={(e) =>
                       updateLessonField(mIdx, lIdx, "duration", e.target.value)
                     }
-                    className="px-4 py-2 border rounded-md w-full sm:w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-2 bg-gray-50 shadow rounded-md w-full sm:w-32 focus:outline-none"
                   />
+
+                  {/* Upload + Preview */}
                   <div className="flex flex-col items-center min-w-[90px]">
                     {previewUrl && (
-                      <img
-                        src={previewUrl}
-                        alt="Lesson Thumbnail"
-                        className="w-20 h-20 object-cover rounded-md mb-2"
-                      />
+                      <div className="relative mb-2">
+                        <img
+                          src={previewUrl}
+                          alt="Lesson Thumbnail"
+                          className="w-20 h-20 object-cover rounded-md"
+                        />
+                        <button
+                          onClick={() => handleRemoveImage(mIdx, lIdx)}
+                          className="absolute top-[-10px] right-[-10px] text-red-600 hover:text-red-800"
+                          title="Delete Image"
+                        >
+                          <XCircle size={20} />
+                        </button>
+                      </div>
                     )}
+
                     <label className="cursor-pointer inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow select-none">
                       <Upload size={18} className="mr-2" />
                       Upload
@@ -135,6 +153,8 @@ const ModulesEditor = ({ modules, setModules }) => {
                       />
                     </label>
                   </div>
+
+                  {/* Remove Lesson */}
                   <Trash2
                     onClick={() => removeLesson(mIdx, lIdx)}
                     size={28}
@@ -146,6 +166,7 @@ const ModulesEditor = ({ modules, setModules }) => {
               );
             })}
 
+            {/* Add Lesson Button */}
             <div className="flex justify-end mt-2">
               <PlusCircle
                 onClick={() => addLesson(mIdx)}
@@ -159,6 +180,7 @@ const ModulesEditor = ({ modules, setModules }) => {
         </div>
       ))}
 
+      {/* Add Module Button */}
       <div className="flex justify-center mt-4">
         <PlusCircle
           onClick={addModule}

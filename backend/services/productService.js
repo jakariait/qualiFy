@@ -12,6 +12,28 @@ const createProduct = async (data) => {
 	}
 };
 
+
+
+
+const updateProduct = async (productId, productData) => {
+	try {
+		// Find product by id and update, return updated document
+		const updatedProduct = await ProductModel.findByIdAndUpdate(
+			productId,
+			{ $set: productData },
+			{ new: true, runValidators: true }
+		);
+
+		return updatedProduct;
+	} catch (error) {
+		console.error("Service error updating product:", error);
+		throw error;
+	}
+};
+
+
+
+
 // ✅ Get all products by filter (type, isActive)
 const getFilteredProducts = async ({ type, isActive }) => {
 	try {
@@ -95,5 +117,6 @@ module.exports = {
 	getProductBySlug,
 	getProductById,
 	deleteProduct,
-	getSimilarProductsByType
+	getSimilarProductsByType,
+	updateProduct
 };

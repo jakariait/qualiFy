@@ -12,15 +12,21 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Upload } from "lucide-react";
+import { Upload, Eye, Pencil, Trash2 } from "lucide-react";
 
 import ModulesEditor from "./ModulesEditor";
+import { Editor } from "primereact/editor";
+import useAuthAdminStore from "../../store/AuthAdminStore.js";
 
 const API_BASE = import.meta.env.VITE_API_URL + "/products";
+const API_TEACHERS = import.meta.env.VITE_API_URL + "/teacher";
 
 const ProductCRUD = () => {
+  const { token } = useAuthAdminStore();
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -40,7 +46,7 @@ const ProductCRUD = () => {
     finalStock: 0,
     author: "",
     publisher: "",
-    instructors: [],
+    instructors: [], // array of instructor IDs
     lessons: "",
     enrolledStudents: "",
     duration: "",
@@ -52,10 +58,15 @@ const ProductCRUD = () => {
     previewPdfFile: null,
   });
 
-  const [modules, setModules] = useState([]);
+  console.table(form);
 
-  // State for showing preview of uploaded thumbnail image
+  const [modules, setModules] = useState([]);
   const [thumbnailPreview, setThumbnailPreview] = useState("");
+
+  // Instructors fetched from API
+  const [instructorsList, setInstructorsList] = useState([]);
+  const [loadingInstructors, setLoadingInstructors] = useState(false);
+  const [instructorsError, setInstructorsError] = useState(null);
 
   const fetchProducts = async () => {
     try {
@@ -70,17 +81,32 @@ const ProductCRUD = () => {
     }
   };
 
+  const fetchInstructors = async () => {
+    try {
+      setLoadingInstructors(true);
+      const res = await axios.get(API_TEACHERS);
+      if (res.data.success) {
+        // Assuming API returns array of instructors with _id and name
+        setInstructorsList(res.data.data);
+      } else {
+        setInstructorsError("Failed to fetch instructors");
+      }
+    } catch (err) {
+      setInstructorsError(err.message || "Error fetching instructors");
+    } finally {
+      setLoadingInstructors(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchInstructors();
   }, []);
 
   useEffect(() => {
-    // Update thumbnail preview when thumbnailFile changes
     if (form.thumbnailFile) {
       const objectUrl = URL.createObjectURL(form.thumbnailFile);
       setThumbnailPreview(objectUrl);
-
-      // Cleanup memory when component unmounts or file changes
       return () => URL.revokeObjectURL(objectUrl);
     } else {
       setThumbnailPreview("");
@@ -130,7 +156,10 @@ const ProductCRUD = () => {
       finalStock: product.finalStock || 0,
       author: product.author || "",
       publisher: product.publisher || "",
-      instructors: product.instructors?.map((i) => i._id || i).join(", ") || "",
+      // If product.instructors is array of objects with _id, map to ids
+      instructors: product.instructors
+        ? product.instructors.map((i) => i._id || i)
+        : [],
       lessons: product.lessons || "",
       enrolledStudents: product.enrolledStudents || "",
       duration: product.duration || "",
@@ -167,6 +196,18 @@ const ProductCRUD = () => {
     }
   };
 
+  const handleInstructorChange = (e) => {
+    const { value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      instructors: typeof value === "string" ? value.split(",") : value,
+    }));
+  };
+
+  const handleEditorChange = (e) => {
+    setForm((f) => ({ ...f, longDesc: e.htmlValue }));
+  };
+
   const handleSave = async () => {
     try {
       const formData = new FormData();
@@ -185,10 +226,7 @@ const ProductCRUD = () => {
       formData.append("finalStock", form.finalStock);
       formData.append("author", form.author);
       formData.append("publisher", form.publisher);
-      formData.append(
-        "instructors",
-        JSON.stringify(form.instructors.split(",").map((i) => i.trim())),
-      );
+      formData.append("instructors", JSON.stringify(form.instructors));
       formData.append("lessons", form.lessons);
       formData.append("enrolledStudents", form.enrolledStudents);
       formData.append("duration", form.duration);
@@ -208,13 +246,11 @@ const ProductCRUD = () => {
         ),
       );
 
-      modules.forEach((mod, mIdx) => {
-        mod.lessons.forEach((lesson, lIdx) => {
+      // Append all courseThumbnail files under key 'courseThumbnails'
+      modules.forEach((mod) => {
+        mod.lessons.forEach((lesson) => {
           if (lesson.courseThumbnailFile) {
-            formData.append(
-              `lessonImage-${mIdx}-${lIdx}`,
-              lesson.courseThumbnailFile,
-            );
+            formData.append("courseThumbnails", lesson.courseThumbnailFile);
           }
         });
       });
@@ -229,7 +265,10 @@ const ProductCRUD = () => {
       let res;
       if (editingProduct) {
         res = await axios.put(`${API_BASE}/${editingProduct._id}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         });
       } else {
         res = await axios.post(API_BASE, formData, {
@@ -254,7 +293,11 @@ const ProductCRUD = () => {
     if (!window.confirm("Are you sure you want to delete this product?"))
       return;
     try {
-      await axios.delete(`${API_BASE}/${id}`);
+      await axios.delete(`${API_BASE}/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Replace with your actual token variable
+        },
+      });
       fetchProducts();
     } catch (err) {
       alert(
@@ -299,21 +342,31 @@ const ProductCRUD = () => {
               <div>
                 <h3 className="font-bold">{p.name}</h3>
                 <p>Type: {p.type}</p>
-                <p>Price: {p.finalPrice} BDT</p>
               </div>
             </div>
             <div className="flex flex-col items-center gap-4">
+              {/* View Button */}
+              <button
+                onClick={() => window.open(`/product/${p.slug}`, "_blank")}
+                className="primaryTextColor cursor-pointer "
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+
+              {/* Edit Button */}
               <button
                 onClick={() => openEditDialog(p)}
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="primaryTextColor cursor-pointer"
               >
-                Edit
+                <Pencil className="w-4 h-4" />
               </button>
+
+              {/* Delete Button */}
               <button
-                onClick={() => handleDelete(p._id)}
-                className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={() => handleDelete(p.productId)}
+                className="primaryTextColor cursor-pointer"
               >
-                Delete
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -363,16 +416,42 @@ const ProductCRUD = () => {
               <MenuItem value="exam">Exam</MenuItem>
             </Select>
           </FormControl>
+          {/* Instructors Selection */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="instructors-label">Instructors</InputLabel>
+            {loadingInstructors ? (
+              <CircularProgress size={24} />
+            ) : instructorsError ? (
+              <p className="text-red-600">{instructorsError}</p>
+            ) : (
+              <Select
+                labelId="instructors-label"
+                label="Instructors"
+                name="instructors"
+                multiple
+                value={form.instructors}
+                onChange={handleInstructorChange}
+                renderValue={(selected) =>
+                  instructorsList
+                    .filter((ins) => selected.includes(ins._id))
+                    .map((ins) => ins.name)
+                    .join(", ")
+                }
+              >
+                {instructorsList.map((instructor) => (
+                  <MenuItem key={instructor._id} value={instructor._id}>
+                    {instructor.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+          </FormControl>
 
-          <TextField
-            label="Long Description"
-            name="longDesc"
+          <Editor
             value={form.longDesc}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={3}
-            margin="normal"
+            onTextChange={handleEditorChange}
+            style={{ height: "260px", marginBottom: "1rem" }}
+            theme="snow"
           />
 
           <TextField

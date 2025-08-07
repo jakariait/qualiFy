@@ -101,6 +101,8 @@ const upload = multer({ storage }).fields([
     name: "teachersImg",
     maxCount: 1,
   },
+  { name: "previewPdf", maxCount: 1 },
+  { name: "courseThumbnails", maxCount: 50 },
 ]);
 
 // Serve images from the 'uploads' folder as static files
@@ -302,9 +304,6 @@ router.delete(
   userController.deleteUser,
 );
 
-
-
-
 // Routes for Products
 router.get("/products", productController.getAllProducts); // All Products Without Sorting
 router.get("/products/:id", productController.getProductById);
@@ -321,6 +320,13 @@ router.post(
   productController.createProduct,
 );
 
+router.put(
+  "/products/:id",
+  adminProtect,
+  checkPermission("edit_products"),
+  upload,
+  productController.updateProduct,
+);
 
 router.delete(
   "/products/:id",
@@ -328,8 +334,6 @@ router.delete(
   checkPermission("delete_products"),
   productController.deleteProduct,
 );
-
-
 
 // Cart Routes
 router.get("/getCart", userProtect, cartController.getCart);
@@ -607,24 +611,21 @@ router.post("/reset-password", PassWordResetController.resetPasswordWithOTP);
 router.post("/teacher", upload, teacherProfileController.create);
 router.get("/teacher", teacherProfileController.getAll);
 router.get("/teacher/:id", teacherProfileController.getById);
-router.put("/teacher/:id",upload, teacherProfileController.update);
+router.put("/teacher/:id", upload, teacherProfileController.update);
 router.delete("/teacher/:id", teacherProfileController.remove);
 
 // Student Review Routes
 router.post(
   "/createstudentreview",
   upload,
-  StudentReviewController.createStudentReview
+  StudentReviewController.createStudentReview,
 );
 
-router.get(
-  "/getallstudentreview",
-  StudentReviewController.getAllStudentReview
-);
+router.get("/getallstudentreview", StudentReviewController.getAllStudentReview);
 
 router.delete(
   "/deletebyidstudentreview/:id",
-  StudentReviewController.deleteByIdStudentReview
+  StudentReviewController.deleteByIdStudentReview,
 );
 
 module.exports = router;
