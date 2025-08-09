@@ -77,6 +77,7 @@ import AllCoursesPage from "./pagesUser/AllCoursesPage.jsx";
 import AllBooksPage from "./pagesUser/AllBooksPage.jsx";
 import StudentReviewPage from "./pagesAdmin/StudentReviewPage.jsx";
 import InstructorInfoPage from "./pagesAdmin/InstructorInfoPage.jsx";
+import ManageProductServicePage from "./pagesAdmin/ManageProductServicePage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -186,6 +187,10 @@ function App() {
           <Route path="/admin/general-info" element={<GeneralInfoPage />} />
           <Route path="/admin/student-review" element={<StudentReviewPage />} />
           <Route path="/admin/instructor" element={<InstructorInfoPage />} />
+          <Route
+            path="/admin/product-service"
+            element={<ManageProductServicePage />}
+          />
 
           <Route
             path="/admin/subscribed-users"

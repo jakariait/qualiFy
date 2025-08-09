@@ -173,10 +173,11 @@ const ProductDetails = () => {
                   />
                 )}
 
-              {/*YoutubeVideoSection*/}
               {product?.type === "course" &&
                 Array.isArray(product.videoUrl) &&
-                product.videoUrl.length > 0 && (
+                product.videoUrl.some(
+                  (url) => typeof url === "string" && url.trim() !== "" && url !== "[]" && url !== "[\"[]\"]"
+                ) && (
                   <YouTubeVideoSection videos={product.videoUrl} />
                 )}
 

@@ -56,9 +56,12 @@ const ProductCRUD = () => {
     previewPdf: "",
     thumbnailFile: null,
     previewPdfFile: null,
-  });
 
-  console.table(form);
+    // NEW fields:
+    videoUrl: [""], // start with one empty string
+    faqs: [{ question: "", answer: "" }], // one empty faq
+    isActive: true,
+  });
 
   const [modules, setModules] = useState([]);
   const [thumbnailPreview, setThumbnailPreview] = useState("");
@@ -67,6 +70,54 @@ const ProductCRUD = () => {
   const [instructorsList, setInstructorsList] = useState([]);
   const [loadingInstructors, setLoadingInstructors] = useState(false);
   const [instructorsError, setInstructorsError] = useState(null);
+
+  const handleVideoUrlChange = (index, value) => {
+    setForm((f) => {
+      const newUrls = [...f.videoUrl];
+      newUrls[index] = value;
+      return { ...f, videoUrl: newUrls };
+    });
+  };
+
+  const addVideoUrl = () => {
+    setForm((f) => ({ ...f, videoUrl: [...f.videoUrl, ""] }));
+  };
+
+  const removeVideoUrl = (index) => {
+    setForm((f) => {
+      const newUrls = f.videoUrl.filter((_, i) => i !== index);
+      return { ...f, videoUrl: newUrls };
+    });
+  };
+
+  const handleFaqChange = (index, field, value) => {
+    setForm((f) => {
+      const newFaqs = [...f.faqs];
+      newFaqs[index] = { ...newFaqs[index], [field]: value };
+      return { ...f, faqs: newFaqs };
+    });
+  };
+
+  const addFaq = () => {
+    setForm((f) => ({
+      ...f,
+      faqs: [
+        ...(Array.isArray(f.faqs) ? f.faqs : []),
+        { question: "", answer: "" },
+      ],
+    }));
+  };
+
+  const removeFaq = (index) => {
+    setForm((f) => {
+      const newFaqs = f.faqs.filter((_, i) => i !== index);
+      return { ...f, faqs: newFaqs };
+    });
+  };
+
+  const handleIsActiveChange = (e) => {
+    setForm((f) => ({ ...f, isActive: e.target.checked }));
+  };
 
   const fetchProducts = async () => {
     try {
@@ -143,6 +194,82 @@ const ProductCRUD = () => {
   };
 
   const openEditDialog = (product) => {
+    // Clean videoUrl array - remove invalid or empty entries
+    // Fix videoUrl if it's an array of one string that looks like a JSON stringified array
+    let videoUrlsRaw = product.videoUrl;
+
+    if (
+      Array.isArray(videoUrlsRaw) &&
+      videoUrlsRaw.length === 1 &&
+      typeof videoUrlsRaw[0] === "string"
+    ) {
+      try {
+        const parsed = JSON.parse(videoUrlsRaw[0]);
+        if (Array.isArray(parsed)) {
+          videoUrlsRaw = parsed;
+        }
+      } catch {
+        // Not JSON parseable, leave as is
+      }
+    }
+
+    const cleanedVideoUrl = Array.isArray(videoUrlsRaw)
+      ? videoUrlsRaw.filter(
+          (url) =>
+            typeof url === "string" &&
+            url.trim() !== "" &&
+            url !== "[]" &&
+            url !== '["[]"]',
+        )
+      : [];
+
+    // Fix metaKeywords if it's a stringified JSON array or an array with a stringified JSON inside
+    let metaKeywordsRaw = product.metaKeywords;
+
+    // If metaKeywordsRaw is a string, try parsing it (maybe it's JSON stringified)
+    if (typeof metaKeywordsRaw === "string") {
+      try {
+        const parsed = JSON.parse(metaKeywordsRaw);
+        if (Array.isArray(parsed)) {
+          metaKeywordsRaw = parsed;
+        }
+      } catch {
+        // Not JSON parseable, keep as string
+      }
+    }
+
+    // If metaKeywordsRaw is an array with one string element that looks like JSON stringified array, parse it
+    if (
+      Array.isArray(metaKeywordsRaw) &&
+      metaKeywordsRaw.length === 1 &&
+      typeof metaKeywordsRaw[0] === "string"
+    ) {
+      try {
+        const parsed = JSON.parse(metaKeywordsRaw[0]);
+        if (Array.isArray(parsed)) {
+          metaKeywordsRaw = parsed;
+        }
+      } catch {
+        // Not parseable, keep as is
+      }
+    }
+
+    // Clean array and join
+    const cleanedMetaKeywords = Array.isArray(metaKeywordsRaw)
+      ? metaKeywordsRaw.filter(
+          (kw) => typeof kw === "string" && kw.trim() !== "",
+        )
+      : [];
+
+    const metaKeywordsForInput =
+      cleanedMetaKeywords.length > 0 ? cleanedMetaKeywords.join(", ") : "";
+
+    setForm({
+      // other fields...
+      metaKeywords: metaKeywordsForInput,
+      // ...
+    });
+
     setEditingProduct(product);
     setForm({
       name: product.name || "",
@@ -150,13 +277,14 @@ const ProductCRUD = () => {
       longDesc: product.longDesc || "",
       metaTitle: product.metaTitle || "",
       metaDescription: product.metaDescription || "",
-      metaKeywords: product.metaKeywords?.join(", ") || "",
+      // Join cleaned keywords as a comma-separated string for the input
+      metaKeywords:
+        cleanedMetaKeywords.length > 0 ? cleanedMetaKeywords.join(", ") : "",
       finalPrice: product.finalPrice || "",
       finalDiscount: product.finalDiscount || 0,
       finalStock: product.finalStock || 0,
       author: product.author || "",
       publisher: product.publisher || "",
-      // If product.instructors is array of objects with _id, map to ids
       instructors: product.instructors
         ? product.instructors.map((i) => i._id || i)
         : [],
@@ -169,6 +297,13 @@ const ProductCRUD = () => {
       previewPdf: product.previewPdf || "",
       thumbnailFile: null,
       previewPdfFile: null,
+      videoUrl: cleanedVideoUrl.length > 0 ? cleanedVideoUrl : [],
+
+      faqs:
+        product.faqs && product.faqs.length
+          ? product.faqs
+          : [{ question: "", answer: "" }],
+      isActive: product.isActive !== undefined ? product.isActive : true,
     });
     setModules(
       product.modules?.map((mod) => ({
@@ -232,6 +367,10 @@ const ProductCRUD = () => {
       formData.append("duration", form.duration);
       formData.append("quizzes", form.quizzes);
       formData.append("classStartDate", form.classStartDate);
+
+      formData.append("videoUrl", JSON.stringify(form.videoUrl));
+      formData.append("faqs", JSON.stringify(form.faqs));
+      formData.append("isActive", form.isActive);
 
       formData.append(
         "modules",
@@ -416,36 +555,6 @@ const ProductCRUD = () => {
               <MenuItem value="exam">Exam</MenuItem>
             </Select>
           </FormControl>
-          {/* Instructors Selection */}
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="instructors-label">Instructors</InputLabel>
-            {loadingInstructors ? (
-              <CircularProgress size={24} />
-            ) : instructorsError ? (
-              <p className="text-red-600">{instructorsError}</p>
-            ) : (
-              <Select
-                labelId="instructors-label"
-                label="Instructors"
-                name="instructors"
-                multiple
-                value={form.instructors}
-                onChange={handleInstructorChange}
-                renderValue={(selected) =>
-                  instructorsList
-                    .filter((ins) => selected.includes(ins._id))
-                    .map((ins) => ins.name)
-                    .join(", ")
-                }
-              >
-                {instructorsList.map((instructor) => (
-                  <MenuItem key={instructor._id} value={instructor._id}>
-                    {instructor.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            )}
-          </FormControl>
 
           <Editor
             value={form.longDesc}
@@ -596,6 +705,37 @@ const ProductCRUD = () => {
 
           {form.type === "course" && (
             <>
+              {/* Instructors Selection */}
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="instructors-label">Instructors</InputLabel>
+                {loadingInstructors ? (
+                  <CircularProgress size={24} />
+                ) : instructorsError ? (
+                  <p className="text-red-600">{instructorsError}</p>
+                ) : (
+                  <Select
+                    labelId="instructors-label"
+                    label="Instructors"
+                    name="instructors"
+                    multiple
+                    value={form.instructors}
+                    onChange={handleInstructorChange}
+                    renderValue={(selected) =>
+                      instructorsList
+                        .filter((ins) => selected.includes(ins._id))
+                        .map((ins) => ins.name)
+                        .join(", ")
+                    }
+                  >
+                    {instructorsList.map((instructor) => (
+                      <MenuItem key={instructor._id} value={instructor._id}>
+                        {instructor.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              </FormControl>
+
               <TextField
                 label="Lessons"
                 name="lessons"
@@ -638,10 +778,102 @@ const ProductCRUD = () => {
                 margin="normal"
               />
 
+              {/* Active Toggle */}
+              <FormControl margin="normal" fullWidth>
+                <label className="inline-flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={form.isActive}
+                    onChange={handleIsActiveChange}
+                  />
+                  <span>Active</span>
+                </label>
+              </FormControl>
+
+              {/* Video URLs */}
+              {form.type === "course" && (
+                <div className="mb-4">
+                  <label className="font-semibold mb-2 block">Video URLs</label>
+                  {form.videoUrl?.map((url, idx) => {
+                    const isValidUrl =
+                      /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/.test(url);
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 mb-2 w-full"
+                      >
+                        <TextField
+                          label={`Video URL ${idx + 1}`}
+                          value={url}
+                          onChange={(e) =>
+                            handleVideoUrlChange(idx, e.target.value)
+                          }
+                          fullWidth
+                          error={!isValidUrl}
+                          helperText={
+                            !isValidUrl
+                              ? "Enter a valid URL starting with http or https"
+                              : ""
+                          }
+                        />
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => removeVideoUrl(idx)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    );
+                  })}
+                  <Button onClick={addVideoUrl}>Add Video URL</Button>
+                </div>
+              )}
+
               {/* Modules Editor Component */}
               <ModulesEditor modules={modules} setModules={setModules} />
             </>
           )}
+          {/* FAQs */}
+          <div className="mb-4">
+            <label className="font-semibold mb-2 block">FAQs</label>
+            {(Array.isArray(form.faqs)
+              ? form.faqs
+              : [{ question: "", answer: "" }]
+            ).map((faq, idx) => (
+              <div key={idx} className="border rounded p-2 mb-3">
+                <TextField
+                  label="Question"
+                  value={faq.question}
+                  onChange={(e) =>
+                    handleFaqChange(idx, "question", e.target.value)
+                  }
+                  fullWidth
+                  margin="dense"
+                />
+                <TextField
+                  label="Answer"
+                  value={faq.answer}
+                  onChange={(e) =>
+                    handleFaqChange(idx, "answer", e.target.value)
+                  }
+                  fullWidth
+                  multiline
+                  rows={2}
+                  margin="dense"
+                />
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => removeFaq(idx)}
+                  disabled={(form.faqs?.length || 1) === 1}
+                >
+                  Remove FAQ
+                </Button>
+              </div>
+            ))}
+            <Button onClick={addFaq}>Add FAQ</Button>
+          </div>
         </DialogContent>
 
         <DialogActions>

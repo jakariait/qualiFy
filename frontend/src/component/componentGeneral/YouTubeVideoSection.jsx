@@ -7,6 +7,10 @@ const extractVideoId = (url) => {
 };
 
 const YouTubeVideoSection = ({ videos = [] }) => {
+
+  console.log(videos);
+
+
   if (!Array.isArray(videos) || videos.length === 0) return null;
 
   return (

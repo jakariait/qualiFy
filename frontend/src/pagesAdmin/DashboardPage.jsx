@@ -46,8 +46,6 @@ const DashboardPage = ({ pageDetails, title }) => {
     <LayoutAdmin>
       <div>
         <Breadcrumb title={"Dashboard"} pageDetails={"WEBSITE CONFIG"} />
-        <ProductCRUD/>
-
         <RequirePermission permission="dashboard">
           <div className={"flex flex-col gap-8"}>
             <div className={"grid md:grid-cols-2 gap-4"}>
