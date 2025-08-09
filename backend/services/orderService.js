@@ -8,6 +8,158 @@ const FreeDeliveryAmount = require("../models/FreeDeliveryAmount");
 const User = require("../models/UserModel");
 const Coupon = require("../models/CouponModel");
 
+// const createOrder = async (orderData, userId) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+//
+//   try {
+//     // Get user (optional for guests)
+//     let user = null;
+//     if (userId) {
+//       user = await User.findById(userId);
+//       if (!user) throw new Error("User not found");
+//     }
+//
+//     // Generate order number
+//     const counter = await OrderCounter.findOneAndUpdate(
+//       { id: "order" },
+//       { $inc: { seq: 1 } },
+//       { new: true, upsert: true, session },
+//     );
+//     const orderNo = String(counter.seq).padStart(6, "0");
+//
+//     // Get VAT
+//     const vatEntry = await VatPercentage.findOne().sort({ createdAt: -1 });
+//     const vatPercent = vatEntry ? vatEntry.value : 0;
+//
+//     // Calculate subtotal and update stock
+//     let subtotal = 0;
+//     const updatedItems = [];
+//
+//     for (const item of orderData.items) {
+//       const { productId, variantId, quantity } = item;
+//
+//       const product = await Product.findById(productId);
+//       if (!product) throw new Error("Product not found");
+//
+//       let price, stock;
+//
+//       if (product.variants.length === 0) {
+//         price =
+//           product.finalDiscount > 0
+//             ? product.finalDiscount
+//             : product.finalPrice;
+//         stock = product.finalStock;
+//
+//         if (stock < quantity)
+//           throw new Error(`Not enough stock for product ${productId}`);
+//
+//         await Product.updateOne(
+//           { _id: productId },
+//           { $inc: { finalStock: -quantity } },
+//           { session },
+//         );
+//       } else {
+//         const variant = product.variants.find(
+//           (v) => v._id.toString() === variantId,
+//         );
+//         if (!variant) throw new Error("Variant not found");
+//
+//         if (variant.stock < quantity)
+//           throw new Error(`Not enough stock for variant ${variantId}`);
+//
+//         price = variant.discount || variant.price;
+//
+//         await Product.updateOne(
+//           { _id: productId, "variants._id": variantId },
+//           { $inc: { "variants.$.stock": -quantity } },
+//           { session },
+//         );
+//       }
+//
+//       subtotal += price * quantity;
+//       updatedItems.push({ productId, variantId, quantity, price }); // Store price for each item
+//     }
+//
+//     // Handle shipping
+//     const shippingMethod = await Shipping.findById(orderData.shippingId);
+//     if (!shippingMethod) throw new Error("Invalid shipping method");
+//
+//     const freeDelivery = await FreeDeliveryAmount.findOne().sort({
+//       createdAt: -1,
+//     });
+//     const freeDeliveryThreshold = freeDelivery ? freeDelivery.value : 0;
+//
+//     const deliveryCharge =
+//       subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
+//
+//     // ✅ Backend Coupon Validation
+//     let promoDiscount = 0;
+//     let appliedCouponCode = orderData.promoCode || null;
+//
+//     if (appliedCouponCode) {
+//       const coupon = await Coupon.findOne({
+//         code: appliedCouponCode.toUpperCase(),
+//         status: "active",
+//         startDate: { $lte: new Date() },
+//         endDate: { $gte: new Date() },
+//       });
+//
+//       if (!coupon) throw new Error("Invalid or expired promo code");
+//
+//       if (subtotal < coupon.minimumOrder)
+//         throw new Error(
+//           `Minimum order amount for this coupon is ৳${coupon.minimumOrder}`,
+//         );
+//
+//       if (coupon.type === "percentage") {
+//         promoDiscount = Math.floor((coupon.value / 100) * subtotal);
+//       } else if (coupon.type === "amount") {
+//         promoDiscount = coupon.value;
+//       }
+//
+//       // Cap promo discount if it exceeds subtotal
+//       promoDiscount = Math.min(promoDiscount, subtotal);
+//     }
+//
+//     // Reward points
+//     const rewardPointsUsed = orderData.rewardPointsUsed || 0;
+//     const finalSubtotal = subtotal - promoDiscount - rewardPointsUsed;
+//
+//     const vat = (finalSubtotal * vatPercent) / 100;
+//     const totalAmount = finalSubtotal + vat + deliveryCharge;
+//
+//     // Save order
+//     const newOrder = new Order({
+//       ...orderData,
+//       orderNo,
+//       userId,
+//       items: updatedItems,
+//       subtotalAmount: subtotal,
+//       deliveryCharge,
+//       vat,
+//       totalAmount,
+//       promoCode: appliedCouponCode,
+//       promoDiscount,
+//       rewardPointsUsed,
+//       specialDiscount: 0,
+//       rewardPointsEarned: 0,
+//       adminNote: "",
+//     });
+//
+//     const savedOrder = await newOrder.save({ session });
+//
+//     await session.commitTransaction();
+//     session.endSession();
+//
+//     return savedOrder;
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     throw new Error(error.message);
+//   }
+// };
+
 const createOrder = async (orderData, userId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -32,68 +184,46 @@ const createOrder = async (orderData, userId) => {
     const vatEntry = await VatPercentage.findOne().sort({ createdAt: -1 });
     const vatPercent = vatEntry ? vatEntry.value : 0;
 
-    // Calculate subtotal and update stock
+    // Calculate subtotal and update stock only if product type is "book"
     let subtotal = 0;
     const updatedItems = [];
 
     for (const item of orderData.items) {
-      const { productId, variantId, quantity } = item;
+      const { productId, quantity } = item;
 
       const product = await Product.findById(productId);
       if (!product) throw new Error("Product not found");
 
-      let price, stock;
+      const price = product.finalDiscount > 0 ? product.finalDiscount : product.finalPrice;
 
-      if (product.variants.length === 0) {
-        price =
-          product.finalDiscount > 0
-            ? product.finalDiscount
-            : product.finalPrice;
-        stock = product.finalStock;
-
-        if (stock < quantity)
+      // Only check and update stock if product.type is "book"
+      if (product.type === "book") {
+        if (product.finalStock < quantity) {
           throw new Error(`Not enough stock for product ${productId}`);
+        }
 
+        // Update stock
         await Product.updateOne(
           { _id: productId },
           { $inc: { finalStock: -quantity } },
           { session },
         );
-      } else {
-        const variant = product.variants.find(
-          (v) => v._id.toString() === variantId,
-        );
-        if (!variant) throw new Error("Variant not found");
-
-        if (variant.stock < quantity)
-          throw new Error(`Not enough stock for variant ${variantId}`);
-
-        price = variant.discount || variant.price;
-
-        await Product.updateOne(
-          { _id: productId, "variants._id": variantId },
-          { $inc: { "variants.$.stock": -quantity } },
-          { session },
-        );
       }
 
       subtotal += price * quantity;
-      updatedItems.push({ productId, variantId, quantity, price }); // Store price for each item
+      updatedItems.push({ productId, quantity, price });
     }
 
     // Handle shipping
     const shippingMethod = await Shipping.findById(orderData.shippingId);
     if (!shippingMethod) throw new Error("Invalid shipping method");
 
-    const freeDelivery = await FreeDeliveryAmount.findOne().sort({
-      createdAt: -1,
-    });
+    const freeDelivery = await FreeDeliveryAmount.findOne().sort({ createdAt: -1 });
     const freeDeliveryThreshold = freeDelivery ? freeDelivery.value : 0;
 
-    const deliveryCharge =
-      subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
+    const deliveryCharge = subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
 
-    // ✅ Backend Coupon Validation
+    // Backend Coupon Validation
     let promoDiscount = 0;
     let appliedCouponCode = orderData.promoCode || null;
 
@@ -108,9 +238,7 @@ const createOrder = async (orderData, userId) => {
       if (!coupon) throw new Error("Invalid or expired promo code");
 
       if (subtotal < coupon.minimumOrder)
-        throw new Error(
-          `Minimum order amount for this coupon is ৳${coupon.minimumOrder}`,
-        );
+        throw new Error(`Minimum order amount for this coupon is ৳${coupon.minimumOrder}`);
 
       if (coupon.type === "percentage") {
         promoDiscount = Math.floor((coupon.value / 100) * subtotal);
@@ -118,13 +246,10 @@ const createOrder = async (orderData, userId) => {
         promoDiscount = coupon.value;
       }
 
-      // Cap promo discount if it exceeds subtotal
       promoDiscount = Math.min(promoDiscount, subtotal);
     }
 
-    // Reward points
-    const rewardPointsUsed = orderData.rewardPointsUsed || 0;
-    const finalSubtotal = subtotal - promoDiscount - rewardPointsUsed;
+    const finalSubtotal = subtotal - promoDiscount;
 
     const vat = (finalSubtotal * vatPercent) / 100;
     const totalAmount = finalSubtotal + vat + deliveryCharge;
@@ -141,9 +266,7 @@ const createOrder = async (orderData, userId) => {
       totalAmount,
       promoCode: appliedCouponCode,
       promoDiscount,
-      rewardPointsUsed,
       specialDiscount: 0,
-      rewardPointsEarned: 0,
       adminNote: "",
     });
 
@@ -159,6 +282,8 @@ const createOrder = async (orderData, userId) => {
     throw new Error(error.message);
   }
 };
+
+
 
 const getAllOrders = async (filter = {}, page, limit, search = '') => {
   try {
@@ -182,7 +307,6 @@ const getAllOrders = async (filter = {}, page, limit, search = '') => {
         select:
           "-sizeChart -longDesc -shortDesc -shippingReturn -videoUrl -flags -metaTitle -metaDescription -metaKeywords -searchTags",
       })
-      .populate("items.variantId")
       .sort({ createdAt: -1 });
 
     // Only apply pagination if page and limit are valid
@@ -224,61 +348,12 @@ const getOrderById = async (orderId) => {
         path: "items.productId",
         select:
           "-sizeChart -longDesc -shortDesc -shippingReturn -videoUrl -flags -metaTitle -metaDescription -metaKeywords -searchTags",
-        populate: {
-          path: "category",
-          select: "name", // Only bring category name
-        },
       })
-      .populate({
-        path: "items.variantId",
-      })
-      .sort({ createdAt: -1 })
       .lean();
 
     if (!order) {
       throw new Error("Order not found");
     }
-
-    // Collect all unique size IDs for the selected variants
-    const sizeIds = new Set();
-    order.items.forEach((item) => {
-      if (item.productId && item.productId.variants.length > 0) {
-        const matchedVariant = item.productId.variants.find(
-          (variant) => variant._id.toString() === item.variantId.toString(),
-        );
-        if (matchedVariant && matchedVariant.size) {
-          sizeIds.add(matchedVariant.size); // Add the size ID of the matched variant
-        }
-      }
-    });
-
-    // Fetch all size names in one query
-    const sizes = await ProductSizeModel.find({
-      _id: { $in: Array.from(sizeIds) },
-    })
-      .select("name")
-      .lean();
-    const sizeMap = new Map(
-      sizes.map((size) => [size._id.toString(), size.name]),
-    );
-
-    // Iterate through items and remove non-matched variants, set size name for the matched variant only
-    order.items = order.items.map((item) => {
-      if (item.productId && item.productId.variants) {
-        // Filter variants to keep only the matched variant
-        item.productId.variants = item.productId.variants.filter(
-          (variant) => variant._id.toString() === item.variantId.toString(),
-        );
-
-        // If a matched variant is found, set its size name
-        if (item.productId.variants.length > 0) {
-          const variant = item.productId.variants[0]; // The matched variant
-          const sizeId = variant.size;
-          variant.sizeName = sizeMap.get(sizeId.toString()) || "N/A"; // Set size name for the matched variant
-        }
-      }
-      return item;
-    });
 
     return order;
   } catch (error) {
@@ -477,14 +552,9 @@ const getOrderByOrderNo = async (orderNo) => {
         path: "items.productId",
         select:
           "-sizeChart -longDesc -shortDesc -shippingReturn -videoUrl -flags -metaTitle -metaDescription -metaKeywords -searchTags",
-        populate: {
-          path: "category",
-          select: "name",
-        },
+        // Removed category populate here
       })
-      .populate({
-        path: "items.variantId",
-      })
+      // Removed variantId populate
       .sort({ createdAt: -1 })
       .lean();
 
@@ -492,50 +562,12 @@ const getOrderByOrderNo = async (orderNo) => {
       throw new Error("Order not found");
     }
 
-    // Collect all unique size IDs for the selected variants
-    const sizeIds = new Set();
-    order.items.forEach((item) => {
-      if (item.productId && item.productId.variants.length > 0) {
-        const matchedVariant = item.productId.variants.find(
-          (variant) => variant._id.toString() === item.variantId.toString(),
-        );
-        if (matchedVariant && matchedVariant.size) {
-          sizeIds.add(matchedVariant.size);
-        }
-      }
-    });
-
-    // Fetch all size names in one query
-    const sizes = await ProductSizeModel.find({
-      _id: { $in: Array.from(sizeIds) },
-    })
-      .select("name")
-      .lean();
-    const sizeMap = new Map(
-      sizes.map((size) => [size._id.toString(), size.name]),
-    );
-
-    // Clean up and assign size names
-    order.items = order.items.map((item) => {
-      if (item.productId && item.productId.variants) {
-        item.productId.variants = item.productId.variants.filter(
-          (variant) => variant._id.toString() === item.variantId.toString(),
-        );
-
-        if (item.productId.variants.length > 0) {
-          const variant = item.productId.variants[0];
-          const sizeId = variant.size;
-          variant.sizeName = sizeMap.get(sizeId.toString()) || "N/A";
-        }
-      }
-      return item;
-    });
-
     return order;
   } catch (error) {
     throw new Error("Error fetching order by orderNo: " + error.message);
   }
 };
+
 
 const getOrdersByUserId = async (userId) => {
   try {
@@ -544,14 +576,8 @@ const getOrdersByUserId = async (userId) => {
         path: "items.productId",
         select:
           "-sizeChart -longDesc -shortDesc -shippingReturn -videoUrl -flags -metaTitle -metaDescription -metaKeywords -searchTags",
-        populate: {
-          path: "category",
-          select: "name",
-        },
       })
-      .populate({
-        path: "items.variantId",
-      })
+      // Removed .populate("items.variantId") since variants are removed
       .sort({ createdAt: -1 })
       .lean();
 
@@ -561,64 +587,17 @@ const getOrdersByUserId = async (userId) => {
       throw new Error("No orders found for this user");
     }
 
-    // Collect all unique size IDs from all orders
-    const sizeIds = new Set();
-
-    orders.forEach((order) => {
-      order.items?.forEach((item) => {
-        if (item?.productId?.variants?.length > 0 && item?.variantId) {
-          const matchedVariant = item.productId.variants.find(
-            (variant) =>
-              variant?._id?.toString() === item.variantId?.toString(),
-          );
-
-          if (matchedVariant?.size) {
-            sizeIds.add(matchedVariant.size);
-          }
-        }
-      });
-    });
-
-    // Fetch all size names in one query
-    const sizes = await ProductSizeModel.find({
-      _id: { $in: Array.from(sizeIds) },
-    })
-      .select("name")
-      .lean();
-
-    const sizeMap = new Map(
-      sizes.map((size) => [size._id.toString(), size.name]),
-    );
-
-    // Clean up and assign size names to all orders
-    const updatedOrders = orders.map((order) => {
-      order.items = order.items.map((item) => {
-        if (item?.productId?.variants?.length > 0 && item?.variantId) {
-          item.productId.variants = item.productId.variants.filter(
-            (variant) =>
-              variant?._id?.toString() === item.variantId?.toString(),
-          );
-
-          if (item.productId.variants.length > 0) {
-            const variant = item.productId.variants[0];
-            const sizeId = variant.size;
-            variant.sizeName = sizeMap.get(sizeId?.toString()) || "N/A";
-          }
-        }
-        return item;
-      });
-
-      return order;
-    });
+    // No variant or size logic
 
     return {
       totalOrders,
-      orders: updatedOrders,
+      orders,
     };
   } catch (error) {
     throw new Error("Error fetching orders by userId: " + error.message);
   }
 };
+
 
 const trackOrderByOrderNoAndPhone = async (orderNo, phone) => {
   const order = await Order.findOne({ orderNo })
@@ -627,12 +606,9 @@ const trackOrderByOrderNoAndPhone = async (orderNo, phone) => {
       path: "items.productId",
       select:
         "-sizeChart -longDesc -shortDesc -shippingReturn -videoUrl -flags -metaTitle -metaDescription -metaKeywords -searchTags",
-      populate: {
-        path: "category",
-        select: "name",
-      },
+      // Removed category populate
     })
-    .populate("items.variantId")
+    // Removed variantId populate
     .lean();
 
   if (!order) {
@@ -649,44 +625,11 @@ const trackOrderByOrderNoAndPhone = async (orderNo, phone) => {
     throw new Error("Phone number does not match order");
   }
 
-  // --- Size logic (no change) ---
-  const sizeIds = new Set();
-  order.items.forEach((item) => {
-    if (item.productId?.variants?.length > 0) {
-      const matchedVariant = item.productId.variants.find(
-        (variant) => variant._id.toString() === item.variantId.toString()
-      );
-      if (matchedVariant?.size) {
-        sizeIds.add(matchedVariant.size);
-      }
-    }
-  });
-
-  const sizes = await ProductSizeModel.find({
-    _id: { $in: Array.from(sizeIds) },
-  })
-    .select("name")
-    .lean();
-
-  const sizeMap = new Map(sizes.map((size) => [size._id.toString(), size.name]));
-
-  order.items = order.items.map((item) => {
-    if (item.productId?.variants) {
-      item.productId.variants = item.productId.variants.filter(
-        (variant) => variant._id.toString() === item.variantId.toString()
-      );
-
-      if (item.productId.variants.length > 0) {
-        const variant = item.productId.variants[0];
-        const sizeId = variant.size;
-        variant.sizeName = sizeMap.get(sizeId.toString()) || "N/A";
-      }
-    }
-    return item;
-  });
+  // Removed size and variant logic
 
   return order;
 };
+
 
 
 

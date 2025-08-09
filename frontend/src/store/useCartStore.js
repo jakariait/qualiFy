@@ -26,11 +26,10 @@ const useCartStore = create((set, get) => ({
         name: item.name,
         originalPrice: item.originalPrice,
         discountPrice: item.discountPrice,
-        variant: item.variant || "Default",
         quantity: item.quantity,
         thumbnail: item.thumbnail,
         slug: item.slug,
-        variantId: item.variantId || "Default",
+        productType: item.type, // <-- add here
       }));
 
       saveCart(serverCartItems);
@@ -41,13 +40,11 @@ const useCartStore = create((set, get) => ({
   },
 
   addToCart: async (product, quantity, selectedVariant) => {
-    const variant = selectedVariant?.size?.name || "Default";
-    const variantId = selectedVariant?._id || "Default";
     const token = localStorage.getItem("user_token");
 
     set((state) => {
       const existingIndex = state.cart.findIndex(
-        (item) => item.productId === product.id && item.variant === variant
+        (item) => item.productId === product.id && item.variant === variant,
       );
 
       let updatedCart = [...state.cart];
@@ -71,11 +68,10 @@ const useCartStore = create((set, get) => ({
           name: product.name,
           originalPrice: selectedVariant?.price ?? product.finalPrice,
           discountPrice: finalDiscount,
-          variant,
           quantity,
           thumbnail: product.thumbnailImage,
-          variantId,
           slug: product.slug,
+          productType: product.type, // <-- add here
         });
       }
 
@@ -100,13 +96,12 @@ const useCartStore = create((set, get) => ({
             name: product.name,
             originalPrice: selectedVariant?.price ?? product.finalPrice,
             discountPrice: finalDiscount,
-            variant,
             quantity,
             thumbnail: product.thumbnailImage,
             slug: product.slug,
-            variantId,
+            productType: product.type, // <-- add here
           },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       } catch (error) {
         console.error("Error adding item to DB cart:", error);
@@ -122,7 +117,7 @@ const useCartStore = create((set, get) => ({
       const updatedCart = state.cart.map((item) =>
         item.productId === productId && item.variant === variant
           ? { ...item, quantity: newQuantity }
-          : item
+          : item,
       );
       saveCart(updatedCart);
       return { cart: updatedCart };
@@ -134,7 +129,7 @@ const useCartStore = create((set, get) => ({
       await axios.patch(
         `${apiUrl}/updateCartItem`,
         { productId, variant, quantity: newQuantity },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
     } catch (error) {
       console.error("Error updating quantity in DB:", error);
@@ -144,7 +139,7 @@ const useCartStore = create((set, get) => ({
   removeFromCart: async (productId, variant) => {
     set((state) => {
       const updatedCart = state.cart.filter(
-        (item) => !(item.productId === productId && item.variant === variant)
+        (item) => !(item.productId === productId && item.variant === variant),
       );
       saveCart(updatedCart);
       return { cart: updatedCart };
@@ -194,17 +189,16 @@ const useCartStore = create((set, get) => ({
             name: item.name,
             originalPrice: item.originalPrice,
             discountPrice: item.discountPrice,
-            variant: item.variant,
             quantity: item.quantity,
             thumbnail: item.thumbnail,
             slug: item.slug,
-            variantId: item.variantId,
+            productType: item.type, // <-- add here
           },
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
       }
 
@@ -220,11 +214,10 @@ const useCartStore = create((set, get) => ({
         name: item.name,
         originalPrice: item.originalPrice,
         discountPrice: item.discountPrice,
-        variant: item.variant,
         quantity: item.quantity,
         thumbnail: item.thumbnail,
         slug: item.product?.slug,
-        variantId: item.variantId,
+        productType: item.type, // <-- add here
       }));
 
       saveCart(serverCartItems);

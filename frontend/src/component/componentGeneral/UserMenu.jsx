@@ -31,7 +31,6 @@ const menuItems = [
     label: "My orders",
     path: "/user/orders",
   },
-  { icon: <FaTicketAlt />, label: "Promo/ Coupon", path: "/coupons" },
   {
     icon: <FaUserCog />,
     label: "Manage profile",
@@ -90,7 +89,6 @@ const UserMenu = () => {
                 {user?.fullName || "User"}
               </h2>
               <p className="text-sm mt-1">{user?.phone || user?.email}</p>
-              <p className="text-sm">Reward Points: {user?.rewardPoints}</p>
 
               <button
                 onClick={handleLogout}

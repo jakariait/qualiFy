@@ -6,8 +6,8 @@ const getCart = async (userId) => {
 };
 
 const addToCart = async (userId, item) => {
-  if (!item.productId || !item.variant || !item.quantity) {
-    throw new Error("Missing productId, variant, or quantity");
+  if (!item.productId || !item.quantity) {
+    throw new Error("Missing productId or quantity");
   }
 
   let cart = await CartModel.findOne({ user: userId });
@@ -15,10 +15,9 @@ const addToCart = async (userId, item) => {
   if (!cart) {
     cart = new CartModel({ user: userId, items: [item] });
   } else {
+    // Find item by productId only, ignoring variant
     const index = cart.items.findIndex(
-      (i) =>
-        i.productId?.toString() === item.productId?.toString() &&
-        i.variant === item.variant
+      (i) => i.productId?.toString() === item.productId?.toString()
     );
 
     if (index > -1) {
@@ -34,6 +33,7 @@ const addToCart = async (userId, item) => {
   await cart.save();
   return cart;
 };
+
 
 const updateCartItem = async (userId, productId, variant, quantity) => {
   const cart = await CartModel.findOne({ user: userId });

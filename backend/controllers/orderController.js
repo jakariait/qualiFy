@@ -3,7 +3,7 @@ const orderService = require("../services/orderService");
 
 const createOrder = async (req, res) => {
   try {
-    const { userId, rewardPointsUsed = 0, ...orderData } = req.body;
+    const { userId, ...orderData } = req.body;
 
     let user = null;
 
@@ -14,28 +14,10 @@ const createOrder = async (req, res) => {
           .status(404)
           .json({ success: false, message: "User not found" });
       }
-
-      const rewardPointsUsedNumber = Number(rewardPointsUsed);
-      const userRewardPoints = Number(user.rewardPoints || 0);
-
-      if (rewardPointsUsedNumber > userRewardPoints) {
-        return res.status(400).json({
-          success: false,
-          message: "You cannot use more reward points than you have available.",
-        });
-      }
     }
 
     // Proceed with creating the order (pass userId only if available)
-    const order = await orderService.createOrder(
-      { ...orderData, rewardPointsUsed },
-      userId || null,
-    );
-
-    if (user && rewardPointsUsed > 0) {
-      user.rewardPoints -= Number(rewardPointsUsed);
-      await user.save();
-    }
+    const order = await orderService.createOrder(orderData, userId || null);
 
     res.status(201).json({
       success: true,

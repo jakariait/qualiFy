@@ -12,7 +12,6 @@ import AddressForm from "./AddressForm.jsx";
 import ShippingOptions from "./ShippingOptions.jsx";
 import OrderReview from "./OrderReview.jsx";
 import CouponSection from "./CouponSection.jsx";
-import RewardPoints from "./RewardPoints.jsx";
 import DeliveryMethod from "./DeliveryMethod.jsx";
 import OrderSummary from "./OrderSummary.jsx";
 import CheckoutHeader from "./CheckoutHeader.jsx";
@@ -25,14 +24,23 @@ const Checkout = () => {
 
   // Store values
   const { cart, removeFromCart, updateQuantity, clearCart } = useCartStore();
+
+
+  const cartContainsBooks = (cart) => cart.some(item => item.productType === "book");
+
+
+  const isBook = cartContainsBooks(cart);
+
+
+
   const { user } = useAuthUserStore();
 
-  // Coupon & Reward
-  const [rewardPointsUsed, setRewardPointsUsed] = useState(0);
+  // Coupon
   const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   // Shipping state
   const [selectedShipping, setSelectedShipping] = useState({
+    id: null,
     name: "",
     value: 0,
   });
@@ -53,10 +61,6 @@ const Checkout = () => {
   // Handle data received from AddressForm
   const handleAddressChange = (data) => {
     setAddressData(data);
-  };
-
-  const handleRewardPointsChange = (value) => {
-    setRewardPointsUsed(value);
   };
 
   const [snackbar, setSnackbar] = useState({
@@ -91,8 +95,8 @@ const Checkout = () => {
 
   // Price Calculations
   const totalAmount = cart.reduce((total, item) => {
-    const price =
-      item.discountPrice > 0 ? item.discountPrice : item.originalPrice;
+    // Removed variantId, so no variant price logic
+    const price = item.discountPrice > 0 ? item.discountPrice : item.originalPrice;
     return total + price * item.quantity;
   }, 0);
 
@@ -107,8 +111,8 @@ const Checkout = () => {
 
   let discount = appliedCoupon?.discountAmount || 0;
 
-  // Calculate total amount after reward points and coupon discount
-  const amountAfterDiscounts = totalAmount - rewardPointsUsed - discount;
+  // Calculate total amount after coupon discount (reward points removed)
+  const amountAfterDiscounts = totalAmount - discount;
 
   // --- VAT Calculation (e.g., 5%) ---
   const vatAmount = (amountAfterDiscounts * vatPercentage) / 100;
@@ -139,11 +143,10 @@ const Checkout = () => {
           value: totalAmount,
           items: cart.map((item) => ({
             item_name: item.name,
-            item_id: item.contentId,
-            price:
-              item.discountPrice > 0 ? item.discountPrice : item.originalPrice,
+            item_id: item.productId,
+            price: item.discountPrice > 0 ? item.discountPrice : item.originalPrice,
             quantity: item.quantity,
-            item_variant: item.variantId || "Default",
+            // Removed variantId from dataLayer event
           })),
         },
       });
@@ -166,16 +169,11 @@ const Checkout = () => {
         address: addressData.address,
       },
       shippingId: selectedShipping.id,
-      items: cart.map((item) => {
-        const baseItem = {
-          productId: item.productId,
-          quantity: item.quantity,
-        };
-        if (item.variantId && item.variantId !== "Default") {
-          baseItem.variantId = item.variantId;
-        }
-        return baseItem;
-      }),
+      items: cart.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        // Removed variantId completely
+      })),
       promoCode: appliedCoupon?.code || null,
       paymentMethod,
     };
@@ -184,20 +182,17 @@ const Checkout = () => {
       orderPayload.userId = user._id;
     }
 
-    // // ---- Handle bKash Checkout ----
+    // ---- Handle bKash Checkout ----
     if (paymentMethod === "bkash") {
       try {
         const createRes = await axios.post(`${apiUrl}/bkashcreate`, {
-          amount: grandTotal.toFixed(2), // round to 2 decimal places
+          amount: grandTotal.toFixed(2),
           payerReference: user?.phone || "guestUser",
           callbackURL: `${window.location.origin}/bkash-callback`,
         });
 
         if (createRes.data && createRes.data.bkashURL) {
-          localStorage.setItem(
-            "bkash_order_payload",
-            JSON.stringify(orderPayload),
-          );
+          localStorage.setItem("bkash_order_payload", JSON.stringify(orderPayload));
           window.location.href = createRes.data.bkashURL;
           return;
         } else {
@@ -211,8 +206,9 @@ const Checkout = () => {
     }
 
     // ---- Normal COD Flow ----
-
     try {
+      console.log("Sending order payload:", orderPayload);
+
       const res = await axios.post(`${apiUrl}/orders`, orderPayload);
 
       if (res.data.success) {
@@ -223,11 +219,12 @@ const Checkout = () => {
 
         setTimeout(() => {
           navigate(`/thank-you/${res.data.order.orderNo}`);
-        }, 300); // delay by 300ms
+        }, 300);
       } else {
         showSnackbar(res.data.message || "Failed to place order.", "error");
       }
-    } catch {
+    } catch (error) {
+      console.error("Order submission error:", error); // <-- Add this line
       showSnackbar("Something went wrong. Please try again later.", "error");
     }
   };
@@ -239,18 +236,18 @@ const Checkout = () => {
         <div className="grid gap-12 md:grid-cols-2">
           {/* Left Column - Address & Shipping */}
           <div className="space-y-8">
-            {/* Address Option */}
             <AddressForm user={user} onAddressChange={handleAddressChange} />
 
-            {/* Shipping Options */}
-            <ShippingOptions onShippingChange={setSelectedShipping} />
+            {isBook && (
+              <>
+                <ShippingOptions onShippingChange={setSelectedShipping} />
+                <DeliveryMethod
+                  freeDelivery={freeDelivery}
+                  formattedTotalAmount={formattedTotalAmount}
+                />
+              </>
+            )}
 
-            {/* Delivery Method */}
-            <DeliveryMethod
-              freeDelivery={freeDelivery}
-              formattedTotalAmount={formattedTotalAmount}
-            />
-            {/* Payment Method */}
             <PaymentMethod
               selectedMethod={paymentMethod}
               setSelectedMethod={setPaymentMethod}
@@ -265,33 +262,20 @@ const Checkout = () => {
               updateQuantity={updateQuantity}
               formattedTotalAmount={formattedTotalAmount}
             />
-
-            {/* Coupon Section */}
             <CouponSection
               orderAmount={totalAmount}
               setAppliedCouponGlobal={setAppliedCoupon}
             />
 
-            {/* Reward Points */}
-            {user && (
-              <RewardPoints
-                availablePoints={user.rewardPoints}
-                points={rewardPointsUsed}
-                onPointsChange={handleRewardPointsChange}
-              />
-            )}
 
-            {/* Final Order Summary */}
             <OrderSummary
               totalItems={totalItems}
               totalAmount={totalAmount}
-              rewardPointsUsed={rewardPointsUsed}
               actualShippingCost={actualShippingCost}
               grandTotal={grandTotal}
               discount={discount}
               appliedCoupon={appliedCoupon}
               formattedTotalAmount={formattedTotalAmount}
-              showRewardPoints={!!user}
               vatAmount={vatAmount}
               vatPercentage={vatPercentage}
             />
@@ -324,10 +308,10 @@ const Checkout = () => {
       <AbandonedCartTracker
         addressData={addressData}
         cart={cart}
-        totalAmount={grandTotal} // Use grandTotal here
+        totalAmount={grandTotal}
         user={user}
         apiUrl={apiUrl}
-        orderPlaced={orderPlaced} // Pass orderPlaced
+        orderPlaced={orderPlaced}
       />
     </div>
   );

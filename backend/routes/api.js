@@ -423,21 +423,21 @@ router.post("/orders", orderController.createOrder);
 
 router.get(
   "/orders",
-  adminProtect,
-  checkPermission("view_orders"),
+  // adminProtect,
+  // checkPermission("view_orders"),
   orderController.getAllOrders,
 );
 router.get(
   "/orders/:orderId",
-  adminProtect,
-  checkPermission("view_orders"),
+  // adminProtect,
+  // checkPermission("view_orders"),
   orderController.getOrderById,
 );
 
 router.put(
   "/orders/:orderId",
-  adminProtect,
-  checkPermission("edit_orders"),
+  // adminProtect,
+  // checkPermission("edit_orders"),
   orderController.updateOrder,
 );
 

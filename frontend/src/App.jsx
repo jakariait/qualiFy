@@ -85,8 +85,7 @@ function App() {
   const { FeatureStoreListRequest } = FeatureStore();
   const { fetchColors, colors } = useColorStore(); // ✅ Extract colors
   const { fetchSocialMediaLinks } = useSocialMediaLinkStore();
-  const { fetchProducts, fetchProductsAdmin, fetchHomeProducts } =
-    useProductStore();
+  const { fetchFilteredProducts } = useProductStore();
   const { initialize } = useAuthUserStore();
 
   useEffect(() => {
@@ -98,11 +97,8 @@ function App() {
           FeatureStoreListRequest(),
           fetchColors(),
           fetchSocialMediaLinks(),
-
-          fetchProducts(),
-          fetchProductsAdmin(),
+          fetchFilteredProducts(),
           initialize(),
-          fetchHomeProducts(),
         ]);
       } catch (error) {
         console.error("Error fetching data:", error);
