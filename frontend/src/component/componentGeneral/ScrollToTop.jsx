@@ -8,7 +8,7 @@ const ScrollToTop = () => {
     // Scroll to top with smooth behavior (handled by CSS)
     window.scrollTo({
       top: 0,
-      behavior: "smooth", // Smooth scroll to top
+      behavior: "auto", // Smooth scroll to top
     });
   }, [pathname]);
 

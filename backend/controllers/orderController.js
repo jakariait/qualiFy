@@ -211,6 +211,17 @@ const getDeliveredProductsForUser = async (req, res) => {
   }
 };
 
+const getProductSalesHistoryController = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const data = await orderService.getProductSalesHistory(productId);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 // Exporting the controller functions
 module.exports = {
   createOrder,
@@ -221,5 +232,6 @@ module.exports = {
   getOrderByOrderNo,
   getOrdersForUser,
   trackOrderByOrderNoAndPhone,
-  getDeliveredProductsForUser
+  getDeliveredProductsForUser,
+  getProductSalesHistoryController
 };

@@ -537,6 +537,78 @@ const getDeliveredProductsByUserId = async (userId) => {
 
 
 
+const getProductSalesHistory = async (productId) => {
+  try {
+    const orders = await Order.find({
+      "items.productId": productId
+    }).lean();
+
+    if (!orders.length) {
+      return {
+        productId,
+        totalUnitsSold: 0,
+        totalRevenue: 0,
+        statusBreakdown: {},
+        salesHistory: []
+      };
+    }
+
+    let totalUnitsSold = 0;
+    let totalRevenue = 0;
+    const statusBreakdown = {};
+    const salesHistory = [];
+
+    for (const order of orders) {
+      const orderItems = order.items.filter(
+        (item) => item.productId.toString() === productId.toString()
+      );
+
+      let orderUnits = 0;
+      let orderRevenue = 0;
+
+      for (const item of orderItems) {
+        totalUnitsSold += item.quantity;
+        totalRevenue += item.price * item.quantity;
+        orderUnits += item.quantity;
+        orderRevenue += item.price * item.quantity;
+      }
+
+      // Group by orderStatus
+      if (!statusBreakdown[order.orderStatus]) {
+        statusBreakdown[order.orderStatus] = {
+          units: 0,
+          revenue: 0
+        };
+      }
+      statusBreakdown[order.orderStatus].units += orderUnits;
+      statusBreakdown[order.orderStatus].revenue += orderRevenue;
+
+      salesHistory.push({
+        orderNo: order.orderNo,
+        orderStatus: order.orderStatus,
+        orderDate: order.createdAt,
+        items: orderItems.map((i) => ({
+          quantity: i.quantity,
+          price: i.price,
+          total: i.price * i.quantity
+        })),
+        orderTotal: order.totalAmount
+      });
+    }
+
+    return {
+      productId,
+      totalUnitsSold,
+      totalRevenue,
+      statusBreakdown,
+      salesHistory
+    };
+  } catch (error) {
+    throw new Error("Error fetching product sales history: " + error.message);
+  }
+};
+
+
 // Export the functions as an object
 module.exports = {
   createOrder,
@@ -547,5 +619,6 @@ module.exports = {
   getOrderByOrderNo,
   getOrdersByUserId,
   trackOrderByOrderNoAndPhone,
-  getDeliveredProductsByUserId
+  getDeliveredProductsByUserId,
+  getProductSalesHistory
 };

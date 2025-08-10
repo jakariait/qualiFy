@@ -127,10 +127,9 @@ const Headers = () => {
 
   if (GeneralInfoListLoading) {
     return (
-      <div className="xl:container xl:mx-auto p-3">
-        <Skeleton height={40} />
-        <Skeleton height={60} />
-        <Skeleton height={40} />
+      <div className="xl:container xl:mx-auto ">
+        <Skeleton height={80} />
+
       </div>
     );
   }

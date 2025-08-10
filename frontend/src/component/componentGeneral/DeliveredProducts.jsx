@@ -79,17 +79,17 @@ const DeliveredProducts = ({ userId, token }) => {
         {deliveredProducts.map(({ product, quantity, orderNo, orderDate }) => (
           <li
             key={`${product._id}-${orderNo}`}
-            className="flex-col gap-4 rounded shadow-sm"
+            className="flex gap-4 rounded-xl shadow-sm"
           >
             <ImageComponent
               imageName={product.thumbnailImage}
               altName={product.name}
               showSkeleton={false}
-              className={"aspect-square object-contain"}
+              className={"h-44 w-44 object-contain"}
             />
 
             <div className="flex flex-col px-4 py-4 justify-between">
-              <h3 className="text-lg font-semibold">{product.name}</h3>
+              <h3 className=" font-semibold">{product.name}</h3>
               <p>
                 <strong>Type:</strong>{" "}
                 {product.type.charAt(0).toUpperCase() + product.type.slice(1)}
