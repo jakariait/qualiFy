@@ -112,7 +112,7 @@ const LoginForm = () => {
           {/* Sign In Button */}
           <button
             type="submit"
-            className="w-full py-3 rounded-md mt-2 primaryBgColor accentTextColor"
+            className="w-full cursor-pointer py-3 rounded-md mt-2 primaryBgColor accentTextColor"
             disabled={loading}
           >
             {loading ? "Signing in..." : "Sign in"}

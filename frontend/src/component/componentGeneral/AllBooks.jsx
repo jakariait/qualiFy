@@ -1,19 +1,22 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import useProductStore from "../../store/useProductStore.js";
 import ProductList from "./ProductList.jsx";
 
-const AllBooks = () => {
-  const { products, fetchFilteredProducts, loading } = useProductStore();
+const AllBooks = ({ limit, showViewAll }) => {
+  const { books, fetchBooks, loadingBooks } = useProductStore();
 
   useEffect(() => {
-    fetchFilteredProducts({ type: "book", isActive: "true" });
+    fetchBooks();
   }, []);
+
+  const displayedBooks = limit ? books.slice(0, limit) : books;
 
   return (
     <section className="xl:container md:mx-auto p-4 md:p-6">
       <div className="text-center mb-10 px-4">
         <div className="relative">
-          <h2 className="text-3xl md:text-4xl  font-extrabold   mb-6 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-6 leading-tight">
             Explore Our{" "}
             <span className="relative inline-block primaryTextColor">
               Books
@@ -32,13 +35,30 @@ const AllBooks = () => {
               </svg>
             </span>
           </h2>
-          <p className="text-base md:text-lg  max-w-2xl mx-auto leading-relaxed">
-            Discover a world of knowledge with our carefully selected books that inspire learning and growth. Explore at your own pace and gain wisdom from renowned authors and experts.
-          </p>
+          {!showViewAll && (
+            <p className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+              Discover a world of knowledge with our carefully selected books
+              that inspire learning and growth. Explore at your own pace and
+              gain wisdom from renowned authors and experts.
+            </p>
+          )}
         </div>
       </div>
-      {/* 📚 Course List */}
-      <ProductList products={products} loading={loading} />
+
+      {/* 📚 Book List */}
+      <ProductList products={displayedBooks} loading={loadingBooks} />
+
+      {/* View All button */}
+      {showViewAll && (
+        <div className="text-center mt-6">
+          <Link
+            to="/books"
+            className="inline-block bg-primary primaryBgColor accentTextColor px-6 py-2 rounded-lg"
+          >
+            View All Books
+          </Link>
+        </div>
+      )}
     </section>
   );
 };

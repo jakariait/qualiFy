@@ -8,51 +8,6 @@ const ThankYou = () => {
   const [order, setOrder] = useState(null);
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // useEffect(() => {
-  //   if (!orderId) return;
-  //
-  //   const fetchOrder = async () => {
-  //     try {
-  //       const res = await axios.get(`${apiUrl}/order-no/${orderId}`);
-  //       if (res.data.success) {
-  //         const order = res.data.order;
-  //         setOrder(order);
-  //
-  //         // Push purchase event to dataLayer
-  //         window.dataLayer = window.dataLayer || [];
-  //         window.dataLayer.push({
-  //           event: "purchase",
-  //           ecommerce: {
-  //             transaction_id: order.orderNo,
-  //             currency: "BDT",
-  //             value: order.totalAmount,
-  //             tax: order.vat,
-  //             shipping: order.deliveryCharge,
-  //             coupon: order.promoCode || "",
-  //             items: order.items.map((item) => ({
-  //               item_name: item.productId?.name || "Unknown Product",
-  //               item_id: item.productId?.productId || "N/A", // <-- numeric productId here
-  //               price: item.price,
-  //               quantity: item.quantity,
-  //               item_variant: item.variantId || "Default",
-  //               item_category: item.productId?.category?.name || "N/A",
-  //               item_image: item.productId?.thumbnailImage || "",
-  //               item_size:
-  //                 item.productId?.variants?.find(
-  //                   (variant) => variant._id === item.variantId,
-  //                 )?.sizeName || "N/A",
-  //             })),
-  //           },
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to fetch order:", error);
-  //     }
-  //   };
-  //
-  //   fetchOrder();
-  // }, [orderId, apiUrl]);
-
   useEffect(() => {
     if (!orderId) return;
 
@@ -81,13 +36,8 @@ const ThankYou = () => {
                   item_id: item.productId?.productId || "N/A",
                   price: item.price,
                   quantity: item.quantity,
-                  item_variant: item.variantId || "Default",
-                  item_category: item.productId?.category?.name || "N/A",
+                  item_category: item.type || "N/A",
                   item_image: item.productId?.thumbnailImage || "",
-                  item_size:
-                    item.productId?.variants?.find(
-                      (variant) => variant._id === item.variantId,
-                    )?.sizeName || "N/A",
                 })),
               },
             });
@@ -122,7 +72,7 @@ const ThankYou = () => {
         </div>
         <div className={"flex flex-row gap-6 justify-center items-center"}>
           <Link
-            to="/orders"
+            to="/track-order"
             className="w-42 inline-block primaryBgColor accentTextColor px-6 py-2 rounded-lg"
           >
             Track My Order

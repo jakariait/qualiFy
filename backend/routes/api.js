@@ -453,6 +453,9 @@ router.get(
   orderController.getOrdersForUser,
 );
 
+router.get("/delivered-products/:userId",userProtect, orderController.getDeliveredProductsForUser);
+
+
 // // Order Tracking
 router.post("/track-order", orderController.trackOrderByOrderNoAndPhone);
 

@@ -1,19 +1,22 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import useProductStore from "../../store/useProductStore.js";
 import ProductList from "./ProductList.jsx";
 
-const AllCourses = () => {
-  const { products, fetchFilteredProducts, loading } = useProductStore();
+const AllCourses = ({ limit, showViewAll }) => {
+  const { courses, fetchCourses, loadingCourses } = useProductStore();
 
   useEffect(() => {
-    fetchFilteredProducts({ type: "course", isActive: "true" });
+    fetchCourses();
   }, []);
+
+  const displayedCourses = limit ? courses.slice(0, limit) : courses;
 
   return (
     <section className="xl:container md:mx-auto p-4 md:p-6">
       <div className="text-center mb-10 px-4">
         <div className="relative">
-          <h2 className="text-3xl md:text-4xl  font-extrabold   mb-6 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-6 leading-tight">
             Explore Our{" "}
             <span className="relative inline-block primaryTextColor">
               Courses
@@ -32,15 +35,28 @@ const AllCourses = () => {
               </svg>
             </span>
           </h2>
-          <p className="text-base md:text-lg  max-w-2xl mx-auto leading-relaxed">
-            Enhance your skills with our expertly crafted courses designed to
-            help you grow personally and professionally. Learn at your own pace
-            from experienced instructors.
-          </p>
+          {!showViewAll && (
+            <p className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+              Enhance your skills with our expertly crafted courses designed to
+              help you grow personally and professionally. Learn at your own pace
+              from experienced instructors.
+            </p>
+          )}
         </div>
       </div>
-      {/* 📚 Course List */}
-      <ProductList products={products} loading={loading} />
+
+      <ProductList products={displayedCourses} loading={loadingCourses} />
+
+      {showViewAll && (
+        <div className="text-center mt-6">
+          <Link
+            to="/courses"
+            className="inline-block bg-primary primaryBgColor accentTextColor px-6 py-2 rounded-lg"
+          >
+            View All Courses
+          </Link>
+        </div>
+      )}
     </section>
   );
 };

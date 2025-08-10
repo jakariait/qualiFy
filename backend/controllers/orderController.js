@@ -193,7 +193,23 @@ const trackOrderByOrderNoAndPhone = async (req, res) => {
   }
 };
 
+// Get delivered products for a user
+const getDeliveredProductsForUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "User ID is required" });
+    }
+
+    const products = await orderService.getDeliveredProductsByUserId(userId);
+
+    res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    console.error("Error fetching delivered products:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // Exporting the controller functions
 module.exports = {
@@ -204,5 +220,6 @@ module.exports = {
   deleteOrder,
   getOrderByOrderNo,
   getOrdersForUser,
-  trackOrderByOrderNoAndPhone
+  trackOrderByOrderNoAndPhone,
+  getDeliveredProductsForUser
 };

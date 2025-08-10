@@ -491,6 +491,52 @@ const trackOrderByOrderNoAndPhone = async (orderNo, phone) => {
   return order;
 };
 
+// Get Delivered Products By User ID
+const getDeliveredProductsByUserId = async (userId) => {
+  try {
+    // Find all orders for this user with status 'delivered'
+    const deliveredOrders = await Order.find({
+      userId,
+      orderStatus: "delivered",
+    })
+      .populate({
+        path: "items.productId",
+        select:
+          "-longDesc -faqs -shortDesc -videoUrl -metaTitle -metaDescription -metaKeywords -searchTags",
+      })
+      .lean();
+
+    if (!deliveredOrders.length) {
+      return { deliveredProducts: [], totalQuantityPurchased: 0 };
+    }
+
+    // Extract products and sum quantities
+    const deliveredProducts = [];
+    let totalQuantityPurchased = 0;
+
+    for (const order of deliveredOrders) {
+      for (const item of order.items) {
+        if (item.productId) {
+          deliveredProducts.push({
+            product: item.productId,
+            quantity: item.quantity,
+            orderNo: order.orderNo,
+            orderDate: order.createdAt,
+          });
+          totalQuantityPurchased += item.quantity;
+        }
+      }
+    }
+
+    return { deliveredProducts, totalQuantityPurchased };
+  } catch (error) {
+    throw new Error("Error fetching delivered products: " + error.message);
+  }
+};
+
+
+
+
 // Export the functions as an object
 module.exports = {
   createOrder,
@@ -501,4 +547,5 @@ module.exports = {
   getOrderByOrderNo,
   getOrdersByUserId,
   trackOrderByOrderNoAndPhone,
+  getDeliveredProductsByUserId
 };

@@ -69,7 +69,7 @@ const MostSoldProductsPieChart = () => {
   return (
     <div className="relative bg-white rounded-lg shadow py-6 px-4 overflow-hidden">
       <div className="text-center mb-6">
-        <Typography variant="h6">Best Selling Products</Typography>
+        <Typography variant="h6">Best Selling Products & Service</Typography>
         <p className="text-gray-500 font-medium">
           Total Items Sold: {totalSold}
         </p>

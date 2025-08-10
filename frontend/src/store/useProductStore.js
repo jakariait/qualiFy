@@ -6,11 +6,53 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const useProductStore = create((set) => ({
   product: null,
-  products: [],
-  loading: false,
-  error: null,
 
-  // ✅ Fetch a single product by ID
+  books: [],
+  loadingBooks: false,
+  errorBooks: null,
+
+  courses: [],
+  loadingCourses: false,
+  errorCourses: null,
+
+  // Fetch books
+  fetchBooks: async () => {
+    set({ loadingBooks: true, errorBooks: null });
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append("type", "book");
+      queryParams.append("isActive", "true");
+
+      const response = await axios.get(`${apiUrl}/products?${queryParams}`);
+      set({ books: response.data?.data || [], loadingBooks: false });
+    } catch (error) {
+      set({
+        errorBooks: error.response?.data?.message || "Failed to fetch books",
+        loadingBooks: false,
+      });
+    }
+  },
+
+  // Fetch courses
+  fetchCourses: async () => {
+    set({ loadingCourses: true, errorCourses: null });
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append("type", "course");
+      queryParams.append("isActive", "true");
+
+      const response = await axios.get(`${apiUrl}/products?${queryParams}`);
+      set({ courses: response.data?.data || [], loadingCourses: false });
+    } catch (error) {
+      set({
+        errorCourses:
+          error.response?.data?.message || "Failed to fetch courses",
+        loadingCourses: false,
+      });
+    }
+  },
+
+  // Other methods unchanged...
   fetchProductById: async (id) => {
     set({ loading: true, error: null });
     try {
@@ -24,7 +66,6 @@ const useProductStore = create((set) => ({
     }
   },
 
-  // ✅ Fetch a product by slug
   fetchProductBySlug: async (slug) => {
     set({ loading: true, error: null });
     try {
@@ -39,58 +80,8 @@ const useProductStore = create((set) => ({
     }
   },
 
-  // ✅ Fetch filtered products by type and isActive
-  // fetchFilteredProducts: async ({ type = "", isActive = "" } = {}) => {
-  //   set({ loading: true, error: null });
-  //   try {
-  //     const queryParams = new URLSearchParams();
-  //     if (type) queryParams.append("type", type);
-  //     if (isActive !== "") queryParams.append("isActive", isActive);
-  //
-  //     const response = await axios.get(`${apiUrl}/products?${queryParams}`);
-  //     set({ products: response.data?.data || [], loading: false });
-  //   } catch (error) {
-  //     set({
-  //       error: error.response?.data?.message || "Failed to fetch products",
-  //       loading: false,
-  //     });
-  //   }
-  // },
-
-  fetchFilteredProducts: async ({ type, isActive } = {}) => {
-    if (!type && (isActive === undefined || isActive === "")) {
-      // Stop here if no filters are provided
-      return;
-    }
-
-    set({ loading: true, error: null });
-
-    try {
-      const queryParams = new URLSearchParams();
-      if (type) queryParams.append("type", type);
-      if (isActive === true || isActive === false) {
-        queryParams.append("isActive", String(isActive));
-      } else if (isActive === "true" || isActive === "false") {
-        queryParams.append("isActive", isActive);
-      }
-
-      const response = await axios.get(`${apiUrl}/products?${queryParams}`);
-      set({ products: response.data?.data || [], loading: false });
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to fetch products",
-        loading: false,
-      });
-    }
-  },
-
-
-
-
-  // ✅ Reset product state
   resetProduct: () => set({ product: null, loading: false, error: null }),
 
-  // ✅ Delete a product
   deleteProduct: async (id) => {
     set({ loading: true, error: null });
     try {
@@ -102,7 +93,8 @@ const useProductStore = create((set) => ({
       });
 
       set((state) => ({
-        products: state.products.filter((prod) => prod._id !== id),
+        books: state.books.filter((prod) => prod._id !== id),
+        courses: state.courses.filter((prod) => prod._id !== id),
         loading: false,
       }));
     } catch (error) {

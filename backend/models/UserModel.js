@@ -21,19 +21,8 @@ const userSchema = new mongoose.Schema(
         "Please fill a valid email address",
       ],
     },
-    accountDeletion: {
-      requested: {
-        type: Boolean,
-        default: false,
-      },
-      requestedAt: {
-        type: Date,
-      },
-    },
-    rewardPoints: {
-      type: Number,
-      default: 0,
-    },
+
+
     address: {
       type: String,
     },

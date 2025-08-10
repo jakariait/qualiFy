@@ -29,7 +29,6 @@ import { saveAs } from "file-saver";
 import RequirePermission from "./RequirePermission.jsx";
 import ExcelJS from "exceljs";
 
-
 const CustomerList = () => {
   const { token } = useAuthAdminStore();
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -242,9 +241,7 @@ const CustomerList = () => {
               <TableCell>Email</TableCell>
               <TableCell>Phone</TableCell>
               <TableCell>Address</TableCell>
-              <TableCell>Reward Points</TableCell>
               <TableCell>Joined</TableCell>
-              <TableCell>Account Deletion</TableCell>
               <RequirePermission permission="delete_customers" fallback={true}>
                 <TableCell>Action</TableCell>
               </RequirePermission>
@@ -280,24 +277,12 @@ const CustomerList = () => {
                     <TableCell>{cus.email || "N/A"}</TableCell>
                     <TableCell>{cus.phone || "N/A"}</TableCell>
                     <TableCell>{cus.address || "N/A"}</TableCell>
-                    <TableCell>{cus.rewardPoints}</TableCell>
                     <TableCell>
                       {cus.createdAt
                         ? new Date(cus.createdAt).toLocaleDateString()
                         : "N/A"}
                     </TableCell>
-                    <TableCell>
-                      {cus.accountDeletion?.requested ? (
-                        <span className="text-red-600 font-medium">
-                          Requested at{" "}
-                          {new Date(
-                            cus.accountDeletion.requestedAt,
-                          ).toLocaleString()}
-                        </span>
-                      ) : (
-                        <span className="text-green-600">Active</span>
-                      )}
-                    </TableCell>
+
                     <RequirePermission
                       permission="delete_customers"
                       fallback={true}

@@ -40,6 +40,7 @@ const orderSchema = new mongoose.Schema(
     deliveryMethod: {
       type: String,
       enum: ["home_delivery"],
+      default: "home_delivery",
       required: false
     },
 
