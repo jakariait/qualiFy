@@ -8,7 +8,6 @@ import MonthlyRevenueChart from "../component/componentAdmin/MonthlyRevenueChart
 import MonthlyOrderStatusRatioChart from "../component/componentAdmin/MonthlyOrderStatusRatioChart.jsx";
 import RequirePermission from "../component/componentAdmin/RequirePermission.jsx";
 import useOrderStore from "../store/useOrderStore.js";
-import ProductSalesHistory from "../component/componentAdmin/ProductSalesHistory.jsx";
 
 const DashboardPage = ({ pageDetails, title }) => {
   const { fetchAllOrders } = useOrderStore();
@@ -46,7 +45,6 @@ const DashboardPage = ({ pageDetails, title }) => {
             <DailyOrdersChart />
             <MonthlyRevenueChart />
             <MonthlyOrderStatusRatioChart />
-            <ProductSalesHistory productId="6892edb3376fd6138be1cf93" />
           </div>
         </RequirePermission>
       </div>

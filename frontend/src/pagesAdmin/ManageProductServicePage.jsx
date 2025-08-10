@@ -11,8 +11,11 @@ const ManageProductServicePage = () => {
         pageDetails="PRODUCT & SERVICES"
         title="Manage Product & Service"
       />
-      <ProductCRUD />
-      <ProductsWithSalesDialog/>
+      <div className={"space-y-5"}>
+        <ProductCRUD />
+        <ProductsWithSalesDialog/>
+      </div>
+
     </LayoutAdmin>
   );
 };

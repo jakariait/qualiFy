@@ -77,9 +77,9 @@ const ProductsWithSalesDialog = () => {
     <>
       <Card>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Product List
-          </Typography>
+          <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-lg font-semibold">
+            Products and Service Sales History
+          </h1>
           <div className="grid grid-cols-3 gap-4">
             {products.map((product) => (
               <div
