@@ -9,6 +9,7 @@ import {
   Box,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
+import useAuthUserStore from "../../store/AuthUserStore.js";
 
 const UpdateUserForm = ({ token }) => {
   const baseUrl = import.meta.env.VITE_API_URL;
@@ -31,6 +32,9 @@ const UpdateUserForm = ({ token }) => {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const initialize = useAuthUserStore(state => state.initialize);
+
 
   // Auto clear success message after 3 seconds
   useEffect(() => {
@@ -151,6 +155,10 @@ const UpdateUserForm = ({ token }) => {
           setPreviewImage(null);
           setImageRemoved(false);
         }
+
+        // **REFETCH USER PROFILE FROM STORE**
+        await initialize();
+
       } else {
         setError("Failed to update user.");
       }

@@ -10,13 +10,14 @@ import ImageComponent from "./ImageComponent";
 import MenuBar from "./MenuBar";
 import MobileMenu from "./MobileMenu";
 import Cart from "./Cart";
+import UserAvatar from "./UserAvatar.jsx";
 
 const Headers = () => {
   const navigate = useNavigate();
   const { GeneralInfoList, GeneralInfoListLoading, GeneralInfoListError } =
     GeneralInfoStore();
   const { cart } = useCartStore();
-  const { user, logout } = useAuthUserStore();
+  const { user, logout, loading } = useAuthUserStore();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,6 +43,7 @@ const Headers = () => {
     primaryBgColor accentTextColor
     transition-all duration-300 ease-in-out
   `;
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -190,16 +192,8 @@ const Headers = () => {
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  {user?.userImage && typeof user.userImage === "string" ? (
-                    <ImageComponent
-                      imageName={user.userImage}
-                      className={avatarClass}
-                    />
-                  ) : (
-                    <span className={avatarClass}>
-                      {user?.fullName?.trim().charAt(0).toUpperCase() || "U"}
-                    </span>
-                  )}
+                  <UserAvatar user={user} avatarClass="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gray-50 primaryTextColor font-semibold" />
+
                 </button>
 
                 {isDropdownOpen && (
