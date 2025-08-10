@@ -284,7 +284,7 @@ export default function SidebarMenu() {
           </RequirePermission>
 
           <RequirePermission
-            permission={["bkash_api", "steadfast_api"]}
+            permission={["bkash_api"]}
             match="any"
             fallback={true}
           >
@@ -332,20 +332,6 @@ export default function SidebarMenu() {
                           className={"flex items-center gap-2"}
                         >
                           <span>bKash</span>
-                        </Link>
-                      </li>
-                    </RequirePermission>
-
-                    <RequirePermission
-                      permission="steadfast_api"
-                      fallback={true}
-                    >
-                      <li>
-                        <Link
-                          to="/admin/steadfast-config"
-                          className={"flex items-center gap-2"}
-                        >
-                          <span>Steadfast</span>
                         </Link>
                       </li>
                     </RequirePermission>

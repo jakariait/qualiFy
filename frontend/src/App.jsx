@@ -53,7 +53,6 @@ import MarqueeAdminPage from "./pagesAdmin/MarqueeAdminPage.jsx";
 import AdminMetaPage from "./pagesAdmin/AdminMetaPage.jsx";
 import MetaProvider from "./component/componentGeneral/MetaProvider.jsx";
 import BKashConfigPage from "./pagesAdmin/BKashConfigPage.jsx";
-import SteadFastConfigPag from "./pagesAdmin/SteadFastConfigPag.jsx";
 import ScrollToTopButton from "./component/componentGeneral/ScrollToTopButton.jsx";
 import DashboardPage from "./pagesAdmin/DashboardPage.jsx";
 import UserAllOrdersPage from "./pagesUser/UserAllOrdersPage.jsx";
@@ -163,6 +162,7 @@ function App() {
 
         {/* Protected User Routes */}
         <Route element={<UserProtectedRoute />}>
+
           <Route path="/checkout" element={<CheckoutPage />} />
 
           <Route path="/user/home" element={<UserHomePage />} />
@@ -248,10 +248,7 @@ function App() {
           <Route path="/admin/scroll-text" element={<MarqueeAdminPage />} />
           <Route path="/admin/homepage-seo" element={<AdminMetaPage />} />
           <Route path="/admin/bkash-config" element={<BKashConfigPage />} />
-          <Route
-            path="/admin/steadfast-config"
-            element={<SteadFastConfigPag />}
-          />
+
 
           <Route path="/admin/dashboard" element={<DashboardPage />} />
           <Route path="/admin/adminlist" element={<AdminListPage />} />

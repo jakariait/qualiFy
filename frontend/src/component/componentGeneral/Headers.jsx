@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { X, ShoppingCart, User, Menu, LogOut } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
-
 import GeneralInfoStore from "../../store/GeneralInfoStore";
 import useCartStore from "../../store/useCartStore";
 import useAuthUserStore from "../../store/AuthUserStore";
@@ -17,7 +16,19 @@ const Headers = () => {
   const { GeneralInfoList, GeneralInfoListLoading, GeneralInfoListError } =
     GeneralInfoStore();
   const { cart } = useCartStore();
-  const { user, logout, loading } = useAuthUserStore();
+  const { user, logout, loading, initialize } = useAuthUserStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([initialize()]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []); // ✅ Empty dependency array to prevent unnecessary re-renders
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -43,7 +54,6 @@ const Headers = () => {
     primaryBgColor accentTextColor
     transition-all duration-300 ease-in-out
   `;
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -129,7 +139,6 @@ const Headers = () => {
     return (
       <div className="xl:container xl:mx-auto ">
         <Skeleton height={80} />
-
       </div>
     );
   }
@@ -155,7 +164,7 @@ const Headers = () => {
           <Link to="/">
             <ImageComponent
               imageName={GeneralInfoList?.PrimaryLogo}
-              className="w-30 md:w-40 mt-1"
+              className="w-30 md:w-40 mb-1"
               showSkeleton={false}
             />
           </Link>
@@ -191,8 +200,10 @@ const Headers = () => {
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <UserAvatar user={user} avatarClass="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gray-50 primaryTextColor font-semibold" />
-
+                  <UserAvatar
+                    user={user}
+                    avatarClass="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gray-50 primaryTextColor font-semibold"
+                  />
                 </button>
 
                 {isDropdownOpen && (

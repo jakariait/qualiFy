@@ -182,7 +182,6 @@ const Checkout = () => {
 
     console.log("Order Payload being sent:", orderPayload);
 
-
     // ---- Handle bKash Checkout ----
     if (paymentMethod === "bkash") {
       try {
@@ -242,15 +241,11 @@ const Checkout = () => {
           <div className="space-y-8">
             <AddressForm user={user} onAddressChange={handleAddressChange} />
 
-            {isBook && (
-              <>
-                <ShippingOptions onShippingChange={setSelectedShipping} />
-                <DeliveryMethod
-                  freeDelivery={freeDelivery}
-                  formattedTotalAmount={formattedTotalAmount}
-                />
-              </>
-            )}
+            <ShippingOptions onShippingChange={setSelectedShipping} />
+            <DeliveryMethod
+              freeDelivery={freeDelivery}
+              formattedTotalAmount={formattedTotalAmount}
+            />
 
             <PaymentMethod
               selectedMethod={paymentMethod}

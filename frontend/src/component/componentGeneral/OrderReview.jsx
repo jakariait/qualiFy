@@ -43,7 +43,6 @@ const OrderReview = ({
                 <h3 className="line-clamp-2 overflow-hidden text-ellipsis">
                   {item.name}
                 </h3>
-                <p>Type: {item.productType.charAt(0).toUpperCase() + item.productType.slice(1)}</p>
               </Link>
             </div>
             <div className="flex flex-col items-center justify-baseline gap-4">
