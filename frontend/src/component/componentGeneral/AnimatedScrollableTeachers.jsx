@@ -109,7 +109,8 @@ const AnimatedScrollableTeachers = () => {
             {[...teachers, ...teachers].map((teacher, index) => (
               <div
                 key={`${teacher._id}-${index}`}
-                className=" rounded-md shadow  transition-all duration-300 overflow-hidden group w-72 flex-shrink-0"
+                className="rounded-md shadow transition-all duration-300 overflow-hidden group flex-shrink-0"
+                style={{ width: '40vw', maxWidth: '288px' }} // 288px is 72 * 4 (Tailwind w-72)
               >
                 <div className="relative">
                   <ImageComponent

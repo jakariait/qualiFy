@@ -8,158 +8,6 @@ const FreeDeliveryAmount = require("../models/FreeDeliveryAmount");
 const User = require("../models/UserModel");
 const Coupon = require("../models/CouponModel");
 
-// const createOrder = async (orderData, userId) => {
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-//
-//   try {
-//     // Get user (optional for guests)
-//     let user = null;
-//     if (userId) {
-//       user = await User.findById(userId);
-//       if (!user) throw new Error("User not found");
-//     }
-//
-//     // Generate order number
-//     const counter = await OrderCounter.findOneAndUpdate(
-//       { id: "order" },
-//       { $inc: { seq: 1 } },
-//       { new: true, upsert: true, session },
-//     );
-//     const orderNo = String(counter.seq).padStart(6, "0");
-//
-//     // Get VAT
-//     const vatEntry = await VatPercentage.findOne().sort({ createdAt: -1 });
-//     const vatPercent = vatEntry ? vatEntry.value : 0;
-//
-//     // Calculate subtotal and update stock
-//     let subtotal = 0;
-//     const updatedItems = [];
-//
-//     for (const item of orderData.items) {
-//       const { productId, variantId, quantity } = item;
-//
-//       const product = await Product.findById(productId);
-//       if (!product) throw new Error("Product not found");
-//
-//       let price, stock;
-//
-//       if (product.variants.length === 0) {
-//         price =
-//           product.finalDiscount > 0
-//             ? product.finalDiscount
-//             : product.finalPrice;
-//         stock = product.finalStock;
-//
-//         if (stock < quantity)
-//           throw new Error(`Not enough stock for product ${productId}`);
-//
-//         await Product.updateOne(
-//           { _id: productId },
-//           { $inc: { finalStock: -quantity } },
-//           { session },
-//         );
-//       } else {
-//         const variant = product.variants.find(
-//           (v) => v._id.toString() === variantId,
-//         );
-//         if (!variant) throw new Error("Variant not found");
-//
-//         if (variant.stock < quantity)
-//           throw new Error(`Not enough stock for variant ${variantId}`);
-//
-//         price = variant.discount || variant.price;
-//
-//         await Product.updateOne(
-//           { _id: productId, "variants._id": variantId },
-//           { $inc: { "variants.$.stock": -quantity } },
-//           { session },
-//         );
-//       }
-//
-//       subtotal += price * quantity;
-//       updatedItems.push({ productId, variantId, quantity, price }); // Store price for each item
-//     }
-//
-//     // Handle shipping
-//     const shippingMethod = await Shipping.findById(orderData.shippingId);
-//     if (!shippingMethod) throw new Error("Invalid shipping method");
-//
-//     const freeDelivery = await FreeDeliveryAmount.findOne().sort({
-//       createdAt: -1,
-//     });
-//     const freeDeliveryThreshold = freeDelivery ? freeDelivery.value : 0;
-//
-//     const deliveryCharge =
-//       subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
-//
-//     // ✅ Backend Coupon Validation
-//     let promoDiscount = 0;
-//     let appliedCouponCode = orderData.promoCode || null;
-//
-//     if (appliedCouponCode) {
-//       const coupon = await Coupon.findOne({
-//         code: appliedCouponCode.toUpperCase(),
-//         status: "active",
-//         startDate: { $lte: new Date() },
-//         endDate: { $gte: new Date() },
-//       });
-//
-//       if (!coupon) throw new Error("Invalid or expired promo code");
-//
-//       if (subtotal < coupon.minimumOrder)
-//         throw new Error(
-//           `Minimum order amount for this coupon is ৳${coupon.minimumOrder}`,
-//         );
-//
-//       if (coupon.type === "percentage") {
-//         promoDiscount = Math.floor((coupon.value / 100) * subtotal);
-//       } else if (coupon.type === "amount") {
-//         promoDiscount = coupon.value;
-//       }
-//
-//       // Cap promo discount if it exceeds subtotal
-//       promoDiscount = Math.min(promoDiscount, subtotal);
-//     }
-//
-//     // Reward points
-//     const rewardPointsUsed = orderData.rewardPointsUsed || 0;
-//     const finalSubtotal = subtotal - promoDiscount - rewardPointsUsed;
-//
-//     const vat = (finalSubtotal * vatPercent) / 100;
-//     const totalAmount = finalSubtotal + vat + deliveryCharge;
-//
-//     // Save order
-//     const newOrder = new Order({
-//       ...orderData,
-//       orderNo,
-//       userId,
-//       items: updatedItems,
-//       subtotalAmount: subtotal,
-//       deliveryCharge,
-//       vat,
-//       totalAmount,
-//       promoCode: appliedCouponCode,
-//       promoDiscount,
-//       rewardPointsUsed,
-//       specialDiscount: 0,
-//       rewardPointsEarned: 0,
-//       adminNote: "",
-//     });
-//
-//     const savedOrder = await newOrder.save({ session });
-//
-//     await session.commitTransaction();
-//     session.endSession();
-//
-//     return savedOrder;
-//   } catch (error) {
-//     await session.abortTransaction();
-//     session.endSession();
-//     throw new Error(error.message);
-//   }
-// };
-
 const createOrder = async (orderData, userId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -227,8 +75,14 @@ const createOrder = async (orderData, userId) => {
       });
       const freeDeliveryThreshold = freeDelivery ? freeDelivery.value : 0;
 
-      deliveryCharge =
-        subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
+      if (freeDeliveryThreshold > 0) {
+        // Free delivery active, apply threshold check
+        deliveryCharge =
+          subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
+      } else {
+        // Free delivery inactive, always apply shipping charge
+        deliveryCharge = shippingMethod.value;
+      }
     }
 
     // Backend Coupon Validation

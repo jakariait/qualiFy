@@ -40,12 +40,39 @@ const useProductStore = create((set) => ({
   },
 
   // ✅ Fetch filtered products by type and isActive
-  fetchFilteredProducts: async ({ type = "", isActive = "" } = {}) => {
+  // fetchFilteredProducts: async ({ type = "", isActive = "" } = {}) => {
+  //   set({ loading: true, error: null });
+  //   try {
+  //     const queryParams = new URLSearchParams();
+  //     if (type) queryParams.append("type", type);
+  //     if (isActive !== "") queryParams.append("isActive", isActive);
+  //
+  //     const response = await axios.get(`${apiUrl}/products?${queryParams}`);
+  //     set({ products: response.data?.data || [], loading: false });
+  //   } catch (error) {
+  //     set({
+  //       error: error.response?.data?.message || "Failed to fetch products",
+  //       loading: false,
+  //     });
+  //   }
+  // },
+
+  fetchFilteredProducts: async ({ type, isActive } = {}) => {
+    if (!type && (isActive === undefined || isActive === "")) {
+      // Stop here if no filters are provided
+      return;
+    }
+
     set({ loading: true, error: null });
+
     try {
       const queryParams = new URLSearchParams();
       if (type) queryParams.append("type", type);
-      if (isActive !== "") queryParams.append("isActive", isActive);
+      if (isActive === true || isActive === false) {
+        queryParams.append("isActive", String(isActive));
+      } else if (isActive === "true" || isActive === "false") {
+        queryParams.append("isActive", isActive);
+      }
 
       const response = await axios.get(`${apiUrl}/products?${queryParams}`);
       set({ products: response.data?.data || [], loading: false });
@@ -56,6 +83,9 @@ const useProductStore = create((set) => ({
       });
     }
   },
+
+
+
 
   // ✅ Reset product state
   resetProduct: () => set({ product: null, loading: false, error: null }),

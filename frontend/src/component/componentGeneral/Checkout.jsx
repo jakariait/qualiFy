@@ -180,6 +180,9 @@ const Checkout = () => {
       orderPayload.userId = user._id;
     }
 
+    console.log("Order Payload being sent:", orderPayload);
+
+
     // ---- Handle bKash Checkout ----
     if (paymentMethod === "bkash") {
       try {
@@ -306,7 +309,6 @@ const Checkout = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-
     </div>
   );
 };

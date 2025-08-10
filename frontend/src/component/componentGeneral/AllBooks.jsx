@@ -16,7 +16,7 @@ const AllBooks = () => {
           <h2 className="text-3xl md:text-4xl  font-extrabold   mb-6 leading-tight">
             Explore Our{" "}
             <span className="relative inline-block primaryTextColor">
-              Courses
+              Books
               <svg
                 className="absolute -bottom-2 left-0 w-full h-3"
                 viewBox="0 0 200 12"
@@ -33,9 +33,7 @@ const AllBooks = () => {
             </span>
           </h2>
           <p className="text-base md:text-lg  max-w-2xl mx-auto leading-relaxed">
-            Enhance your skills with our expertly crafted courses designed to
-            help you grow personally and professionally. Learn at your own pace
-            from experienced instructors.
+            Discover a world of knowledge with our carefully selected books that inspire learning and growth. Explore at your own pace and gain wisdom from renowned authors and experts.
           </p>
         </div>
       </div>

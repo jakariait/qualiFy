@@ -311,6 +311,11 @@ const ViewOrder = () => {
                       <TableCell>
                         <div>
                           <div>{product.name}</div>
+                          <p>
+                            Type:{" "}
+                            {product.type.charAt(0).toUpperCase() +
+                              product.type.slice(1)}
+                          </p>
                         </div>
                       </TableCell>
 
@@ -373,7 +378,6 @@ const ViewOrder = () => {
           <OrderStatusUpdate orderId={order._id} onUpdate={fetchOrder} />
         </RequirePermission>
       </div>
-
     </div>
   );
 };

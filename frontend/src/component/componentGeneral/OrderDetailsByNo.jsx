@@ -197,6 +197,7 @@ const OrderDetailsByNo = () => {
                     <TableCell>
                       <div>
                         <div>{product.name || item.productName || "N/A"}</div>
+                        <p>Type: {product.type.charAt(0).toUpperCase() + product.type.slice(1)}</p>
                       </div>
                     </TableCell>
                     <TableCell>{item.quantity}</TableCell>

@@ -42,6 +42,10 @@ const ProductAddToCart = ({ product }) => {
   const { addToCart } = useCartStore();
   const navigate = useNavigate();
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const baseUrl = apiUrl.replace("/api", "");
+  const src = `${baseUrl}/uploads/${product.previewPdf}`;
+
   const handleAddToCart = () => {
     addToCart(product, quantity);
 
@@ -168,7 +172,7 @@ const ProductAddToCart = ({ product }) => {
 
               {/* Cash on Delivery Button */}
               <button
-                className="primaryBgColor accentTextColor px-4 py-2 rounded w-full"
+                className="primaryBgColor cursor-pointer accentTextColor px-4 py-2 rounded w-full"
                 onClick={() => {
                   addToCart(product, quantity);
                   navigate("/checkout");
@@ -280,7 +284,7 @@ const ProductAddToCart = ({ product }) => {
         <DialogContent>
           <div className="w-full h-[80vh]">
             <iframe
-              src={`http://localhost:5050/uploads/${product.previewPdf}`}
+              src={src}
               title="eBook Preview"
               width="100%"
               height="100%"

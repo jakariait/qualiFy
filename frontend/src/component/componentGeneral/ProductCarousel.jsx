@@ -35,7 +35,7 @@ const ProductCarousel = () => {
     autoplay: products.length > 1,
     autoplaySpeed: 6000,
     pauseOnHover: false,
-    arrows: true,
+    arrows: false,
     prevArrow: <CustomPrevArrow />,
     nextArrow: <CustomNextArrow />,
   };
@@ -56,7 +56,7 @@ const ProductCarousel = () => {
     ); // Display error message
   }
   return (
-    <div className="product-carousel xl:container xl:mx-auto  px-3 py-2 relative">
+    <div className="product-carousel relative">
       {CarouselStoreListLoading ? (
         <>
           <Skeleton height={400} width={"100%"} />

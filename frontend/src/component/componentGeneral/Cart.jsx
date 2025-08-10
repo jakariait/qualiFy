@@ -62,7 +62,6 @@ const Cart = ({ onCloseCartMenu }) => {
                       {item.name}
                     </h3>
                   </Link>
-
                   {/*Original Price*/}
                   <p>
                     Price: Tk.{" "}
@@ -84,8 +83,9 @@ const Cart = ({ onCloseCartMenu }) => {
                       )}
                     </p>
                   )}
-                  <h1>{item.productType}</h1>
-
+                  Type:{" "}
+                  {(item?.productType?.[0]?.toUpperCase() ?? "") +
+                    (item?.productType?.slice(1) ?? "") || "N/A"}
                   <div className="flex items-center gap-2 justify-between">
                     {item.productType === "book" && (
                       <div className="flex items-center">
