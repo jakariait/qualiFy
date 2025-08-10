@@ -180,7 +180,6 @@ const OrderDetailsByNo = () => {
               <TableRow>
                 <TableCell>SL</TableCell>
                 <TableCell>Item</TableCell>
-                <TableCell>Variant</TableCell>
                 <TableCell>Quantity</TableCell>
                 <TableCell>Unit Cost</TableCell>
                 <TableCell>Total</TableCell>
@@ -198,11 +197,8 @@ const OrderDetailsByNo = () => {
                     <TableCell>
                       <div>
                         <div>{product.name || item.productName || "N/A"}</div>
-                        <div>Category: {product?.category?.name || "N/A"}</div>
-                        <div>Code: {product.productCode || "N/A"}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{variant ? variant.sizeName : "N/A"}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell>{(item.price ?? 0).toFixed(2)}</TableCell>
                     <TableCell>{totalPrice.toFixed(2)}</TableCell>
@@ -226,7 +222,6 @@ const OrderDetailsByNo = () => {
         <div className="flex flex-col gap-2 items-end">
           <p>Sub-total: Tk. {(order.subtotalAmount ?? 0).toFixed(2)}</p>
           <p>Promo Discount: Tk. {(order.promoDiscount ?? 0).toFixed(2)}</p>
-          <p>Reward Points Used: {order.rewardPointsUsed || 0}</p>
           <p>VAT/TAX: Tk. {(order.vat ?? 0).toFixed(2)}</p>
           <p>Delivery Charge: Tk. {(order.deliveryCharge ?? 0).toFixed(2)}</p>
           <p>

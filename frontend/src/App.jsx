@@ -60,7 +60,6 @@ import UserAllOrdersPage from "./pagesUser/UserAllOrdersPage.jsx";
 import UserOrderDetailsPage from "./pagesUser/UserOrderDetailsPage.jsx";
 import UpdateUserPage from "./pagesUser/UpdateUserPage.jsx";
 import ChangePasswordPage from "./pagesUser/ChangePasswordPage.jsx";
-import AbandonedCartPage from "./pagesAdmin/AbandonedCartPage.jsx";
 import TrackOrderPage from "./pagesUser/TrackOrderPage.jsx";
 import AdminListPage from "./pagesAdmin/AdminListPage.jsx";
 import CreateAdminPage from "./pagesAdmin/CreateAdminPage.jsx";
@@ -145,7 +144,6 @@ function App() {
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/thank-you/:orderId" element={<ThankYouPage />} />
         <Route path="/bkash-callback" element={<BkashCallbackPage />} />
         <Route path="/about" element={<AboutUsPageUser />} />
@@ -165,6 +163,8 @@ function App() {
 
         {/* Protected User Routes */}
         <Route element={<UserProtectedRoute />}>
+          <Route path="/checkout" element={<CheckoutPage />} />
+
           <Route path="/user/home" element={<UserHomePage />} />
           <Route path="/user/orders" element={<UserAllOrdersPage />} />
           <Route
@@ -258,10 +258,6 @@ function App() {
           <Route path="/admin/createadmin" element={<CreateAdminPage />} />
           <Route path="/admin/edit/:id" element={<EditAdminPage />} />
 
-          <Route
-            path="/admin/incomplete-order"
-            element={<AbandonedCartPage />}
-          />
           <Route path="/admin/create-blog" element={<CreateBlogPage />} />
 
           <Route path="/admin/blogs" element={<BlogsListPage />} />

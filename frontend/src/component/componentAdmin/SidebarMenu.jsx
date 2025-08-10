@@ -17,7 +17,6 @@ import {
   FaSignOutAlt,
   FaShoppingBag,
   FaInfo,
-  FaClipboardList,
   FaBlog,
   FaComments,
   FaChalkboardTeacher,
@@ -118,7 +117,10 @@ export default function SidebarMenu() {
           </RequirePermission>
         </ul>
         <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-          <Link to="/admin/product-service" className={"flex items-center gap-2"}>
+          <Link
+            to="/admin/product-service"
+            className={"flex items-center gap-2"}
+          >
             <FaTags /> <span>Manage Products & Service</span>
           </Link>
         </li>
@@ -174,11 +176,20 @@ export default function SidebarMenu() {
                     </div>
                   </Typography>
                 </AccordionSummary>
+
                 <AccordionDetails>
                   <ul className={"space-y-2 pl-4"}>
                     <RequirePermission permission="scroll_text" fallback={true}>
                       <li>
                         <Link to="/admin/scroll-text">Scroll Text</Link>
+                      </li>
+                    </RequirePermission>
+                    <RequirePermission
+                      permission="setup_config"
+                      fallback={true}
+                    >
+                      <li>
+                        <Link to="/admin/configsetup">Setup Your Config</Link>
                       </li>
                     </RequirePermission>
                     <RequirePermission
@@ -206,9 +217,6 @@ export default function SidebarMenu() {
               </Accordion>
             </li>
           </RequirePermission>
-
-
-
 
           <RequirePermission permission="view_orders" fallback={true}>
             <li className="space-x-2 px-2 rounded-md cursor-pointer">
@@ -274,16 +282,7 @@ export default function SidebarMenu() {
               </Accordion>
             </li>
           </RequirePermission>
-          <RequirePermission permission="incomplete_orders" fallback={true}>
-            <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-              <Link
-                to="/admin/incomplete-order"
-                className={"flex items-center gap-2"}
-              >
-                <FaClipboardList /> <span>Incomplete Order</span>
-              </Link>
-            </li>
-          </RequirePermission>
+
           <RequirePermission
             permission={["bkash_api", "steadfast_api"]}
             match="any"

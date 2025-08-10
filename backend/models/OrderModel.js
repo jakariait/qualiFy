@@ -40,9 +40,9 @@ const orderSchema = new mongoose.Schema(
     deliveryMethod: {
       type: String,
       enum: ["home_delivery"],
-      required: true,
-      default: "home_delivery",
+      required: false
     },
+
 
     paymentMethod: {
       type: String,
@@ -102,6 +102,7 @@ const orderSchema = new mongoose.Schema(
     shippingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Shipping",
+      required: false, // make it optional
     },
 
     specialDiscount: {

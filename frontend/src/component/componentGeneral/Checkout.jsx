@@ -16,7 +16,6 @@ import DeliveryMethod from "./DeliveryMethod.jsx";
 import OrderSummary from "./OrderSummary.jsx";
 import CheckoutHeader from "./CheckoutHeader.jsx";
 import PaymentMethod from "./PaymentMethod.jsx";
-import AbandonedCartTracker from "./AbandonedCartTracker.jsx";
 
 const Checkout = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -25,13 +24,10 @@ const Checkout = () => {
   // Store values
   const { cart, removeFromCart, updateQuantity, clearCart } = useCartStore();
 
-
-  const cartContainsBooks = (cart) => cart.some(item => item.productType === "book");
-
+  const cartContainsBooks = (cart) =>
+    cart.some((item) => item.productType === "book");
 
   const isBook = cartContainsBooks(cart);
-
-
 
   const { user } = useAuthUserStore();
 
@@ -46,7 +42,7 @@ const Checkout = () => {
   });
 
   // Payment Method state
-  const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
+  const [paymentMethod, setPaymentMethod] = useState("bkash");
 
   // Free Delivery
   const [freeDelivery, setFreeDelivery] = useState(null);
@@ -96,7 +92,8 @@ const Checkout = () => {
   // Price Calculations
   const totalAmount = cart.reduce((total, item) => {
     // Removed variantId, so no variant price logic
-    const price = item.discountPrice > 0 ? item.discountPrice : item.originalPrice;
+    const price =
+      item.discountPrice > 0 ? item.discountPrice : item.originalPrice;
     return total + price * item.quantity;
   }, 0);
 
@@ -144,7 +141,8 @@ const Checkout = () => {
           items: cart.map((item) => ({
             item_name: item.name,
             item_id: item.productId,
-            price: item.discountPrice > 0 ? item.discountPrice : item.originalPrice,
+            price:
+              item.discountPrice > 0 ? item.discountPrice : item.originalPrice,
             quantity: item.quantity,
             // Removed variantId from dataLayer event
           })),
@@ -192,7 +190,10 @@ const Checkout = () => {
         });
 
         if (createRes.data && createRes.data.bkashURL) {
-          localStorage.setItem("bkash_order_payload", JSON.stringify(orderPayload));
+          localStorage.setItem(
+            "bkash_order_payload",
+            JSON.stringify(orderPayload),
+          );
           window.location.href = createRes.data.bkashURL;
           return;
         } else {
@@ -251,6 +252,7 @@ const Checkout = () => {
             <PaymentMethod
               selectedMethod={paymentMethod}
               setSelectedMethod={setPaymentMethod}
+              isBook={isBook}
             />
           </div>
 
@@ -266,7 +268,6 @@ const Checkout = () => {
               orderAmount={totalAmount}
               setAppliedCouponGlobal={setAppliedCoupon}
             />
-
 
             <OrderSummary
               totalItems={totalItems}
@@ -305,14 +306,7 @@ const Checkout = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <AbandonedCartTracker
-        addressData={addressData}
-        cart={cart}
-        totalAmount={grandTotal}
-        user={user}
-        apiUrl={apiUrl}
-        orderPlaced={orderPlaced}
-      />
+
     </div>
   );
 };

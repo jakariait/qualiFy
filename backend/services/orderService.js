@@ -194,7 +194,8 @@ const createOrder = async (orderData, userId) => {
       const product = await Product.findById(productId);
       if (!product) throw new Error("Product not found");
 
-      const price = product.finalDiscount > 0 ? product.finalDiscount : product.finalPrice;
+      const price =
+        product.finalDiscount > 0 ? product.finalDiscount : product.finalPrice;
 
       // Only check and update stock if product.type is "book"
       if (product.type === "book") {
@@ -214,14 +215,21 @@ const createOrder = async (orderData, userId) => {
       updatedItems.push({ productId, quantity, price });
     }
 
-    // Handle shipping
-    const shippingMethod = await Shipping.findById(orderData.shippingId);
-    if (!shippingMethod) throw new Error("Invalid shipping method");
+    // Handle shipping (optional)
+    let deliveryCharge = 0;
 
-    const freeDelivery = await FreeDeliveryAmount.findOne().sort({ createdAt: -1 });
-    const freeDeliveryThreshold = freeDelivery ? freeDelivery.value : 0;
+    if (orderData.shippingId) {
+      const shippingMethod = await Shipping.findById(orderData.shippingId);
+      if (!shippingMethod) throw new Error("Invalid shipping method");
 
-    const deliveryCharge = subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
+      const freeDelivery = await FreeDeliveryAmount.findOne().sort({
+        createdAt: -1,
+      });
+      const freeDeliveryThreshold = freeDelivery ? freeDelivery.value : 0;
+
+      deliveryCharge =
+        subtotal >= freeDeliveryThreshold ? 0 : shippingMethod.value;
+    }
 
     // Backend Coupon Validation
     let promoDiscount = 0;
@@ -238,7 +246,9 @@ const createOrder = async (orderData, userId) => {
       if (!coupon) throw new Error("Invalid or expired promo code");
 
       if (subtotal < coupon.minimumOrder)
-        throw new Error(`Minimum order amount for this coupon is ৳${coupon.minimumOrder}`);
+        throw new Error(
+          `Minimum order amount for this coupon is ৳${coupon.minimumOrder}`,
+        );
 
       if (coupon.type === "percentage") {
         promoDiscount = Math.floor((coupon.value / 100) * subtotal);
@@ -283,20 +293,18 @@ const createOrder = async (orderData, userId) => {
   }
 };
 
-
-
-const getAllOrders = async (filter = {}, page, limit, search = '') => {
+const getAllOrders = async (filter = {}, page, limit, search = "") => {
   try {
     let queryFilter = { ...filter };
 
     if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), 'i');
+      const searchRegex = new RegExp(search.trim(), "i");
       queryFilter.$or = [
         { orderNo: searchRegex },
-        { 'shippingInfo.fullName': searchRegex },
-        { 'shippingInfo.mobileNo': searchRegex },
-        { 'shippingInfo.email': searchRegex },
-        { 'shippingInfo.address': searchRegex },
+        { "shippingInfo.fullName": searchRegex },
+        { "shippingInfo.mobileNo": searchRegex },
+        { "shippingInfo.email": searchRegex },
+        { "shippingInfo.address": searchRegex },
       ];
     }
 
@@ -334,7 +342,7 @@ const getAllOrders = async (filter = {}, page, limit, search = '') => {
       currentPage,
     };
   } catch (error) {
-    console.error('Error in getAllOrders:', error);
+    console.error("Error in getAllOrders:", error);
     throw new Error("Error fetching orders: " + error.message);
   }
 };
@@ -568,7 +576,6 @@ const getOrderByOrderNo = async (orderNo) => {
   }
 };
 
-
 const getOrdersByUserId = async (userId) => {
   try {
     const orders = await Order.find({ userId })
@@ -598,7 +605,6 @@ const getOrdersByUserId = async (userId) => {
   }
 };
 
-
 const trackOrderByOrderNoAndPhone = async (orderNo, phone) => {
   const order = await Order.findOne({ orderNo })
     .populate("userId", "phone")
@@ -619,7 +625,8 @@ const trackOrderByOrderNoAndPhone = async (orderNo, phone) => {
   const storedPhone =
     order.userId?.phone || order.shippingInfo?.mobileNo || order.phone;
 
-  const normalize = (num) => (num || "").replace(/[^0-9]/g, "").replace(/^88/, "");
+  const normalize = (num) =>
+    (num || "").replace(/[^0-9]/g, "").replace(/^88/, "");
 
   if (normalize(storedPhone) !== normalize(phone)) {
     throw new Error("Phone number does not match order");
@@ -629,10 +636,6 @@ const trackOrderByOrderNoAndPhone = async (orderNo, phone) => {
 
   return order;
 };
-
-
-
-
 
 // Export the functions as an object
 module.exports = {

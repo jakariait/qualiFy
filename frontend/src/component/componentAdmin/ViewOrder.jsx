@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 import { useRef } from "react";
 import OrderStatusUpdate from "./OrderStatusUpdate.jsx";
-import CourierStats from "./CourierStats.jsx";
 import RequirePermission from "./RequirePermission.jsx";
 
 // Import your VITE API URL
@@ -293,7 +292,6 @@ const ViewOrder = () => {
                 <TableRow>
                   <TableCell>SL</TableCell>
                   <TableCell>Item</TableCell>
-                  <TableCell>Variant</TableCell>
                   <TableCell>Quantity</TableCell>
                   <TableCell>Unit Cost</TableCell>
                   <TableCell>Total</TableCell>
@@ -302,9 +300,6 @@ const ViewOrder = () => {
               <TableBody>
                 {order.items.map((item, index) => {
                   const product = item.productId;
-
-                  // Get the first variant (if any)
-                  const variant = product.variants[0];
 
                   // Check for discount or final price
                   const price = item.price;
@@ -316,13 +311,9 @@ const ViewOrder = () => {
                       <TableCell>
                         <div>
                           <div>{product.name}</div>
-                          <div>Category: {item.productId?.category?.name}</div>
-                          <div>Code: {product.productCode}</div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {variant ? variant.sizeName : "N/A"}
-                      </TableCell>
+
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{item.price.toFixed(2)}</TableCell>
 
@@ -346,10 +337,6 @@ const ViewOrder = () => {
             <p>Sub-total: Tk.{order.subtotalAmount.toFixed(2)}</p>
             {order.promoDiscount !== 0 && (
               <p>Promo Discount: Tk.{order.promoDiscount.toFixed(2)}</p>
-            )}
-
-            {order.rewardPointsUsed !== 0 && (
-              <p>Reward Points Used: {order.rewardPointsUsed}</p>
             )}
 
             {order.vat !== 0 && <p>VAT/TAX: {order.vat.toFixed(2)}</p>}
@@ -386,9 +373,7 @@ const ViewOrder = () => {
           <OrderStatusUpdate orderId={order._id} onUpdate={fetchOrder} />
         </RequirePermission>
       </div>
-      <div className="mt-6">
-        <CourierStats phone={order.shippingInfo.mobileNo} />
-      </div>
+
     </div>
   );
 };

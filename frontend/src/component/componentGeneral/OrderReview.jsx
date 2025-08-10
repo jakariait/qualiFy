@@ -1,11 +1,16 @@
 // OrderReview.jsx
 import React from "react";
-import {FaPlus, FaTrash} from "react-icons/fa";
+import { FaPlus, FaTrash } from "react-icons/fa";
 import ImageComponent from "./ImageComponent.jsx";
 import { Link } from "react-router-dom";
-import {FiMinus} from "react-icons/fi";
+import { FiMinus } from "react-icons/fi";
 
-const OrderReview = ({ cart, removeFromCart, updateQuantity, formattedTotalAmount }) => {
+const OrderReview = ({
+  cart,
+  removeFromCart,
+  updateQuantity,
+  formattedTotalAmount,
+}) => {
   return (
     <div>
       <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-lg font-semibold">
@@ -39,58 +44,57 @@ const OrderReview = ({ cart, removeFromCart, updateQuantity, formattedTotalAmoun
                   {item.name}
                 </h3>
               </Link>
-              {item.variant !== "Default" && <p>Size: {item.variant}</p>}
             </div>
             <div className="flex flex-col items-center justify-baseline gap-4">
               <div>
                 {item.discountPrice > 0 ? (
                   <p>
                     Price: Tk.{" "}
-                    {formattedTotalAmount(
-                      item.discountPrice * item.quantity,
-                    )}
+                    {formattedTotalAmount(item.discountPrice * item.quantity)}
                   </p>
                 ) : (
                   <p>
                     Price: Tk.{" "}
-                    {formattedTotalAmount(
-                      item.originalPrice * item.quantity,
-                    )}
+                    {formattedTotalAmount(item.originalPrice * item.quantity)}
                   </p>
                 )}
               </div>
               <div className="flex items-center gap-2 justify-between">
-                <div className="flex items-center">
-                  <button
-                    className="primaryBgColor accentTextColor px-2 py-2 rounded-l cursor-pointer"
-                    onClick={() =>
-                      updateQuantity(
-                        item.productId,
-                        item.variant,
-                        item.quantity - 1,
-                      )
-                    }
-                    disabled={item.quantity <= 1}
-                  >
-                    <FiMinus />
-                  </button>
-                  <span className={"px-3 py-1 bg-gray-200"}>
-                    {item.quantity}
-                  </span>
-                  <button
-                    className="primaryBgColor accentTextColor px-2 py-2 rounded-r cursor-pointer"
-                    onClick={() =>
-                      updateQuantity(
-                        item.productId,
-                        item.variant,
-                        item.quantity + 1,
-                      )
-                    }
-                    disabled={item.quantity >= 5}
-                  >
-                    <FaPlus />
-                  </button>
-                </div>
+                {item.productType === "book" && (
+                  <div className="flex items-center">
+                    {/*Decrease Button*/}
+                    <button
+                      className="primaryBgColor accentTextColor px-2 py-2 rounded-l cursor-pointer"
+                      onClick={() =>
+                        updateQuantity(
+                          item.productId,
+                          item.variant,
+                          item.quantity - 1,
+                        )
+                      }
+                      disabled={item.quantity <= 1}
+                    >
+                      <FiMinus />
+                    </button>
+                    <span className={"px-3 py-1 bg-gray-200"}>
+                      {item.quantity}
+                    </span>
+                    {/*Increase Button*/}
+                    <button
+                      className="primaryBgColor accentTextColor px-2 py-2 rounded-r cursor-pointer"
+                      onClick={() =>
+                        updateQuantity(
+                          item.productId,
+                          item.variant,
+                          item.quantity + 1,
+                        )
+                      }
+                      disabled={item.quantity >= 5}
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

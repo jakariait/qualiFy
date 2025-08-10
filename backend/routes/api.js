@@ -22,7 +22,6 @@ const PageContentController = require("../controllers/PageContentController");
 const FaqController = require("../controllers/FaqController");
 const MarqueeController = require("../controllers/MarqueeController");
 const metaController = require("../controllers/metaController");
-const abandonedCartController = require("../controllers/abandonedCartController");
 const GoogleTagManagerController = require("../controllers/GoogleTagManagerController");
 const bkashConfigController = require("../controllers/bkashConfigController");
 const SteadfastConfigController = require("../controllers/SteadfastConfigController");
@@ -522,21 +521,6 @@ router.get(
   getSteadfastOrderStatusByInvoice,
 );
 
-// Abandoned Cart Routes
-router.post("/abandoned-cart", abandonedCartController.createAbandonedCart);
-
-router.get(
-  "/abandoned-cart",
-  adminProtect,
-  checkPermission("incomplete_orders"),
-  abandonedCartController.getAllAbandonedCarts,
-);
-router.delete(
-  "/abandoned-cart/:id",
-  adminProtect,
-  checkPermission("delete_incomplete_orders"),
-  abandonedCartController.deleteAbandonedCart,
-);
 
 // Google Tag Manager Routes
 router.get("/getGTM", GoogleTagManagerController.getGTM);

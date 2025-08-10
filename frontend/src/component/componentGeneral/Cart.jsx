@@ -22,10 +22,6 @@ const Cart = ({ onCloseCartMenu }) => {
     return Number(amount).toLocaleString();
   };
 
-
-
-  // console.table(cart);
-
   return (
     <div className="py-3">
       {cart.length === 0 ? (
@@ -88,41 +84,45 @@ const Cart = ({ onCloseCartMenu }) => {
                       )}
                     </p>
                   )}
-                  {item.variant !== "Default" && <p>Size: {item.variant}</p>}
+                  <h1>{item.productType}</h1>
+
                   <div className="flex items-center gap-2 justify-between">
-                    <div className="flex items-center">
-                      {/*Decrease Button*/}
-                      <button
-                        className="primaryBgColor accentTextColor px-2 py-2 rounded-l cursor-pointer"
-                        onClick={() =>
-                          updateQuantity(
-                            item.productId, // <-- FIXED
-                            item.variant,
-                            item.quantity - 1,
-                          )
-                        }
-                        disabled={item.quantity <= 1}
-                      >
-                        <FiMinus />
-                      </button>
-                      <span className={"px-3 py-1 bg-gray-200"}>
-                        {item.quantity}
-                      </span>
-                      {/*Increase Button*/}
-                      <button
-                        className="primaryBgColor accentTextColor px-2 py-2 rounded-r cursor-pointer"
-                        onClick={() =>
-                          updateQuantity(
-                            item.productId, // <-- FIXED
-                            item.variant,
-                            item.quantity + 1,
-                          )
-                        }
-                        disabled={item.quantity >= 5}
-                      >
-                        <FaPlus />
-                      </button>
-                    </div>
+                    {item.productType === "book" && (
+                      <div className="flex items-center">
+                        {/*Decrease Button*/}
+                        <button
+                          className="primaryBgColor accentTextColor px-2 py-2 rounded-l cursor-pointer"
+                          onClick={() =>
+                            updateQuantity(
+                              item.productId,
+                              item.variant,
+                              item.quantity - 1,
+                            )
+                          }
+                          disabled={item.quantity <= 1}
+                        >
+                          <FiMinus />
+                        </button>
+                        <span className={"px-3 py-1 bg-gray-200"}>
+                          {item.quantity}
+                        </span>
+                        {/*Increase Button*/}
+                        <button
+                          className="primaryBgColor accentTextColor px-2 py-2 rounded-r cursor-pointer"
+                          onClick={() =>
+                            updateQuantity(
+                              item.productId,
+                              item.variant,
+                              item.quantity + 1,
+                            )
+                          }
+                          disabled={item.quantity >= 5}
+                        >
+                          <FaPlus />
+                        </button>
+                      </div>
+                    )}
+
                     {/*Delete Button*/}
                     <div>
                       <button
