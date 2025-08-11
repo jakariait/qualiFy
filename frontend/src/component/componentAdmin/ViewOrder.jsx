@@ -310,12 +310,7 @@ const ViewOrder = () => {
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
                         <div>
-                          <div>{product.name}</div>
-                          <p>
-                            Type:{" "}
-                            {product.type.charAt(0).toUpperCase() +
-                              product.type.slice(1)}
-                          </p>
+                          <div>{product?.name || "N/A"}</div>
                         </div>
                       </TableCell>
 

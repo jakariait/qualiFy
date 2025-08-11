@@ -11,7 +11,9 @@ const AllBooks = ({ limit, showViewAll }) => {
   }, []);
 
   const displayedBooks = limit ? books.slice(0, limit) : books;
-
+  if (limit && displayedBooks.length === 0) {
+    return null;
+  }
   return (
     <section className="xl:container md:mx-auto p-4 md:p-6">
       <div className="text-center mb-10 px-4">

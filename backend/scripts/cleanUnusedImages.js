@@ -12,7 +12,9 @@ import GeneralInfoModel from "../models/GeneralInfoModel.js";
 import ProductModel from "../models/ProductModel.js";
 import UserModel from "../models/UserModel.js";
 import BlogModel from "../models/BlogModel.js";
-
+import StudentReviewModel from "../models/StudentReviewModel.js";
+import TeacherProfileModel from "../models/TeacherProfileModel.js";
+import FreeResourceModel from "../models/FreeResourceModel.js";
 
 // Setup __dirname for ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -37,29 +39,69 @@ const addImage = (img) => {
 
 const collectUsedImages = async () => {
   const carousels = await CarouselModel.find({}, "imgSrc");
-  carousels.forEach((item) => addImage(item.imgSrc));
-
-  const features = await FeatureImageModel.find({}, "imgSrc");
-  features.forEach((item) => addImage(item.imgSrc));
-
-  const infos = await GeneralInfoModel.find({}, "PrimaryLogo SecondaryLogo Favicon");
-  infos.forEach((item) => {
-    addImage(item.PrimaryLogo);
-    addImage(item.SecondaryLogo);
-    addImage(item.Favicon);
+  carousels.forEach((item) => {
+    if (item.imgSrc) addImage(item.imgSrc);
   });
 
-  const products = await ProductModel.find({}, "thumbnailImage images");
+  const features = await FeatureImageModel.find({}, "imgSrc");
+  features.forEach((item) => {
+    if (item.imgSrc) addImage(item.imgSrc);
+  });
+
+  const infos = await GeneralInfoModel.find(
+    {},
+    "PrimaryLogo SecondaryLogo Favicon",
+  );
+  infos.forEach((item) => {
+    if (item.PrimaryLogo) addImage(item.PrimaryLogo);
+    if (item.SecondaryLogo) addImage(item.SecondaryLogo);
+    if (item.Favicon) addImage(item.Favicon);
+  });
+
+  const products = await ProductModel.find(
+    {},
+    "thumbnailImage previewPdf modules",
+  );
   products.forEach((product) => {
-    addImage(product.thumbnailImage);
-    product.images?.forEach(addImage);
+    if (product.thumbnailImage) addImage(product.thumbnailImage);
+    if (product.previewPdf) addImage(product.previewPdf); // use addImage here for PDF
+    product.modules?.forEach((module) => {
+      module.lessons?.forEach((lesson) => {
+        if (lesson.courseThumbnail) addImage(lesson.courseThumbnail);
+      });
+    });
   });
 
   const users = await UserModel.find({}, "userImage");
-  users.forEach((user) => addImage(user.userImage));
+  users.forEach((user) => {
+    if (user.userImage) addImage(user.userImage);
+  });
 
   const blogs = await BlogModel.find({}, "thumbnailImage");
-  blogs.forEach((user) => addImage(user.userImage));
+  blogs.forEach((blog) => {
+    if (blog.thumbnailImage) addImage(blog.thumbnailImage);
+  });
+
+  const studentReviews = await StudentReviewModel.find({}, "imgSrc");
+  studentReviews.forEach((review) => {
+    if (review.imgSrc) addImage(review.imgSrc);
+  });
+
+  const teachers = await TeacherProfileModel.find({}, "teachersImg");
+  teachers.forEach((teacher) => {
+    if (teacher.teachersImg) addImage(teacher.teachersImg);
+  });
+
+  const freeResources = await FreeResourceModel.find(
+    {},
+    "resourceThumbnailImage resourcePdf",
+  );
+
+  freeResources.forEach((resource) => {
+    if (resource.resourceThumbnailImage)
+      addImage(resource.resourceThumbnailImage);
+    if (resource.resourcePdf) addImage(resource.resourcePdf); // use addImage here for PDF too
+  });
 };
 
 await collectUsedImages();
@@ -84,7 +126,9 @@ fs.readdir(uploadsDir, (err, allFiles) => {
       } else {
         deletedCount++;
         if (deletedCount === unusedFiles.length) {
-          console.log(`✅ Cleanup complete. ${deletedCount} unused image(s) deleted.`);
+          console.log(
+            `✅ Cleanup complete. ${deletedCount} unused image(s) deleted.`,
+          );
           process.exit();
         }
       }

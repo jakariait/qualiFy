@@ -12,13 +12,11 @@ import GeneralInfoStore from "./store/GeneralInfoStore.js";
 import CarouselStore from "./store/CarouselStore.js";
 import FeatureStore from "./store/FeatureStore.js";
 import useSocialMediaLinkStore from "./store/SocialMediaLinkStore.js";
-import useProductStore from "./store/useProductStore.js";
 import useAuthUserStore from "./store/AuthUserStore.js";
 import ContactRequestPage from "./pagesAdmin/ContactRequestPage.jsx";
 import AdminLogin from "./component/componentAdmin/AdminLogin.jsx";
 import ProtectedRoute from "./component/componentAdmin/ProtectedRoute.jsx";
 import NotFoundPage from "./pagesUser/NotFoundPage.jsx";
-
 import ProductDetailsPage from "./pagesUser/ProductDetailsPage.jsx";
 import LoginPage from "./pagesUser/LoginPage.jsx";
 import RegisterPage from "./pagesUser/RegisterPage.jsx";
@@ -77,6 +75,9 @@ import StudentReviewPage from "./pagesAdmin/StudentReviewPage.jsx";
 import InstructorInfoPage from "./pagesAdmin/InstructorInfoPage.jsx";
 import ManageProductServicePage from "./pagesAdmin/ManageProductServicePage.jsx";
 import AllLiveExamPage from "./pagesUser/AllLiveExamPage.jsx";
+import FreeResourceUploadPage from "./pagesAdmin/FreeResourceUploadPage.jsx";
+import AllFreeResourcesPage from "./pagesUser/AllFreeResourcesPage.jsx";
+import ResourceViewerPage from "./pagesUser/ResourceViewerPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -84,7 +85,6 @@ function App() {
   const { FeatureStoreListRequest } = FeatureStore();
   const { fetchColors, colors } = useColorStore(); // ✅ Extract colors
   const { fetchSocialMediaLinks } = useSocialMediaLinkStore();
-  const { fetchFilteredProducts } = useProductStore();
   const { initialize } = useAuthUserStore();
 
   useEffect(() => {
@@ -96,7 +96,6 @@ function App() {
           FeatureStoreListRequest(),
           fetchColors(),
           fetchSocialMediaLinks(),
-          fetchFilteredProducts(),
           initialize(),
         ]);
       } catch (error) {
@@ -141,6 +140,7 @@ function App() {
         <Route path="/courses" element={<AllCoursesPage />} />
         <Route path="/books" element={<AllBooksPage />} />
         <Route path="/live-exam" element={<AllLiveExamPage />} />
+        <Route path="/free-resources" element={<AllFreeResourcesPage />} />
         <Route path="/product/:slug" element={<ProductDetailsPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -164,6 +164,7 @@ function App() {
 
         {/* Protected User Routes */}
         <Route element={<UserProtectedRoute />}>
+          <Route path="/resource-viewer/:id" element={<ResourceViewerPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
 
           <Route path="/user/home" element={<UserHomePage />} />
@@ -188,7 +189,10 @@ function App() {
             path="/admin/product-service"
             element={<ManageProductServicePage />}
           />
-
+          <Route
+            path="/admin/free-resource"
+            element={<FreeResourceUploadPage />}
+          />
           <Route
             path="/admin/subscribed-users"
             element={<SubscribedUsersPage />}

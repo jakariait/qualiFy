@@ -12,6 +12,11 @@ const AllLiveExam = ({ limit, showViewAll }) => {
 
   const displayedExams = limit ? exams.slice(0, limit) : exams;
 
+  // If limit is active and there are no exams to show, render nothing
+  if (limit && displayedExams.length === 0) {
+    return null;
+  }
+
   return (
     <section className="xl:container md:mx-auto p-4 md:p-6">
       <div className="text-center mb-10 px-4">

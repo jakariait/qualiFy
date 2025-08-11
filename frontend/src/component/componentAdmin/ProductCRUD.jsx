@@ -712,7 +712,17 @@ const ProductCRUD = () => {
               />
             </label>
           </div>
-
+          {/* Active Toggle */}
+          <FormControl margin="normal" fullWidth>
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isActive}
+                onChange={handleIsActiveChange}
+              />
+              <span>Active</span>
+            </label>
+          </FormControl>
           {form.type === "course" && (
             <>
               {/* Instructors Selection */}
@@ -788,17 +798,7 @@ const ProductCRUD = () => {
                 margin="normal"
               />
 
-              {/* Active Toggle */}
-              <FormControl margin="normal" fullWidth>
-                <label className="inline-flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={form.isActive}
-                    onChange={handleIsActiveChange}
-                  />
-                  <span>Active</span>
-                </label>
-              </FormControl>
+
 
               {/* Video URLs */}
               {form.type === "course" && (
@@ -876,7 +876,6 @@ const ProductCRUD = () => {
                   variant="outlined"
                   color="error"
                   onClick={() => removeFaq(idx)}
-                  disabled={(form.faqs?.length || 1) === 1}
                 >
                   Remove FAQ
                 </Button>

@@ -12,6 +12,10 @@ const AllCourses = ({ limit, showViewAll }) => {
 
   const displayedCourses = limit ? courses.slice(0, limit) : courses;
 
+  if (limit && displayedCourses.length === 0) {
+    return null;
+  }
+
   return (
     <section className="xl:container md:mx-auto p-4 md:p-6">
       <div className="text-center mb-10 px-4">

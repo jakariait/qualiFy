@@ -10,10 +10,15 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AuthAdminStore from "../../store/AuthAdminStore.js";
 
 const API_BASE = import.meta.env.VITE_API_URL + "/teacher";
 
 const TeacherProfilesCRUD = () => {
+
+  const { token } = AuthAdminStore();
+
+
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -102,12 +107,20 @@ const TeacherProfilesCRUD = () => {
       let res;
       if (editingTeacher) {
         res = await axios.put(`${API_BASE}/${editingTeacher._id}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         });
+
       } else {
         res = await axios.post(API_BASE, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         });
+
       }
 
       if (res.data.success) {
@@ -128,7 +141,9 @@ const TeacherProfilesCRUD = () => {
     if (!window.confirm("Are you sure you want to delete this teacher?"))
       return;
     try {
-      await axios.delete(`${API_BASE}/${id}`);
+      await axios.delete(`${API_BASE}/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       fetchTeachers();
     } catch (err) {
       alert(

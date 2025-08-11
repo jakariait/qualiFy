@@ -20,7 +20,9 @@ import {
   FaBlog,
   FaComments,
   FaChalkboardTeacher,
+  FaArchive,
 } from "react-icons/fa";
+
 import { Link } from "react-router-dom";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
 import { useNavigate } from "react-router-dom";
@@ -122,6 +124,11 @@ export default function SidebarMenu() {
             className={"flex items-center gap-2"}
           >
             <FaTags /> <span>Manage Products & Service</span>
+          </Link>
+        </li>
+        <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+          <Link to="/admin/free-resource" className={"flex items-center gap-2"}>
+            <FaArchive /> <span>Manage Free Resources</span>
           </Link>
         </li>
       </div>

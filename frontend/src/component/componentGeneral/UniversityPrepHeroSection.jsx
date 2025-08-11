@@ -2,6 +2,8 @@ import React from "react";
 import { Award } from "lucide-react";
 import student from "../../assets/portrait-cheerful-male-international-indian-600nw-2071252046.webp";
 import StatsSection from "./StatsSection.jsx";
+import { Link } from "react-router-dom";
+
 
 const UniversityPrepHeroSection = () => {
   return (
@@ -41,22 +43,23 @@ const UniversityPrepHeroSection = () => {
             <StatsSection />
 
             {/* Enhanced CTA buttons */}
+
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                className={
-                  "primaryBgColor accentTextColor px-5 py-2 cursor-pointer rounded"
-                }
+              <Link
+                to="/register"
+                className="primaryBgColor accentTextColor px-5 py-2 cursor-pointer rounded flex justify-center items-center"
               >
                 <span>Start Your Journey</span>
-              </button>
-              <button
-                className={
-                  "primaryBorderColor border-2 primaryTextColor py-2 px-5 cursor-pointer rounded"
-                }
+              </Link>
+
+              <Link
+                to="/courses"
+                className="primaryBorderColor border-2 primaryTextColor py-2 px-5 cursor-pointer rounded flex justify-center items-center"
               >
                 Explore Courses
-              </button>
+              </Link>
             </div>
+
 
             {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4  opacity-70">

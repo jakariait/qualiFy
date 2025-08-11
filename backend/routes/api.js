@@ -29,6 +29,7 @@ const blogController = require("../controllers/BlogController");
 const PassWordResetController = require("../controllers/PassWordResetController");
 const teacherProfileController = require("../controllers/TeacherProfileController");
 const StudentReviewController = require("../controllers/StudentReviewController");
+const freeResourceController = require("../controllers/freeResourceController");
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
@@ -102,6 +103,8 @@ const upload = multer({ storage }).fields([
   },
   { name: "previewPdf", maxCount: 1 },
   { name: "courseThumbnails", maxCount: 50 },
+  { name: "resourcePdf", maxCount: 1 },
+  { name: "resourceThumbnailImage", maxCount: 1 },
 ]);
 
 // Serve images from the 'uploads' folder as static files
@@ -453,10 +456,15 @@ router.get(
   orderController.getOrdersForUser,
 );
 
-router.get("/delivered-products/:userId",userProtect, orderController.getDeliveredProductsForUser);
-router.get("/product-sales/:productId", orderController.getProductSalesHistoryController);
-
-
+router.get(
+  "/delivered-products/:userId",
+  userProtect,
+  orderController.getDeliveredProductsForUser,
+);
+router.get(
+  "/product-sales/:productId",
+  orderController.getProductSalesHistoryController,
+);
 
 // // Order Tracking
 router.post("/track-order", orderController.trackOrderByOrderNoAndPhone);
@@ -525,7 +533,6 @@ router.get(
   adminProtect,
   getSteadfastOrderStatusByInvoice,
 );
-
 
 // Google Tag Manager Routes
 router.get("/getGTM", GoogleTagManagerController.getGTM);
@@ -597,11 +604,16 @@ router.post("/request-reset", PassWordResetController.requestPasswordReset);
 router.post("/reset-password", PassWordResetController.resetPasswordWithOTP);
 
 // Teachers Profile Routes
-router.post("/teacher", upload, teacherProfileController.create);
+router.post("/teacher", upload, adminProtect, teacherProfileController.create);
 router.get("/teacher", teacherProfileController.getAll);
 router.get("/teacher/:id", teacherProfileController.getById);
-router.put("/teacher/:id", upload, teacherProfileController.update);
-router.delete("/teacher/:id", teacherProfileController.remove);
+router.put(
+  "/teacher/:id",
+  upload,
+  adminProtect,
+  teacherProfileController.update,
+);
+router.delete("/teacher/:id", adminProtect, teacherProfileController.remove);
 
 // Student Review Routes
 router.post(
@@ -615,6 +627,27 @@ router.get("/getallstudentreview", StudentReviewController.getAllStudentReview);
 router.delete(
   "/deletebyidstudentreview/:id",
   StudentReviewController.deleteByIdStudentReview,
+);
+
+// Free resources CRUD routes
+router.post(
+  "/resources",
+  upload,
+  adminProtect,
+  freeResourceController.createFreeResource,
+);
+router.get("/resources", freeResourceController.getAllFreeResources);
+router.get("/resources/:id", freeResourceController.getFreeResourceById);
+router.put(
+  "/resources/:id",
+  upload,
+  adminProtect,
+  freeResourceController.updateFreeResource,
+);
+router.delete(
+  "/resources/:id",
+  adminProtect,
+  freeResourceController.deleteFreeResource,
 );
 
 module.exports = router;
