@@ -3,12 +3,7 @@ import axios from "axios";
 import {
   Card,
   CardContent,
-  Typography,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
+
   CircularProgress,
   Alert,
   Dialog,
@@ -92,14 +87,14 @@ const ProductsWithSalesDialog = () => {
                     src={`${import.meta.env.VITE_API_URL.replace(
                       "/api",
                       ""
-                    )}/uploads/${product.thumbnailImage}`}
-                    alt={product.name}
+                    )}/uploads/${product?.thumbnailImage}`}
+                    alt={product?.name}
                     className=" w-full h-40 object-contain "
                   />
                 ) : (
                   <div className="w-24 h-24 bg-gray-300 rounded-md mb-2" />
                 )}
-                <span className="text-center primaryTextColor mt-3 ">{product.name}</span>
+                <span className="text-center primaryTextColor mt-3 ">{product?.name}</span>
               </div>
             ))}
           </div>
