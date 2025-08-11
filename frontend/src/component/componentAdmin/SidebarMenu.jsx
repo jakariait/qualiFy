@@ -85,6 +85,11 @@ export default function SidebarMenu() {
               <FaChalkboardTeacher /> <span>Instructor</span>
             </Link>
           </li>
+          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+            <Link to="/admin/platform" className={"flex items-center gap-2"}>
+              <FaEnvelope /> <span>Platform Info</span>
+            </Link>
+          </li>
           <RequirePermission permission="website_theme_color" fallback={true}>
             <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
               <Link

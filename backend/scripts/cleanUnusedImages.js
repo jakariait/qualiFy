@@ -15,6 +15,8 @@ import BlogModel from "../models/BlogModel.js";
 import StudentReviewModel from "../models/StudentReviewModel.js";
 import TeacherProfileModel from "../models/TeacherProfileModel.js";
 import FreeResourceModel from "../models/FreeResourceModel.js";
+import PlatformInfoModel from "../models/PlatformInfoModel.js";
+
 
 // Setup __dirname for ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -90,6 +92,11 @@ const collectUsedImages = async () => {
   const teachers = await TeacherProfileModel.find({}, "teachersImg");
   teachers.forEach((teacher) => {
     if (teacher.teachersImg) addImage(teacher.teachersImg);
+  });
+
+  const platform = await PlatformInfoModel.find({}, "platformThumbnail");
+  platform.forEach((teacher) => {
+    if (teacher.platformThumbnail) addImage(teacher.platformThumbnail);
   });
 
   const freeResources = await FreeResourceModel.find(

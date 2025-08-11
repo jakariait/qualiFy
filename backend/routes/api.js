@@ -30,6 +30,8 @@ const PassWordResetController = require("../controllers/PassWordResetController"
 const teacherProfileController = require("../controllers/TeacherProfileController");
 const StudentReviewController = require("../controllers/StudentReviewController");
 const freeResourceController = require("../controllers/freeResourceController");
+const platformInfoController = require("../controllers/platformInfo.controller");
+const freeClassController = require("../controllers/freeClass.controller");
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
@@ -105,6 +107,7 @@ const upload = multer({ storage }).fields([
   { name: "courseThumbnails", maxCount: 50 },
   { name: "resourcePdf", maxCount: 1 },
   { name: "resourceThumbnailImage", maxCount: 1 },
+  { name: "platformThumbnail", maxCount: 1 },
 ]);
 
 // Serve images from the 'uploads' folder as static files
@@ -648,6 +651,26 @@ router.delete(
   "/resources/:id",
   adminProtect,
   freeResourceController.deleteFreeResource,
+);
+
+// Platform api Route
+router.get("/platform", platformInfoController.getPlatformInfo);
+router.put(
+  "/platform",
+  upload,
+  adminProtect,
+  platformInfoController.updatePlatformInfo,
+);
+
+// Free Class Routes
+router.post("/freeclass", adminProtect, freeClassController.createFreeClass);
+router.get("/freeclass", freeClassController.getAllFreeClasses);
+router.get("/freeclass/:id", freeClassController.getFreeClassById);
+router.put("/freeclass/:id", adminProtect, freeClassController.updateFreeClass);
+router.delete(
+  "/freeclass/:id",
+  adminProtect,
+  freeClassController.deleteFreeClass,
 );
 
 module.exports = router;

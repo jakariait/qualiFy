@@ -42,7 +42,10 @@ const AllLiveExam = ({ limit, showViewAll }) => {
           </h2>
           {!showViewAll && (
             <p className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              Prepare for success with our comprehensive live exam system, designed to help you excel in university admission tests. Practice in real exam conditions, track your progress, and boost your confidence with expert-crafted questions and instant feedback.
+              Prepare for success with our comprehensive live exam system,
+              designed to help you excel in university admission tests. Practice
+              in real exam conditions, track your progress, and boost your
+              confidence with expert-crafted questions and instant feedback.
             </p>
           )}
         </div>

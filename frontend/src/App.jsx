@@ -78,6 +78,9 @@ import AllLiveExamPage from "./pagesUser/AllLiveExamPage.jsx";
 import FreeResourceUploadPage from "./pagesAdmin/FreeResourceUploadPage.jsx";
 import AllFreeResourcesPage from "./pagesUser/AllFreeResourcesPage.jsx";
 import ResourceViewerPage from "./pagesUser/ResourceViewerPage.jsx";
+import PlatformInfoPage from "./pagesAdmin/PlatformInfoPage.jsx";
+import FreeClassPage from "./pagesAdmin/FreeClassPage.jsx";
+import ViewAllClassPage from "./pagesUser/ViewAllClassPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -141,6 +144,8 @@ function App() {
         <Route path="/books" element={<AllBooksPage />} />
         <Route path="/live-exam" element={<AllLiveExamPage />} />
         <Route path="/free-resources" element={<AllFreeResourcesPage />} />
+        <Route path="/free-class" element={<ViewAllClassPage />} />
+
         <Route path="/product/:slug" element={<ProductDetailsPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -194,6 +199,10 @@ function App() {
             element={<FreeResourceUploadPage />}
           />
           <Route
+            path="/admin/platform"
+            element={<PlatformInfoPage/>}
+          />
+          <Route
             path="/admin/subscribed-users"
             element={<SubscribedUsersPage />}
           />
@@ -203,6 +212,8 @@ function App() {
             element={<SocialLinkUpdaterPage />}
           />
           <Route path="/admin/sliders-banners" element={<SliderBannerPage />} />
+          <Route path="/admin/free-class" element={<FreeClassPage />} />
+
           <Route
             path="/admin/contact-request"
             element={<ContactRequestPage />}

@@ -8,6 +8,7 @@ import AnimatedScrollableStudentReviews from "../component/componentGeneral/Anim
 import AllCourses from "../component/componentGeneral/AllCourses.jsx";
 import AllBooks from "../component/componentGeneral/AllBooks.jsx";
 import AllLiveExam from "../component/componentGeneral/AllLiveExam.jsx";
+import FreeClassVideos from "../component/componentGeneral/FreeClassVideos.jsx";
 
 const HomePage = () => {
   return (
@@ -18,6 +19,7 @@ const HomePage = () => {
       <AllCourses limit={3} showViewAll />
       <AllBooks limit={3} showViewAll />
       <AllLiveExam limit={3} showViewAll />
+      <FreeClassVideos limit={4} showViewAll={true} />
       <AnimatedScrollableStudentReviews />
       <AnimatedScrollableTeachers />
     </Layout>
