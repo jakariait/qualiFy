@@ -1,9 +1,90 @@
 const productService = require("../services/productService");
 
 // ✅ Create a product
+// const createProduct = async (req, res) => {
+//   try {
+//     const productData = { ...req.body };
+//
+//     // Handle thumbnailImage upload
+//     if (req.files?.thumbnailImage) {
+//       productData.thumbnailImage = req.files.thumbnailImage[0].filename;
+//     }
+//
+//     // Handle previewPdf upload
+//     if (req.files?.previewPdf) {
+//       productData.previewPdf = req.files.previewPdf[0].filename;
+//     }
+//
+//     // Handle courseThumbnail(s) inside modules
+//     if (req.files?.courseThumbnails && productData.modules) {
+//       const courseThumbnails = req.files.courseThumbnails.map((f) => f.filename);
+//
+//       let parsedModules = typeof productData.modules === "string"
+//         ? JSON.parse(productData.modules)
+//         : productData.modules;
+//
+//       parsedModules = parsedModules.map((module, moduleIdx) => ({
+//         ...module,
+//         lessons: module.lessons.map((lesson, lessonIdx) => ({
+//           ...lesson,
+//           courseThumbnail: courseThumbnails.shift() || lesson.courseThumbnail || "",
+//         })),
+//       }));
+//
+//       productData.modules = parsedModules;
+//     }
+//
+//     // Handle optional nested JSON fields
+//     if (typeof productData.instructors === "string") {
+//       productData.instructors = JSON.parse(productData.instructors);
+//     }
+//
+//     if (typeof productData.faqs === "string") {
+//       productData.faqs = JSON.parse(productData.faqs);
+//     }
+//
+//     // Create the product
+//     const product = await productService.createProduct(productData);
+//
+//     res.status(201).json({
+//       success: true,
+//       message: "Product created successfully!",
+//       data: product,
+//     });
+//   } catch (error) {
+//     console.error("Error creating product:", error);
+//     res.status(400).json({
+//       success: false,
+//       message: "Failed to create product. Please try again!",
+//       error: error.message,
+//     });
+//   }
+// };
+
+
+// Helper to safely parse JSON strings
+function safeJSONParse(str) {
+  if (typeof str !== "string") return str;
+  str = str.trim();
+  if (!str || str === "undefined" || str === "null") return null;
+  try {
+    return JSON.parse(str);
+  } catch {
+    return null;
+  }
+}
+
 const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+
+    // Normalize boolean fields
+    if (typeof productData.isActive === "string") {
+      const val = productData.isActive.toLowerCase();
+      if (val === "true") productData.isActive = true;
+      else if (val === "false") productData.isActive = false;
+      else delete productData.isActive;
+    }
 
     // Handle thumbnailImage upload
     if (req.files?.thumbnailImage) {
@@ -15,35 +96,34 @@ const createProduct = async (req, res) => {
       productData.previewPdf = req.files.previewPdf[0].filename;
     }
 
-    // Handle courseThumbnail(s) inside modules
+    // Handle courseThumbnails inside modules
     if (req.files?.courseThumbnails && productData.modules) {
       const courseThumbnails = req.files.courseThumbnails.map((f) => f.filename);
 
-      let parsedModules = typeof productData.modules === "string"
-        ? JSON.parse(productData.modules)
-        : productData.modules;
+      let parsedModules = safeJSONParse(productData.modules);
+      if (!parsedModules) parsedModules = [];
 
-      parsedModules = parsedModules.map((module, moduleIdx) => ({
+      parsedModules = parsedModules.map((module) => ({
         ...module,
-        lessons: module.lessons.map((lesson, lessonIdx) => ({
+        lessons: module.lessons.map((lesson) => ({
           ...lesson,
           courseThumbnail: courseThumbnails.shift() || lesson.courseThumbnail || "",
         })),
       }));
 
       productData.modules = parsedModules;
+    } else if (productData.modules) {
+      // If modules is string but no thumbnails uploaded, still parse it
+      productData.modules = safeJSONParse(productData.modules) || [];
     }
 
-    // Handle optional nested JSON fields
-    if (typeof productData.instructors === "string") {
-      productData.instructors = JSON.parse(productData.instructors);
-    }
+    // Parse instructors if string
+    productData.instructors = safeJSONParse(productData.instructors);
 
-    if (typeof productData.faqs === "string") {
-      productData.faqs = JSON.parse(productData.faqs);
-    }
+    // Parse faqs if string
+    productData.faqs = safeJSONParse(productData.faqs);
 
-    // Create the product
+    // Call service to create the product
     const product = await productService.createProduct(productData);
 
     res.status(201).json({
@@ -60,6 +140,7 @@ const createProduct = async (req, res) => {
     });
   }
 };
+
 
 
 // ✅ Update a product by ID

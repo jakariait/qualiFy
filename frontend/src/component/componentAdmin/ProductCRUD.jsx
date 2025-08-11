@@ -80,8 +80,12 @@ const ProductCRUD = () => {
   };
 
   const addVideoUrl = () => {
-    setForm((f) => ({ ...f, videoUrl: [...f.videoUrl, ""] }));
+    setForm((f) => ({
+      ...f,
+      videoUrl: Array.isArray(f.videoUrl) ? [...f.videoUrl, ""] : [""],
+    }));
   };
+
 
   const removeVideoUrl = (index) => {
     setForm((f) => {
@@ -92,11 +96,12 @@ const ProductCRUD = () => {
 
   const handleFaqChange = (index, field, value) => {
     setForm((f) => {
-      const newFaqs = [...f.faqs];
+      const newFaqs = Array.isArray(f.faqs) ? [...f.faqs] : [];  // safe fallback
       newFaqs[index] = { ...newFaqs[index], [field]: value };
       return { ...f, faqs: newFaqs };
     });
   };
+
 
   const addFaq = () => {
     setForm((f) => ({
@@ -411,8 +416,13 @@ const ProductCRUD = () => {
         });
       } else {
         res = await axios.post(API_BASE, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         });
+
+
       }
 
       if (res.data.success) {

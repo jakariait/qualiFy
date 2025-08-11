@@ -69,21 +69,21 @@ const UserStats = () => {
       label: "Total order placed",
       icon: <FaShoppingBag className="text-3xl text-blue-500" />,
     },
-    {
-      value: runningOrders,
-      label: "Running orders",
-      icon: <FaBox className="text-3xl text-yellow-500" />,
-    },
+    // {
+    //   value: runningOrders,
+    //   label: "Running orders",
+    //   icon: <FaBox className="text-3xl text-yellow-500" />,
+    // },
     {
       value: cart?.reduce((total, item) => total + item.quantity, 0) || 0,
       label: "Items in cart",
       icon: <FaShoppingCart className="text-3xl text-green-500" />,
     },
-    {
-      value: deliveredAmount,
-      label: "Amount spent on delivered orders",
-      icon: <FaMoneyBillWave className="text-3xl text-blue-600" />,
-    },
+    // {
+    //   value: deliveredAmount,
+    //   label: "Amount spent on delivered orders",
+    //   icon: <FaMoneyBillWave className="text-3xl text-blue-600" />,
+    // },
   ];
 
   return (

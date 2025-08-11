@@ -7,6 +7,7 @@ import AnimatedScrollableTeachers from "../component/componentGeneral/AnimatedSc
 import AnimatedScrollableStudentReviews from "../component/componentGeneral/AnimatedScrollableStudentReviews.jsx";
 import AllCourses from "../component/componentGeneral/AllCourses.jsx";
 import AllBooks from "../component/componentGeneral/AllBooks.jsx";
+import AllLiveExam from "../component/componentGeneral/AllLiveExam.jsx";
 
 const HomePage = () => {
   return (
@@ -16,6 +17,7 @@ const HomePage = () => {
       <Feature />
       <AllCourses limit={3} showViewAll />
       <AllBooks limit={3} showViewAll />
+      <AllLiveExam limit={3} showViewAll />
       <AnimatedScrollableStudentReviews />
       <AnimatedScrollableTeachers />
     </Layout>

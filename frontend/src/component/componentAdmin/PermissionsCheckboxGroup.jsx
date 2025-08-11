@@ -13,15 +13,11 @@ const PermissionsCheckboxGroup = ({
     { value: "home_page_seo", label: "Home Page SEO" },
 
     { value: "setup_config", label: "Configuration Setup" },
-    { value: "product_size", label: "Add Product Size" },
     { value: "product_flag", label: "Product Flag" },
     { value: "scroll_text", label: "Scroll Text" },
     { value: "delivery_charges", label: "Delivery Charges" },
     { value: "manage_coupons", label: "Manage Coupons" },
 
-    { value: "category", label: "Category" },
-    { value: "sub_category", label: "Sub Category" },
-    { value: "child_category", label: "Child Category" },
 
     { value: "add_products", label: "Add Products" },
     { value: "delete_products", label: "Delete Products" },
@@ -33,11 +29,7 @@ const PermissionsCheckboxGroup = ({
     { value: "delete_orders", label: "Delete Orders" },
 
 
-    { value: "incomplete_orders", label: "Incomplete Orders" },
-    { value: "delete_incomplete_orders", label: "Delete Incomplete Orders" },
-
     { value: "bkash_api", label: "bKash API" },
-    { value: "steadfast_api", label: "Steadfast API" },
 
     { value: "view_customers", label: "View Customers" },
     { value: "delete_customers", label: "Delete Customers" },

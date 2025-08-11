@@ -1,13 +1,13 @@
 const FeatureImageModel = require("../models/FeatureImageModel");
 
 // Create a new feature image
-const createFeatureImage = async (title, imgSrc) => {
-  return await FeatureImageModel.create({ title, imgSrc });
+const createFeatureImage = async (title, imgSrc, link = "") => {
+  return await FeatureImageModel.create({ title, imgSrc, link });
 };
 
 // Get all feature images
 const getAllFeatureImages = async () => {
-  return await FeatureImageModel.find().select('-createdAt -updatedAt');
+  return await FeatureImageModel.find().select("-createdAt -updatedAt");
 };
 
 // Get a single feature image by ID
@@ -20,41 +20,37 @@ const getFeatureImageById = async (id) => {
 };
 
 // Update a feature image
-const updateFeatureImage = async (id, title, imgSrc) => {
+const updateFeatureImage = async (id, title, imgSrc, link) => {
   // Prepare the update data
   const updateData = {};
 
-  // Update the title if provided
   if (title) {
     updateData.title = title;
   }
-
-  // Update the image source if provided
   if (imgSrc) {
     updateData.imgSrc = imgSrc; // Store only the filename
   }
+  if (link !== undefined) {
+    updateData.link = link;
+  }
 
-  // If no update data is provided, throw an error
   if (Object.keys(updateData).length === 0) {
     throw new Error("No data provided for update");
   }
 
-  // Perform the update
   const updatedFeatureImage = await FeatureImageModel.findByIdAndUpdate(
     id,
     updateData,
     {
-      new: true, // Return the updated document
-      runValidators: true, // Run schema validators on update
-    },
+      new: true,
+      runValidators: true,
+    }
   );
 
-  // If no feature image is found, throw an error
   if (!updatedFeatureImage) {
     throw new Error("Feature image not found");
   }
 
-  // Return the updated feature image
   return updatedFeatureImage;
 };
 

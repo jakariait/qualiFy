@@ -4,5 +4,5 @@ export const menuItems = [
   { label: "Books", path: "/books" },
   { label: "Free Resources", path: "/" },
   { label: "About Us", path: "/about" },
-  { label: "Live Exam", path: "/" },
+  { label: "Live Exam", path: "/live-exam" },
 ];

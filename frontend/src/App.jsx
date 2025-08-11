@@ -76,6 +76,7 @@ import AllBooksPage from "./pagesUser/AllBooksPage.jsx";
 import StudentReviewPage from "./pagesAdmin/StudentReviewPage.jsx";
 import InstructorInfoPage from "./pagesAdmin/InstructorInfoPage.jsx";
 import ManageProductServicePage from "./pagesAdmin/ManageProductServicePage.jsx";
+import AllLiveExamPage from "./pagesUser/AllLiveExamPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -139,6 +140,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/courses" element={<AllCoursesPage />} />
         <Route path="/books" element={<AllBooksPage />} />
+        <Route path="/live-exam" element={<AllLiveExamPage />} />
         <Route path="/product/:slug" element={<ProductDetailsPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -162,7 +164,6 @@ function App() {
 
         {/* Protected User Routes */}
         <Route element={<UserProtectedRoute />}>
-
           <Route path="/checkout" element={<CheckoutPage />} />
 
           <Route path="/user/home" element={<UserHomePage />} />
@@ -248,7 +249,6 @@ function App() {
           <Route path="/admin/scroll-text" element={<MarqueeAdminPage />} />
           <Route path="/admin/homepage-seo" element={<AdminMetaPage />} />
           <Route path="/admin/bkash-config" element={<BKashConfigPage />} />
-
 
           <Route path="/admin/dashboard" element={<DashboardPage />} />
           <Route path="/admin/adminlist" element={<AdminListPage />} />

@@ -15,6 +15,29 @@ const useProductStore = create((set) => ({
   loadingCourses: false,
   errorCourses: null,
 
+
+  exams: [],
+  loadingExams: false,
+  errorExams: null,
+
+  // Fetch exams
+  fetchExams: async () => {
+    set({ loadingExams: true, errorExams: null });
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append("type", "exam");
+      queryParams.append("isActive", "true");
+
+      const response = await axios.get(`${apiUrl}/products?${queryParams}`);
+      set({ exams: response.data?.data || [], loadingExams: false });
+    } catch (error) {
+      set({
+        errorExams: error.response?.data?.message || "Failed to fetch exams",
+        loadingExams: false,
+      });
+    }
+  },
+
   // Fetch books
   fetchBooks: async () => {
     set({ loadingBooks: true, errorBooks: null });
