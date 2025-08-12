@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import DOMPurify from "dompurify";
 
 const FAQSection = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -74,9 +75,12 @@ const FAQSection = () => {
 
               {/* Answer */}
               {openIndex === index && (
-                <div className="bg-white px-4 py-3 rounded-b-xl  border-t border-gray-200">
-                  {faq.answer}
-                </div>
+                <div
+                  className="bg-white px-4 py-3 rounded-b-xl border-t border-gray-200"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(faq.answer),
+                  }}
+                ></div>
               )}
             </div>
           ))}

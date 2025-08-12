@@ -17,7 +17,9 @@ const ThankYou = () => {
         if (res.data.success) {
           const order = res.data.order;
           setOrder(order);
-          console.log(order);
+
+          // console.log(order);
+
           window.dataLayer = window.dataLayer || [];
 
           // 🕒 Delay the push to allow GTM to be ready
@@ -32,6 +34,7 @@ const ThankYou = () => {
                 shipping: order.deliveryCharge,
                 em: order.shippingInfo.email,
                 fn: order.shippingInfo.fullName,
+                ph: order.shippingInfo.mobileNo,
                 country: "bangladesh",
                 external_id: order.userId._id,
                 coupon: order.promoCode || "",
@@ -54,7 +57,6 @@ const ThankYou = () => {
 
     fetchOrder();
   }, [orderId, apiUrl]);
-
 
   return (
     <div className="flex items-center justify-center p-14">

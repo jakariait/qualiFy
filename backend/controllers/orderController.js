@@ -2,7 +2,6 @@ const User = require("../models/UserModel"); // Import the User model
 const orderService = require("../services/orderService");
 const { sendOrderEmail } = require("../utility/sendOrderEmail");
 
-
 const createOrder = async (req, res) => {
   try {
     const { userId, ...orderData } = req.body;
@@ -38,7 +37,6 @@ const createOrder = async (req, res) => {
   }
 };
 
-
 const getAllOrders = async (req, res) => {
   try {
     const { orderStatus, page, limit, search } = req.query;
@@ -66,7 +64,6 @@ const getAllOrders = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 // Get order by ID
 const getOrderById = async (req, res) => {
@@ -172,17 +169,23 @@ const getOrdersForUser = async (req, res) => {
   }
 };
 
-
-
 const trackOrderByOrderNoAndPhone = async (req, res) => {
   try {
     const { orderNo, phone } = req.body;
 
     if (!orderNo || !phone) {
-      return res.status(400).json({ success: false, message: "Order number and phone are required" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Order number and phone are required",
+        });
     }
 
-    const order = await orderService.trackOrderByOrderNoAndPhone(orderNo, phone);
+    const order = await orderService.trackOrderByOrderNoAndPhone(
+      orderNo,
+      phone,
+    );
 
     return res.status(200).json({ success: true, order });
   } catch (error) {
@@ -204,7 +207,9 @@ const getDeliveredProductsForUser = async (req, res) => {
     const { userId } = req.params;
 
     if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
     }
 
     const products = await orderService.getDeliveredProductsByUserId(userId);
@@ -226,7 +231,6 @@ const getProductSalesHistoryController = async (req, res) => {
   }
 };
 
-
 // Exporting the controller functions
 module.exports = {
   createOrder,
@@ -238,5 +242,5 @@ module.exports = {
   getOrdersForUser,
   trackOrderByOrderNoAndPhone,
   getDeliveredProductsForUser,
-  getProductSalesHistoryController
+  getProductSalesHistoryController,
 };

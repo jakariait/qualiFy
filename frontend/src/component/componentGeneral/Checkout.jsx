@@ -129,8 +129,11 @@ const Checkout = () => {
     fetchVatAmount();
   }, []);
 
-  // Data Layer for Initiat Checkout
-  console.log(cart);
+  // console.log(cart);
+
+
+  // Data Layer for Initiate Checkout
+
   useEffect(() => {
     if (cart.length > 0) {
       window.dataLayer.push({
@@ -294,7 +297,7 @@ const Checkout = () => {
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
           onClose={handleCloseSnackbar}

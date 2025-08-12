@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
+import {Editor} from "primereact/editor";
 
 const defaultForm = {
   question: "",
@@ -168,9 +169,12 @@ const AdminFAQSection = () => {
                   <Typography variant="subtitle1" className="font-semibold">
                     {faq.question}
                   </Typography>
-                  <Typography variant="body2" className="mt-1 text-gray-700">
-                    {faq.answer}
-                  </Typography>
+                  <Typography
+                    variant="body2"
+                    className="mt-1 text-gray-700"
+                    dangerouslySetInnerHTML={{ __html: faq.answer }}
+                  />
+
                   <Typography variant="caption" color="textSecondary">
                     Status: {faq.status}
                   </Typography>
@@ -208,15 +212,25 @@ const AdminFAQSection = () => {
             fullWidth
             margin="dense"
           />
-          <TextField
-            name="answer"
-            label="Answer"
+          {/*<TextField*/}
+          {/*  name="answer"*/}
+          {/*  label="Answer"*/}
+          {/*  value={formData.answer}*/}
+          {/*  onChange={handleChange}*/}
+          {/*  fullWidth*/}
+          {/*  multiline*/}
+          {/*  rows={4}*/}
+          {/*  margin="dense"*/}
+          {/*/>*/}
+
+          {/* Rich text editor for Answer */}
+          <Editor
             value={formData.answer}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={4}
-            margin="dense"
+            onTextChange={(e) =>
+              setFormData((prev) => ({ ...prev, answer: e.htmlValue }))
+            }
+            style={{ height: "260px", marginBottom: "1rem" }}
+            theme="snow"
           />
           <TextField
             name="status"
