@@ -130,7 +130,7 @@ const Checkout = () => {
   }, []);
 
   // Data Layer for Initiat Checkout
-
+  console.log(cart);
   useEffect(() => {
     if (cart.length > 0) {
       window.dataLayer.push({
@@ -140,7 +140,7 @@ const Checkout = () => {
           value: totalAmount,
           items: cart.map((item) => ({
             item_name: item.name,
-            item_id: item.productId,
+            item_id: item.contentId,
             price:
               item.discountPrice > 0 ? item.discountPrice : item.originalPrice,
             quantity: item.quantity,
@@ -180,7 +180,7 @@ const Checkout = () => {
       orderPayload.userId = user._id;
     }
 
-    console.log("Order Payload being sent:", orderPayload);
+    // console.log("Order Payload being sent:", orderPayload);
 
     // ---- Handle bKash Checkout ----
     if (paymentMethod === "bkash") {
@@ -210,7 +210,7 @@ const Checkout = () => {
 
     // ---- Normal COD Flow ----
     try {
-      console.log("Sending order payload:", orderPayload);
+      // console.log("Sending order payload:", orderPayload);
 
       const res = await axios.post(`${apiUrl}/orders`, orderPayload);
 

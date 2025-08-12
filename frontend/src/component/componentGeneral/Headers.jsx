@@ -20,15 +20,17 @@ const Headers = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        await Promise.all([initialize()]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      if (!user) {
+        // ✅ Only fetch if no user
+        try {
+          await initialize();
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
       }
     };
-
     fetchData();
-  }, []); // ✅ Empty dependency array to prevent unnecessary re-renders
+  }, [user, initialize]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -202,7 +204,7 @@ const Headers = () => {
                 >
                   <UserAvatar
                     user={user}
-                    avatarClass="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gray-50 primaryTextColor font-semibold"
+                    avatarClass="w-10 h-10 rounded-full flex items-center justify-center text-xl  primaryTextColor font-semibold"
                   />
                 </button>
 

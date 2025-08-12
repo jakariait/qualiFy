@@ -116,4 +116,4 @@ const transporter = nodemailer.createTransport({
 };
 
 
-module.exports = sendOrderEmail;
+module.exports = { sendOrderEmail };

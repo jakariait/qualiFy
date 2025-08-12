@@ -1,6 +1,6 @@
 const User = require("../models/UserModel"); // Import the User model
 const orderService = require("../services/orderService");
-const { sendOrderEmail } = require("../utility/sendOrderEmail"); // Adjust path as needed
+const { sendOrderEmail } = require("../utility/sendOrderEmail");
 
 
 const createOrder = async (req, res) => {
@@ -22,7 +22,7 @@ const createOrder = async (req, res) => {
     const order = await orderService.createOrder(orderData, userId || null);
 
     // Send order confirmation email (async, but we await to handle errors)
-    await sendOrderEmail(order);
+    // await sendOrderEmail(order);
 
     res.status(201).json({
       success: true,

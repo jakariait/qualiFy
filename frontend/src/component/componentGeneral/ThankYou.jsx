@@ -17,7 +17,7 @@ const ThankYou = () => {
         if (res.data.success) {
           const order = res.data.order;
           setOrder(order);
-
+          console.log(order);
           window.dataLayer = window.dataLayer || [];
 
           // 🕒 Delay the push to allow GTM to be ready
@@ -30,6 +30,10 @@ const ThankYou = () => {
                 value: order.totalAmount,
                 tax: order.vat,
                 shipping: order.deliveryCharge,
+                em: order.shippingInfo.email,
+                fn: order.shippingInfo.fullName,
+                country: "bangladesh",
+                external_id: order.userId._id,
                 coupon: order.promoCode || "",
                 items: order.items.map((item) => ({
                   item_name: item.productId?.name || "Unknown Product",
