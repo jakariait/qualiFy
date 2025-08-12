@@ -20,9 +20,9 @@ const AllCourses = ({ limit, showViewAll }) => {
     <section className="xl:container md:mx-auto p-4 md:p-6">
       <div className="text-center mb-10 px-4">
         <div className="relative">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-6 leading-tight">
+          <h2 className="heading text-3xl md:text-4xl font-extrabold mb-6 leading-tight">
             Explore Our{" "}
-            <span className="relative inline-block primaryTextColor">
+            <span className="heading relative inline-block primaryTextColor">
               Courses
               <svg
                 className="absolute -bottom-2 left-0 w-full h-3"

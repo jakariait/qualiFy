@@ -19,7 +19,7 @@ const Feature = () => {
     <div className="xl:container xl:mx-auto pb-6 pt-4 px-3">
       {/* ✅ Headline */}
       <div className="text-center mb-6">
-        <h2 className="text-xl md:text-2xl font-bold primaryTextColor">
+        <h2 className="text-xl heading md:text-2xl font-bold primaryTextColor">
           Join Our Facebook Group
         </h2>
         <p className=" mt-1">

@@ -1,11 +1,25 @@
 @import "tailwindcss";
 
 * {
-  font-family: "Jost", sans-serif;
+  font-family: "Source Sans 3", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
 }
+
+
+.font-raleway {
+  font-family: "Raleway", sans-serif;
+  font-weight: 700; /* or bold */
+}
+
+.heading {
+  font-family: "Raleway", sans-serif;
+  font-weight: 700;
+}
+
+
+
 :root {
   --primaryColor: #ff4500;
   --secondaryColor: #000000;

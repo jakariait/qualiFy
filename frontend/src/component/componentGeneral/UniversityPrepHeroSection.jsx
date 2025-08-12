@@ -70,8 +70,8 @@ const UniversityPrepHeroSection = () => {
             </div>
 
             {/* Heading */}
-            <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-              <span className="primaryTextColor">{platformInfo.subTitle}</span>
+            <h1 className="text-3xl md:text-5xl  font-bold leading-tight">
+              <span className="primaryTextColor heading">{platformInfo.subTitle}</span>
             </h1>
 
             {/* Description */}
