@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendOrderEmail = async (order) => {
+ const sendOrderEmail = async (order) => {
   // Extract product ObjectIds from order items
   const productObjectIds = order.items.map(
     (item) => item.productId.$oid || item.productId,
@@ -114,3 +114,6 @@ export const sendOrderEmail = async (order) => {
     throw error;
   }
 };
+
+
+module.exports = sendOrderEmail;
