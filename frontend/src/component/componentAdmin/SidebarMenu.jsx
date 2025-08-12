@@ -136,6 +136,11 @@ export default function SidebarMenu() {
             <FaArchive /> <span>Manage Free Resources</span>
           </Link>
         </li>
+        <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+          <Link to="/admin/free-class" className={"flex items-center gap-2"}>
+            <FaArchive /> <span>Manage Free Class</span>
+          </Link>
+        </li>
       </div>
 
       {/* E-Commerce Modules */}
