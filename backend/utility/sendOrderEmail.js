@@ -1,5 +1,6 @@
-import nodemailer from "nodemailer";
-import ProductModel from "../models/ProductModel.js";
+const nodemailer = require("nodemailer");
+const ProductModel = require("../models/ProductModel");
+
 
 const transporter = nodemailer.createTransport({
   host: "mail.qualifybd.com",
