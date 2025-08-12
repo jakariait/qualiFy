@@ -1,5 +1,7 @@
 const User = require("../models/UserModel"); // Import the User model
 const orderService = require("../services/orderService");
+const { sendOrderEmail } = require("../utility/sendOrderEmail"); // Adjust path as needed
+
 
 const createOrder = async (req, res) => {
   try {
@@ -18,6 +20,9 @@ const createOrder = async (req, res) => {
 
     // Proceed with creating the order (pass userId only if available)
     const order = await orderService.createOrder(orderData, userId || null);
+
+    // Send order confirmation email (async, but we await to handle errors)
+    await sendOrderEmail(order);
 
     res.status(201).json({
       success: true,
