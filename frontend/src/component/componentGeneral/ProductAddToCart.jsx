@@ -96,7 +96,7 @@ const ProductAddToCart = ({ product }) => {
         />
 
         {/* Product Name */}
-        <h2 className="text-2xl primaryTextColor">{product.name}</h2>
+        <h2 className="text-2xl heading primaryTextColor">{product.name}</h2>
 
         {/* Price Display */}
         <div className="flex  gap-2 items-center">

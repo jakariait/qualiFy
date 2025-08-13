@@ -17,16 +17,23 @@ const UserAvatar = ({ user, avatarClass }) => {
     return (
       <img
         src={imageSrc}
-        alt={user.fullName || "User Avatar"}
+        alt={user?.fullName || "User Avatar"}
         className={avatarClass}
-        onError={() => setImageSrc("")} // fallback to initials if broken image
+        onError={() => setImageSrc("")} // fallback if image fails
       />
     );
   }
 
+  // fallback initials
   const initial = user?.fullName?.trim().charAt(0).toUpperCase() || "U";
 
-  return <span className={avatarClass}>{initial}</span>;
+  return (
+    <div
+      className={`${avatarClass} bg-white flex items-center justify-center font-semibold`}
+    >
+      {initial}
+    </div>
+  );
 };
 
 export default UserAvatar;

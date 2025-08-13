@@ -345,59 +345,42 @@ const updateOrder = async (orderId, updateData) => {
   }
 };
 
-// Delete and order
+// Delete an order and restore stock (no variants)
 const deleteOrder = async (orderId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // Find the order by ID
-    const order = await Order.findById(orderId)
-      .populate("items.productId")
-      .populate("items.variantId");
+    // Find the order and populate product data
+    const order = await Order.findById(orderId).populate("items.productId");
 
     if (!order) throw new Error("Order not found");
 
     // Restore stock for each item in the order
     for (const item of order.items) {
-      const { productId, variantId, quantity } = item;
-
-      const product = await Product.findById(productId);
-      if (!product) throw new Error(`Product not found for item ${productId}`);
-
-      if (product.variants.length === 0) {
-        // If the product doesn't have variants, restore the stock to the product
-        await Product.updateOne(
-          { _id: productId },
-          { $inc: { finalStock: quantity } },
-          { session },
-        );
-      } else {
-        // If the product has variants, find the specific variant and restore the stock
-        const variant = product.variants.find(
-          (v) => v._id.toString() === variantId.toString(),
-        );
-        if (!variant)
-          throw new Error(`Variant not found for product ${productId}`);
-
-        await Product.updateOne(
-          { _id: productId, "variants._id": variantId },
-          { $inc: { "variants.$.stock": quantity } },
-          { session },
-        );
+      if (!item.productId) {
+        console.warn(`Skipping item with missing product in order ${orderId}`);
+        continue; // or throw if you want strict handling
       }
+
+      const productId = item.productId._id; // populated product's ID
+      const quantity = item.quantity;
+
+      await Product.updateOne(
+        { _id: productId },
+        { $inc: { finalStock: quantity } },
+        { session },
+      );
     }
 
     // Delete the order after updating stock
     await Order.findByIdAndDelete(orderId, { session });
 
-    // Commit the transaction
     await session.commitTransaction();
     session.endSession();
 
     return { message: "Order deleted successfully, stock updated" };
   } catch (error) {
-    // Abort the transaction if there's an error
     await session.abortTransaction();
     session.endSession();
     throw new Error(
@@ -534,13 +517,10 @@ const getDeliveredProductsByUserId = async (userId) => {
   }
 };
 
-
-
-
 const getProductSalesHistory = async (productId) => {
   try {
     const orders = await Order.find({
-      "items.productId": productId
+      "items.productId": productId,
     }).lean();
 
     if (!orders.length) {
@@ -549,7 +529,7 @@ const getProductSalesHistory = async (productId) => {
         totalUnitsSold: 0,
         totalRevenue: 0,
         statusBreakdown: {},
-        salesHistory: []
+        salesHistory: [],
       };
     }
 
@@ -560,7 +540,7 @@ const getProductSalesHistory = async (productId) => {
 
     for (const order of orders) {
       const orderItems = order.items.filter(
-        (item) => item.productId.toString() === productId.toString()
+        (item) => item.productId.toString() === productId.toString(),
       );
 
       let orderUnits = 0;
@@ -577,7 +557,7 @@ const getProductSalesHistory = async (productId) => {
       if (!statusBreakdown[order.orderStatus]) {
         statusBreakdown[order.orderStatus] = {
           units: 0,
-          revenue: 0
+          revenue: 0,
         };
       }
       statusBreakdown[order.orderStatus].units += orderUnits;
@@ -590,9 +570,9 @@ const getProductSalesHistory = async (productId) => {
         items: orderItems.map((i) => ({
           quantity: i.quantity,
           price: i.price,
-          total: i.price * i.quantity
+          total: i.price * i.quantity,
         })),
-        orderTotal: order.totalAmount
+        orderTotal: order.totalAmount,
       });
     }
 
@@ -601,13 +581,12 @@ const getProductSalesHistory = async (productId) => {
       totalUnitsSold,
       totalRevenue,
       statusBreakdown,
-      salesHistory
+      salesHistory,
     };
   } catch (error) {
     throw new Error("Error fetching product sales history: " + error.message);
   }
 };
-
 
 // Export the functions as an object
 module.exports = {
@@ -620,5 +599,5 @@ module.exports = {
   getOrdersByUserId,
   trackOrderByOrderNoAndPhone,
   getDeliveredProductsByUserId,
-  getProductSalesHistory
+  getProductSalesHistory,
 };

@@ -145,7 +145,6 @@ function App() {
         <Route path="/live-exam" element={<AllLiveExamPage />} />
         <Route path="/free-resources" element={<AllFreeResourcesPage />} />
         <Route path="/free-class" element={<ViewAllClassPage />} />
-
         <Route path="/product/:slug" element={<ProductDetailsPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -198,10 +197,7 @@ function App() {
             path="/admin/free-resource"
             element={<FreeResourceUploadPage />}
           />
-          <Route
-            path="/admin/platform"
-            element={<PlatformInfoPage/>}
-          />
+          <Route path="/admin/platform" element={<PlatformInfoPage />} />
           <Route
             path="/admin/subscribed-users"
             element={<SubscribedUsersPage />}

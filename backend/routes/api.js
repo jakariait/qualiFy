@@ -35,8 +35,8 @@ const freeClassController = require("../controllers/freeClass.controller");
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
-  createSteadfastOrder,
-  getSteadfastOrderStatusByInvoice,
+	createSteadfastOrder,
+	getSteadfastOrderStatusByInvoice,
 } = require("../controllers/steadfastController");
 
 // Admin
@@ -48,7 +48,7 @@ const { authenticateToken } = require("../middlewares/authenticateToken");
 // User
 const { userProtect } = require("../middlewares/authUserMiddleware");
 const {
-  authenticateUserToken,
+	authenticateUserToken,
 } = require("../middlewares/authinticateUserToken");
 
 require("dotenv").config();
@@ -57,57 +57,57 @@ const router = express.Router();
 
 // Set Up Multer Storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"), // Ensure files are saved in the 'uploads' folder
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname)), // Naming files uniquely
+	destination: (req, file, cb) => cb(null, "uploads/"), // Ensure files are saved in the 'uploads' folder
+	filename: (req, file, cb) =>
+		cb(null, Date.now() + path.extname(file.originalname)), // Naming files uniquely
 });
 
 const upload = multer({ storage }).fields([
-  {
-    name: "PrimaryLogo",
-    maxCount: 1,
-  },
-  {
-    name: "SecondaryLogo",
-    maxCount: 1,
-  },
-  {
-    name: "Favicon",
-    maxCount: 1,
-  },
-  {
-    name: "imgSrc",
-    maxCount: 1,
-  },
-  {
-    name: "categoryIcon",
-    maxCount: 1,
-  },
-  {
-    name: "categoryBanner",
-    maxCount: 1,
-  },
-  {
-    name: "thumbnailImage",
-    maxCount: 1,
-  },
-  {
-    name: "images",
-    maxCount: 10,
-  },
-  {
-    name: "userImage",
-    maxCount: 1,
-  },
-  {
-    name: "teachersImg",
-    maxCount: 1,
-  },
-  { name: "previewPdf", maxCount: 1 },
-  { name: "courseThumbnails", maxCount: 50 },
-  { name: "resourcePdf", maxCount: 1 },
-  { name: "resourceThumbnailImage", maxCount: 1 },
-  { name: "platformThumbnail", maxCount: 1 },
+	{
+		name: "PrimaryLogo",
+		maxCount: 1,
+	},
+	{
+		name: "SecondaryLogo",
+		maxCount: 1,
+	},
+	{
+		name: "Favicon",
+		maxCount: 1,
+	},
+	{
+		name: "imgSrc",
+		maxCount: 1,
+	},
+	{
+		name: "categoryIcon",
+		maxCount: 1,
+	},
+	{
+		name: "categoryBanner",
+		maxCount: 1,
+	},
+	{
+		name: "thumbnailImage",
+		maxCount: 1,
+	},
+	{
+		name: "images",
+		maxCount: 10,
+	},
+	{
+		name: "userImage",
+		maxCount: 1,
+	},
+	{
+		name: "teachersImg",
+		maxCount: 1,
+	},
+	{ name: "previewPdf", maxCount: 1 },
+	{ name: "courseThumbnails", maxCount: 50 },
+	{ name: "resourcePdf", maxCount: 1 },
+	{ name: "resourceThumbnailImage", maxCount: 1 },
+	{ name: "platformThumbnail", maxCount: 1 },
 ]);
 
 // Serve images from the 'uploads' folder as static files
@@ -117,124 +117,124 @@ router.use("/uploads", express.static(path.join(__dirname, "uploads")));
 router.get("/getGeneralInfo", generalInfoController.getGeneralInfo);
 
 router.post(
-  "/updateGeneralInfo",
-  adminProtect,
-  checkPermission("general_info"),
-  upload,
-  generalInfoController.generalInfoUpdate,
+	"/updateGeneralInfo",
+	adminProtect,
+	checkPermission("general_info"),
+	upload,
+	generalInfoController.generalInfoUpdate
 );
 
 router.delete(
-  "/deleteGeneralInfo",
-  adminProtect,
-  checkPermission("general_info"),
+	"/deleteGeneralInfo",
+	adminProtect,
+	checkPermission("general_info"),
 
-  generalInfoController.deleteGeneralInfo,
+	generalInfoController.deleteGeneralInfo
 );
 
 //   Routes for Newsletter Subscription
 router.post("/subscribe", newsletterController.subscribe);
 router.get(
-  "/subscribers",
-  adminProtect,
-  checkPermission("subscribed_users"),
-  newsletterController.getSubscription,
+	"/subscribers",
+	adminProtect,
+	checkPermission("subscribed_users"),
+	newsletterController.getSubscription
 );
 router.delete(
-  "/delete-subscriber",
-  adminProtect,
-  checkPermission("subscribed_users"),
-  newsletterController.deleteSubscriber,
+	"/delete-subscriber",
+	adminProtect,
+	checkPermission("subscribed_users"),
+	newsletterController.deleteSubscriber
 );
 
 //  Routes for Carousel
 router.post(
-  "/createcarousel",
-  upload,
-  adminProtect,
-  checkPermission("sliders-banners"),
-  CarouselController.createCarousel,
+	"/createcarousel",
+	upload,
+	adminProtect,
+	checkPermission("sliders-banners"),
+	CarouselController.createCarousel
 );
 router.get("/getallcarousel", CarouselController.getAllCarousel);
 router.delete(
-  "/deletebyidcarousel/:id",
-  adminProtect,
-  checkPermission("sliders-banners"),
-  CarouselController.deleteByIdCarousel,
+	"/deletebyidcarousel/:id",
+	adminProtect,
+	checkPermission("sliders-banners"),
+	CarouselController.deleteByIdCarousel
 );
 
 // Routes for Feature Images
 router.post(
-  "/feature-images/create",
-  upload,
-  adminProtect,
-  checkPermission("sliders-banners"),
-  featureImageController.createFeatureImage,
+	"/feature-images/create",
+	upload,
+	adminProtect,
+	checkPermission("sliders-banners"),
+	featureImageController.createFeatureImage
 );
 router.get("/feature-images", featureImageController.getAllFeatureImages);
 router.get(
-  "/feature-images/:id",
-  adminProtect,
-  checkPermission("sliders-banners"),
-  featureImageController.getFeatureImageById,
+	"/feature-images/:id",
+	adminProtect,
+	checkPermission("sliders-banners"),
+	featureImageController.getFeatureImageById
 );
 router.put(
-  "/feature-images/:id",
-  upload,
-  adminProtect,
-  checkPermission("sliders-banners"),
-  featureImageController.updateFeatureImage,
+	"/feature-images/:id",
+	upload,
+	adminProtect,
+	checkPermission("sliders-banners"),
+	featureImageController.updateFeatureImage
 );
 router.delete(
-  "/feature-images/:id",
-  adminProtect,
-  checkPermission("sliders-banners"),
-  featureImageController.deleteFeatureImage,
+	"/feature-images/:id",
+	adminProtect,
+	checkPermission("sliders-banners"),
+	featureImageController.deleteFeatureImage
 );
 
 // Routes for Colors
 router.get("/colors", colorController.getColors);
 router.put(
-  "/colors",
-  adminProtect,
-  checkPermission("website_theme_color"),
-  colorController.updateColor,
+	"/colors",
+	adminProtect,
+	checkPermission("website_theme_color"),
+	colorController.updateColor
 );
 
 // Routes for Social Media Link
 router.get("/socialmedia", socialMediaLinkController.getSocialMedia);
 router.put(
-  "/socialmedia",
-  adminProtect,
-  checkPermission("social_media_link"),
-  socialMediaLinkController.updateSocialMedia,
+	"/socialmedia",
+	adminProtect,
+	checkPermission("social_media_link"),
+	socialMediaLinkController.updateSocialMedia
 );
 
 // Routes for Contact Us Form
 router.post("/contacts", contactController.createContact);
 router.get(
-  "/contacts",
-  adminProtect,
-  checkPermission("contact_request"),
-  contactController.getAllContacts,
+	"/contacts",
+	adminProtect,
+	checkPermission("contact_request"),
+	contactController.getAllContacts
 );
 router.get(
-  "/contacts/:id",
-  adminProtect,
-  checkPermission("contact_request"),
-  contactController.getContactById,
+	"/contacts/:id",
+	adminProtect,
+	checkPermission("contact_request"),
+	contactController.getContactById
 );
 router.put(
-  "/contacts/:id",
-  adminProtect,
-  checkPermission("contact_request"),
-  contactController.updateContact,
+	"/contacts/:id",
+	adminProtect,
+	checkPermission("contact_request"),
+	contactController.updateContact
 );
 router.delete(
-  "/contacts/:id",
-  adminProtect,
-  checkPermission("contact_request"),
-  contactController.deleteContact,
+	"/contacts/:id",
+	adminProtect,
+	checkPermission("contact_request"),
+	contactController.deleteContact
 );
 
 // Admin Login route
@@ -243,34 +243,34 @@ router.get("/admin/me", authenticateToken, AdminController.getLoggedInAdmin);
 
 // CRUD routes for Admin User
 router.post(
-  "/admin/create",
-  adminProtect,
-  checkPermission("admin-users"),
-  AdminController.createAdmin,
+	"/admin/create",
+	adminProtect,
+	checkPermission("admin-users"),
+	AdminController.createAdmin
 );
 router.get(
-  "/admin/getall",
-  adminProtect,
-  checkPermission("admin-users"),
-  AdminController.getAllAdmins,
+	"/admin/getall",
+	adminProtect,
+	checkPermission("admin-users"),
+	AdminController.getAllAdmins
 );
 router.get(
-  "/admin/:id",
-  adminProtect,
-  checkPermission("admin-users"),
-  AdminController.getAdminById,
+	"/admin/:id",
+	adminProtect,
+	checkPermission("admin-users"),
+	AdminController.getAdminById
 );
 router.put(
-  "/admin/:id",
-  adminProtect,
-  checkPermission("admin-users"),
-  AdminController.updateAdmin,
+	"/admin/:id",
+	adminProtect,
+	checkPermission("admin-users"),
+	AdminController.updateAdmin
 );
 router.delete(
-  "/admin/:id",
-  adminProtect,
-  checkPermission("admin-users"),
-  AdminController.deleteAdmin,
+	"/admin/:id",
+	adminProtect,
+	checkPermission("admin-users"),
+	AdminController.deleteAdmin
 );
 
 // User Login Route
@@ -283,30 +283,30 @@ router.post("/register", userController.createUser); // Create a new user
 router.get("/profile", userProtect, userController.getLoggedInUser); // Get logged-in user's profile
 router.put("/updateUser/:id", upload, userController.updateUser);
 router.put(
-  "/request-deletion",
-  userProtect,
-  userController.requestAccountDeletion,
+	"/request-deletion",
+	userProtect,
+	userController.requestAccountDeletion
 );
 router.patch("/change-password", userProtect, userController.changePassword);
 
 // Admin Protected Routes
 router.get(
-  "/getAllUsers",
-  adminProtect,
-  checkPermission("view_customers"),
-  userController.getAllUsers,
+	"/getAllUsers",
+	adminProtect,
+	checkPermission("view_customers"),
+	userController.getAllUsers
 );
 router.get(
-  "/getUserById/:id",
-  adminProtect,
-  checkPermission("view_customers"),
-  userController.getUserById,
+	"/getUserById/:id",
+	adminProtect,
+	checkPermission("view_customers"),
+	userController.getUserById
 );
 router.delete(
-  "/deleteUser/:id",
-  adminProtect,
-  checkPermission("delete_customers"),
-  userController.deleteUser,
+	"/deleteUser/:id",
+	adminProtect,
+	checkPermission("delete_customers"),
+	userController.deleteUser
 );
 
 // Routes for Products
@@ -318,26 +318,26 @@ router.get("/products/slug/:slug", productController.getProductBySlug);
 router.get("/similar/:type/:id", productController.getSimilarProducts);
 
 router.post(
-  "/products",
-  adminProtect,
-  checkPermission("add_products"),
-  upload,
-  productController.createProduct,
+	"/products",
+	adminProtect,
+	checkPermission("add_products"),
+	upload,
+	productController.createProduct
 );
 
 router.put(
-  "/products/:id",
-  adminProtect,
-  checkPermission("edit_products"),
-  upload,
-  productController.updateProduct,
+	"/products/:id",
+	adminProtect,
+	checkPermission("edit_products"),
+	upload,
+	productController.updateProduct
 );
 
 router.delete(
-  "/products/:id",
-  adminProtect,
-  checkPermission("delete_products"),
-  productController.deleteProduct,
+	"/products/:id",
+	adminProtect,
+	checkPermission("delete_products"),
+	productController.deleteProduct
 );
 
 // Cart Routes
@@ -350,123 +350,123 @@ router.delete("/clearCart", userProtect, cartController.clearCart);
 // Shipping Option Routes
 router.get("/getAllShipping", shippingController.getAllShipping);
 router.post(
-  "/createShipping",
-  adminProtect,
-  checkPermission("delivery_charges"),
-  shippingController.createShipping,
+	"/createShipping",
+	adminProtect,
+	checkPermission("delivery_charges"),
+	shippingController.createShipping
 );
 router.get(
-  "/getShippingById/:id",
-  adminProtect,
-  checkPermission("delivery_charges"),
-  shippingController.getShippingById,
+	"/getShippingById/:id",
+	adminProtect,
+	checkPermission("delivery_charges"),
+	shippingController.getShippingById
 );
 router.patch(
-  "/updateShipping/:id",
-  adminProtect,
-  checkPermission("delivery_charges"),
-  shippingController.updateShipping,
+	"/updateShipping/:id",
+	adminProtect,
+	checkPermission("delivery_charges"),
+	shippingController.updateShipping
 );
 router.delete(
-  "/deleteShipping/:id",
-  adminProtect,
-  checkPermission("delivery_charges"),
-  shippingController.deleteShipping,
+	"/deleteShipping/:id",
+	adminProtect,
+	checkPermission("delivery_charges"),
+	shippingController.deleteShipping
 );
 
 // Free Delivery Routes
 router.get(
-  "/getFreeDeliveryAmount",
-  freeDeliveryController.getFreeDeliveryAmount,
+	"/getFreeDeliveryAmount",
+	freeDeliveryController.getFreeDeliveryAmount
 );
 router.patch(
-  "/updateFreeDeliveryAmount",
-  adminProtect,
-  checkPermission("setup_config"),
-  freeDeliveryController.updateFreeDeliveryAmount,
+	"/updateFreeDeliveryAmount",
+	adminProtect,
+	checkPermission("setup_config"),
+	freeDeliveryController.updateFreeDeliveryAmount
 );
 
 // Coupon Routes
 router.post("/applyCoupon", couponController.applyCoupon);
 
 router.post(
-  "/createCoupon",
-  adminProtect,
-  checkPermission("manage_coupons"),
-  couponController.createCoupon,
+	"/createCoupon",
+	adminProtect,
+	checkPermission("manage_coupons"),
+	couponController.createCoupon
 );
 router.get(
-  "/getAllCoupons",
-  adminProtect,
-  checkPermission("manage_coupons"),
-  couponController.getAllCoupons,
+	"/getAllCoupons",
+	adminProtect,
+	checkPermission("manage_coupons"),
+	couponController.getAllCoupons
 );
 router.patch(
-  "/updateCoupon/:id",
-  adminProtect,
-  checkPermission("manage_coupons"),
-  couponController.updateCoupon,
+	"/updateCoupon/:id",
+	adminProtect,
+	checkPermission("manage_coupons"),
+	couponController.updateCoupon
 );
 router.delete(
-  "/deleteCoupon/:id",
-  adminProtect,
-  checkPermission("manage_coupons"),
-  couponController.deleteCoupon,
+	"/deleteCoupon/:id",
+	adminProtect,
+	checkPermission("manage_coupons"),
+	couponController.deleteCoupon
 );
 
 // VAT Percentage Routes
 router.get("/getVatPercentage", VatPercentageController.getVatPercentage);
 router.patch(
-  "/updateVatPercentage",
-  adminProtect,
-  checkPermission("setup_config"),
-  VatPercentageController.updateVatPercentage,
+	"/updateVatPercentage",
+	adminProtect,
+	checkPermission("setup_config"),
+	VatPercentageController.updateVatPercentage
 );
 
 // Order routes
 router.post("/orders", orderController.createOrder);
 
 router.get(
-  "/orders",
-  // adminProtect,
-  // checkPermission("view_orders"),
-  orderController.getAllOrders,
+	"/orders",
+	// adminProtect,
+	// checkPermission("view_orders"),
+	orderController.getAllOrders
 );
 router.get(
-  "/orders/:orderId",
-  // adminProtect,
-  // checkPermission("view_orders"),
-  orderController.getOrderById,
+	"/orders/:orderId",
+	// adminProtect,
+	// checkPermission("view_orders"),
+	orderController.getOrderById
 );
 
 router.put(
-  "/orders/:orderId",
-  // adminProtect,
-  // checkPermission("edit_orders"),
-  orderController.updateOrder,
+	"/orders/:orderId",
+	// adminProtect,
+	// checkPermission("edit_orders"),
+	orderController.updateOrder
 );
 
 router.delete(
-  "/orders/:orderId",
-  adminProtect,
-  checkPermission("delete_orders"),
-  orderController.deleteOrder,
+	"/orders/:orderId",
+	adminProtect,
+	checkPermission("delete_orders"),
+	orderController.deleteOrder
 );
 router.get("/order-no/:orderNo", orderController.getOrderByOrderNo);
 router.get(
-  "/ordersbyUser/:userId",
-  userProtect,
-  orderController.getOrdersForUser,
+	"/ordersbyUser/:userId",
+	userProtect,
+	orderController.getOrdersForUser
 );
 
 router.get(
-  "/delivered-products/:userId",
-  userProtect,
-  orderController.getDeliveredProductsForUser,
+	"/delivered-products/:userId",
+	userProtect,
+	orderController.getDeliveredProductsForUser
 );
 router.get(
-  "/product-sales/:productId",
-  orderController.getProductSalesHistoryController,
+	"/product-sales/:productId",
+	orderController.getProductSalesHistoryController
 );
 
 // // Order Tracking
@@ -480,50 +480,50 @@ router.post("/queryPaymentStatus", bkashController.queryPaymentStatus);
 // Page Content Routes
 router.get("/pagecontent/:page", PageContentController.getPageContent);
 router.patch(
-  "/pagecontent/:page",
-  adminProtect,
-  checkPermission("about_terms-policies"),
-  PageContentController.updatePageContent,
+	"/pagecontent/:page",
+	adminProtect,
+	checkPermission("about_terms-policies"),
+	PageContentController.updatePageContent
 );
 
 // FAQ's Routes
 router.get("/faq", FaqController.getAllFAQs);
 router.get("/faq/:id", FaqController.getSingleFAQ);
 router.patch(
-  "/faq/:id",
-  adminProtect,
-  checkPermission("faqs"),
-  FaqController.updateFAQ,
+	"/faq/:id",
+	adminProtect,
+	checkPermission("faqs"),
+	FaqController.updateFAQ
 );
 router.delete(
-  "/faq/:id",
-  adminProtect,
-  checkPermission("faqs"),
-  FaqController.deleteFAQ,
+	"/faq/:id",
+	adminProtect,
+	checkPermission("faqs"),
+	FaqController.deleteFAQ
 );
 router.post(
-  "/faq",
-  adminProtect,
-  checkPermission("faqs"),
-  FaqController.createFAQ,
+	"/faq",
+	adminProtect,
+	checkPermission("faqs"),
+	FaqController.createFAQ
 );
 
 // Marquee Routes
 router.get("/marquee", MarqueeController.getMessages);
 router.patch(
-  "/marquee",
-  adminProtect,
-  checkPermission("scroll_text"),
-  MarqueeController.updateMessageSet,
+	"/marquee",
+	adminProtect,
+	checkPermission("scroll_text"),
+	MarqueeController.updateMessageSet
 );
 
 // Meta Routes
 router.get("/meta", metaController.getMeta);
 router.patch(
-  "/meta",
-  adminProtect,
-  checkPermission("home_page_seo"),
-  metaController.updateMeta,
+	"/meta",
+	adminProtect,
+	checkPermission("home_page_seo"),
+	metaController.updateMeta
 );
 
 // Courier Check Routs
@@ -532,70 +532,70 @@ router.post("/courier-check", handleCourierCheck);
 // Steadfast Courier Routes
 router.post("/steadfast/create-order", adminProtect, createSteadfastOrder);
 router.get(
-  "/steadfast/get-order-status",
-  adminProtect,
-  getSteadfastOrderStatusByInvoice,
+	"/steadfast/get-order-status",
+	adminProtect,
+	getSteadfastOrderStatusByInvoice
 );
 
 // Google Tag Manager Routes
 router.get("/getGTM", GoogleTagManagerController.getGTM);
 router.post(
-  "/updateGTM",
-  adminProtect,
-  checkPermission("setup_config"),
-  GoogleTagManagerController.updateGTM,
+	"/updateGTM",
+	adminProtect,
+	checkPermission("setup_config"),
+	GoogleTagManagerController.updateGTM
 );
 
 // bKash Config Routes
 router.get(
-  "/bkash-config",
-  adminProtect,
-  checkPermission("bkash_api"),
-  bkashConfigController.getBkashConfig,
+	"/bkash-config",
+	adminProtect,
+	checkPermission("bkash_api"),
+	bkashConfigController.getBkashConfig
 );
 router.patch(
-  "/bkash-config",
-  adminProtect,
-  checkPermission("bkash_api"),
-  bkashConfigController.updateBkashConfig,
+	"/bkash-config",
+	adminProtect,
+	checkPermission("bkash_api"),
+	bkashConfigController.updateBkashConfig
 );
 
 router.get("/bkash-is-active", bkashConfigController.getBkashIsActive);
 
 // SteadFast Config Routes
 router.get(
-  "/steadfast-config",
-  adminProtect,
-  checkPermission("steadfast_api"),
-  SteadfastConfigController.getConfig,
+	"/steadfast-config",
+	adminProtect,
+	checkPermission("steadfast_api"),
+	SteadfastConfigController.getConfig
 );
 router.patch(
-  "/steadfast-config",
-  adminProtect,
-  checkPermission("steadfast_api"),
-  SteadfastConfigController.updateConfig,
+	"/steadfast-config",
+	adminProtect,
+	checkPermission("steadfast_api"),
+	SteadfastConfigController.updateConfig
 );
 
 // Routes for Blogs
 router.post(
-  "/blog",
-  upload,
-  adminProtect,
-  checkPermission("blogs"),
-  blogController.createBlog,
+	"/blog",
+	upload,
+	adminProtect,
+	checkPermission("blogs"),
+	blogController.createBlog
 );
 router.patch(
-  "/blog/:id",
-  upload,
-  adminProtect,
-  checkPermission("blogs"),
-  blogController.updateBlog,
+	"/blog/:id",
+	upload,
+	adminProtect,
+	checkPermission("blogs"),
+	blogController.updateBlog
 );
 router.delete(
-  "/blog/:id",
-  adminProtect,
-  checkPermission("blogs"),
-  blogController.deleteBlog,
+	"/blog/:id",
+	adminProtect,
+	checkPermission("blogs"),
+	blogController.deleteBlog
 );
 router.get("/blog", blogController.getAllBlogs);
 router.get("/activeblog", blogController.getActiveBlogs);
@@ -611,55 +611,55 @@ router.post("/teacher", upload, adminProtect, teacherProfileController.create);
 router.get("/teacher", teacherProfileController.getAll);
 router.get("/teacher/:id", teacherProfileController.getById);
 router.put(
-  "/teacher/:id",
-  upload,
-  adminProtect,
-  teacherProfileController.update,
+	"/teacher/:id",
+	upload,
+	adminProtect,
+	teacherProfileController.update
 );
 router.delete("/teacher/:id", adminProtect, teacherProfileController.remove);
 
 // Student Review Routes
 router.post(
-  "/createstudentreview",
-  upload,
-  StudentReviewController.createStudentReview,
+	"/createstudentreview",
+	upload,
+	StudentReviewController.createStudentReview
 );
 
 router.get("/getallstudentreview", StudentReviewController.getAllStudentReview);
 
 router.delete(
-  "/deletebyidstudentreview/:id",
-  StudentReviewController.deleteByIdStudentReview,
+	"/deletebyidstudentreview/:id",
+	StudentReviewController.deleteByIdStudentReview
 );
 
 // Free resources CRUD routes
 router.post(
-  "/resources",
-  upload,
-  adminProtect,
-  freeResourceController.createFreeResource,
+	"/resources",
+	upload,
+	adminProtect,
+	freeResourceController.createFreeResource
 );
 router.get("/resources", freeResourceController.getAllFreeResources);
 router.get("/resources/:id", freeResourceController.getFreeResourceById);
 router.put(
-  "/resources/:id",
-  upload,
-  adminProtect,
-  freeResourceController.updateFreeResource,
+	"/resources/:id",
+	upload,
+	adminProtect,
+	freeResourceController.updateFreeResource
 );
 router.delete(
-  "/resources/:id",
-  adminProtect,
-  freeResourceController.deleteFreeResource,
+	"/resources/:id",
+	adminProtect,
+	freeResourceController.deleteFreeResource
 );
 
 // Platform api Route
 router.get("/platform", platformInfoController.getPlatformInfo);
 router.put(
-  "/platform",
-  upload,
-  adminProtect,
-  platformInfoController.updatePlatformInfo,
+	"/platform",
+	upload,
+	adminProtect,
+	platformInfoController.updatePlatformInfo
 );
 
 // Free Class Routes
@@ -668,9 +668,10 @@ router.get("/freeclass", freeClassController.getAllFreeClasses);
 router.get("/freeclass/:id", freeClassController.getFreeClassById);
 router.put("/freeclass/:id", adminProtect, freeClassController.updateFreeClass);
 router.delete(
-  "/freeclass/:id",
-  adminProtect,
-  freeClassController.deleteFreeClass,
+	"/freeclass/:id",
+	adminProtect,
+	freeClassController.deleteFreeClass
 );
+
 
 module.exports = router;

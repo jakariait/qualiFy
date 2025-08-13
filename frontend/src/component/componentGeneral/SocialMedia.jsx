@@ -27,7 +27,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaFacebookF className="text-blue-600" />
+            <FaFacebookF className="text-blue-600 bg-white p-1 rounded" />
           </a>
         )}
         {socialMediaLinks?.instagram && (
@@ -38,7 +38,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <CiInstagram className="text-[#833AB4]" />
+            <CiInstagram className="text-[#833AB4] bg-white p-1 rounded" />
           </a>
         )}
         {socialMediaLinks?.tiktok && (
@@ -49,7 +49,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaTiktok className={"text-[#00F2EA]"} />
+            <FaTiktok className={"text-[#00F2EA] bg-white p-1 rounded"} />
           </a>
         )}
         {socialMediaLinks?.twitter && (
@@ -60,7 +60,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaXTwitter />
+            <FaXTwitter className={"text-black bg-white p-1 rounded"} />
           </a>
         )}
         {socialMediaLinks?.whatsapp && (
@@ -71,7 +71,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaWhatsapp className="text-green-500" />
+            <FaWhatsapp className="text-green-500 bg-white p-1 rounded" />
           </a>
         )}
         {socialMediaLinks?.messenger && (
@@ -82,7 +82,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaFacebookMessenger className="text-blue-500" />
+            <FaFacebookMessenger className="text-blue-500 bg-white p-1 rounded" />
           </a>
         )}
         {socialMediaLinks?.youtube && (
@@ -93,7 +93,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaYoutube className="text-red-600" />
+            <FaYoutube className="text-red-600 bg-white p-1 rounded" />
           </a>
         )}
         {socialMediaLinks?.linkedin && (
@@ -104,7 +104,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaLinkedin className="text-blue-700" />
+            <FaLinkedin className="text-blue-700 bg-white p-1 rounded" />
           </a>
         )}
 
@@ -116,7 +116,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaPinterest className="text-red-600" />
+            <FaPinterest className="text-red-600 bg-white p-1 rounded" />
           </a>
         )}
         {socialMediaLinks?.telegram && (
@@ -127,7 +127,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaTelegramPlane className="text-blue-400" />
+            <FaTelegramPlane className="text-blue-400 bg-white p-1 rounded" />
           </a>
         )}
 
@@ -139,7 +139,7 @@ const SocialMedia = () => {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
           >
-            <FaViber className="text-purple-600" />
+            <FaViber className="text-purple-600 bg-white p-1 rounded" />
           </a>
         )}
       </div>

@@ -71,7 +71,7 @@ const ProductList = ({ products, loading }) => {
                 </Link>
 
                 <Link to={`/product/${product.slug}`}>
-                  <div className="text-center primaryTextColor mt-2 mb-1 hover:underline">
+                  <div className="text-center heading primaryTextColor mt-2 mb-1 hover:underline">
                     {product.name}
                   </div>
                 </Link>
