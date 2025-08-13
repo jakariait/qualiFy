@@ -22,7 +22,7 @@ const Feature = () => {
         <h2 className="text-xl heading md:text-2xl font-bold primaryTextColor">
           Join Our Facebook Group
         </h2>
-        <p className=" mt-1">
+        <p className="mt-1">
           Stay connected, share ideas, and never miss an update!
         </p>
       </div>
@@ -37,11 +37,8 @@ const Feature = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {FeatureStoreList.map((feature) => (
-            <a
+            <div
               key={feature._id}
-              href={feature.link}
-              target="_blank"
-              rel="noopener noreferrer"
               className="bg-white border border-gray-50 rounded-xl shadow-md flex flex-col items-center text-center hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex justify-center items-center">
@@ -52,7 +49,15 @@ const Feature = () => {
                 />
               </div>
               <h3 className="mt-2 primaryTextColor p-2">{feature.title}</h3>
-            </a>
+              <a
+                href={feature.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="primaryBgColor accentTextColor px-4 py-2 mb-2 rounded inline-block"
+              >
+                Join Now
+              </a>
+            </div>
           ))}
         </div>
       )}

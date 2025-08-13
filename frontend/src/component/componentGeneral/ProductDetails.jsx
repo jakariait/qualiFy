@@ -187,7 +187,7 @@ const ProductDetails = () => {
 
             {/* Right sticky column - cart box */}
             <div
-              className="w-full md:w-[350px] lg:w-[400px] xl:w-[420px] shrink-0 pt-4 md:pt-0 md:sticky top-44 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
+              className="w-full md:w-[350px] lg:w-[400px] xl:w-[420px] shrink-0 pt-4 md:pt-0 md:sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto"
               style={{ scrollbarWidth: "thin" }}
             >
               <div className="flex flex-col p-3 gap-3 bg-orange-200/50 rounded">

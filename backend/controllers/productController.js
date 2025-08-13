@@ -163,6 +163,7 @@ const updateProduct = async (req, res) => {
     if (req.files?.courseThumbnails && productData.modules) {
       const courseThumbnails = req.files.courseThumbnails.map((f) => f.filename);
 
+
       let parsedModules =
         typeof productData.modules === "string"
           ? JSON.parse(productData.modules)

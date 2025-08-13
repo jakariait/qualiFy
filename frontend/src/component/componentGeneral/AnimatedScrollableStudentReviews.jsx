@@ -56,6 +56,10 @@ const AnimatedScrollableStudentReviews = () => {
     );
   }
 
+  if (reviews.length === 0) {
+    return null;
+  }
+
   return (
     <section className="xl:container md:mx-auto p-3">
       <div className="text-center mb-10 px-4">

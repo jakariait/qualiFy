@@ -163,7 +163,7 @@ const FreeClassManager = () => {
           placeholder="Enter YouTube URL"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
-          className="flex-grow bg-gray-50 px-3 py-2 rounded"
+          className="flex-grow bg-gray-50 px-3 py-2 focus:outline-none rounded"
         />
         <button
           onClick={handleAdd}

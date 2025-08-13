@@ -88,7 +88,7 @@ const ProductAddToCart = ({ product }) => {
 
   return (
     <div>
-      <div className="flex  flex-col gap-3 pt-4">
+      <div className="flex  flex-col gap-3">
         {/* Product Image */}
         <ImageComponent
           imageName={product.thumbnailImage}
@@ -96,10 +96,10 @@ const ProductAddToCart = ({ product }) => {
         />
 
         {/* Product Name */}
-        <h2 className="text-xl primaryTextColor">{product.name}</h2>
+        <h2 className="text-2xl primaryTextColor">{product.name}</h2>
 
         {/* Price Display */}
-        <div className="flex gap-2 items-center">
+        <div className="flex  gap-2 items-center">
           {product.finalDiscount > 0 ? (
             <>
               <div className="line-through">

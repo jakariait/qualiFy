@@ -119,10 +119,10 @@ const AnimatedScrollableTeachers = () => {
                     className="w-full object-cover  transition-transform duration-500"
                   />
                 </div>
-                <div className="py-2 primaryTextColor text-center">
-                  <h3 className="text-xl f">{teacher.name}</h3>
-                  <p className="">{teacher.teacherUniversity}</p>
-                  <p className="">{teacher.title}</p>
+                <div className="py-2 px-2 primaryTextColor text-center">
+                  <h3 className="text-md md:text-lg">{teacher.name}</h3>
+                  <p className="text-sm md:text-lg">{teacher.teacherUniversity}</p>
+                  <p className="text-sm md:text-lg">{teacher.title}</p>
                 </div>
               </div>
             ))}
