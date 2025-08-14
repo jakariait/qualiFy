@@ -81,6 +81,9 @@ import ResourceViewerPage from "./pagesUser/ResourceViewerPage.jsx";
 import PlatformInfoPage from "./pagesAdmin/PlatformInfoPage.jsx";
 import FreeClassPage from "./pagesAdmin/FreeClassPage.jsx";
 import ViewAllClassPage from "./pagesUser/ViewAllClassPage.jsx";
+import ExamListPage from "./pagesAdmin/ExamListPage.jsx";
+import CreateExamPage from "./pagesAdmin/CreateExamPage.jsx";
+import EditExamPage from "./pagesAdmin/EditExamPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -197,6 +200,10 @@ function App() {
             path="/admin/free-resource"
             element={<FreeResourceUploadPage />}
           />
+          <Route path="/admin/exams" element={<ExamListPage />} />
+          <Route path="/admin/exams/create" element={<CreateExamPage />} />
+          <Route path="/admin/exams/edit/:id" element={<EditExamPage />} />
+
           <Route path="/admin/platform" element={<PlatformInfoPage />} />
           <Route
             path="/admin/subscribed-users"

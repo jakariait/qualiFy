@@ -91,16 +91,14 @@ export default function SidebarMenu() {
 							<FaEnvelope /> <span>Platform Info</span>
 						</Link>
 					</li>
-					<RequirePermission permission="manage_exams" fallback={true}>
 						<li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
 							<Link
-								to="/admin/exam-management"
+								to="/admin/exams"
 								className={"flex items-center gap-2"}
 							>
 								<FaClipboardCheck /> <span>Exam Management</span>
 							</Link>
 						</li>
-					</RequirePermission>
 					<RequirePermission permission="website_theme_color" fallback={true}>
 						<li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
 							<Link

@@ -15,10 +15,10 @@ const HomePage = () => {
     <Layout>
       <ProductCarousel />
       <UniversityPrepHeroSection />
-      <Feature />
       <AllCourses limit={3} showViewAll />
       <AllBooks limit={3} showViewAll />
       <AllLiveExam limit={3} showViewAll />
+      <Feature />
       <FreeClassVideos limit={4} showViewAll={true} />
       <AnimatedScrollableStudentReviews />
       <AnimatedScrollableTeachers />

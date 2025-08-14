@@ -21,7 +21,7 @@ const createOrder = async (req, res) => {
     const order = await orderService.createOrder(orderData, userId || null);
 
     // Send order confirmation email (async, but we await to handle errors)
-    // await sendOrderEmail(order);
+    await sendOrderEmail(order);
 
     res.status(201).json({
       success: true,
@@ -174,12 +174,10 @@ const trackOrderByOrderNoAndPhone = async (req, res) => {
     const { orderNo, phone } = req.body;
 
     if (!orderNo || !phone) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Order number and phone are required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Order number and phone are required",
+      });
     }
 
     const order = await orderService.trackOrderByOrderNoAndPhone(

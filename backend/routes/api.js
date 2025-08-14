@@ -32,6 +32,7 @@ const StudentReviewController = require("../controllers/StudentReviewController"
 const freeResourceController = require("../controllers/freeResourceController");
 const platformInfoController = require("../controllers/platformInfo.controller");
 const freeClassController = require("../controllers/freeClass.controller");
+const examController = require("../controllers/examController");
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
@@ -673,5 +674,11 @@ router.delete(
 	freeClassController.deleteFreeClass
 );
 
+// Exam Routes
+router.post("/exams", upload, examController.createExam);
+router.get("/exams", examController.getAllExams);
+router.get("/exams/:id", examController.getExamById);
+router.put("/exams/:id", upload, examController.updateExam);
+router.delete("/exams/:id", examController.deleteExam);
 
 module.exports = router;

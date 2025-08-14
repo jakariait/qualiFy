@@ -24,17 +24,17 @@ const nodemailer = require("nodemailer");
 
 const sendEmail = async ({ to, subject, text }) => {
   let transporter = nodemailer.createTransport({
-    host: "mail.sayuree.com",      // ✅ NOT Gmail
+    host: "mail.qualifybd.com",      // ✅ NOT Gmail
     port: 465,                     // ✅ Secure SSL port
     secure: true,                  // ✅ true because port 465
     auth: {
-      user: "otp@sayuree.com",     // ✅ full email
+      user: "otp@qualifybd.com",     // ✅ full email
       pass: "fm#!#6bStkW}",         // ✅ your real password
     },
   });
 
   await transporter.sendMail({
-    from: '"Sayuree" <otp@sayuree.com>', // Optional display name
+    from: '"qualiFy" <otp@qualifybd.com>', // Optional display name
     to,
     subject,
     text,
