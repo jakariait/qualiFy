@@ -43,7 +43,7 @@ class ExamAttemptController {
 		}
 	}
 
-	async submitAnswer(req, res) {
+	  async submitAnswer(req, res) {
 		try {
 			const { attemptId } = req.params;
 			const { subjectIndex, questionIndex, answer, timeSpent } = req.body;
@@ -74,6 +74,36 @@ class ExamAttemptController {
 			res.status(400).json({ success: false, message: error.message });
 		}
 	}
+
+    async submitAllAnswers(req, res) {
+        try {
+            const { attemptId } = req.params;
+            const { subjectIndex, answers } = req.body; // answers will be an array
+            const userId = req.user.id;
+
+            if (subjectIndex === undefined || !Array.isArray(answers)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Missing required fields: subjectIndex, and answers array",
+                });
+            }
+
+            const result = await examAttemptService.submitAllAnswers(
+                attemptId,
+                userId,
+                subjectIndex,
+                answers
+            );
+
+            res.status(200).json({
+                success: true,
+                message: "All answers submitted successfully",
+                data: result,
+            });
+        } catch (error) {
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
 
 	async completeSubject(req, res) {
 		try {

@@ -678,7 +678,7 @@ router.delete(
 );
 
 // Exam Routes
-router.post("/exams", adminProtect, examController.createExam);
+router.post("/exams",  examController.createExam);
 router.get("/exams", examController.getAllExams);
 router.get("/exams/:id", examController.getExamById);
 router.put("/exams/:id", adminProtect, examController.updateExam);
@@ -701,26 +701,38 @@ router.post(
 
 router.post(
   "/exam-attempts/:attemptId/complete-subject",
+  userProtect,
   examAttemptController.completeSubject,
 );
 router.post(
+  "/exam-attempts/:attemptId/submit-all-answers",
+  userProtect,
+  examAttemptController.submitAllAnswers,
+);
+
+router.post(
   "/exam-attempts/:attemptId/submit",
+  userProtect,
   examAttemptController.submitExam,
 );
 router.get(
   "/exam-attempts/:attemptId/results",
+  userProtect,
   examAttemptController.getExamResults,
 );
 router.get(
   "/exam-attempts/:attemptId/questions",
+  userProtect,
   examAttemptController.getCurrentExamQuestions,
 );
 router.get(
   "/exam-attempts/:attemptId/progress",
+  userProtect,
   examAttemptController.getAttemptProgress,
 );
 router.get(
   "/exam-attempts/:attemptId/sync-time",
+  userProtect,
   examAttemptController.syncTime,
 );
 router.get("/user/exam-attempts", examAttemptController.getUserAttempts);

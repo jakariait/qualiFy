@@ -8,10 +8,10 @@ class ExamAttemptService {
 	async startExamAttempt(examId, userId, clientInfo = {}) {
 		try {
 			// Check if user already has an attempt for this exam
-			const existingAttempt = await ExamAttempt.findOne({ examId, userId });
-			if (existingAttempt) {
-				throw new Error("User already has an attempt for this exam");
-			}
+		const existingAttempt = await ExamAttempt.findOne({ examId, userId, status: 'in_progress' });
+		if (existingAttempt) {
+			throw new Error("User already has an in-progress attempt for this exam");
+		}
 
 			// Get exam details
 			const exam = await Exam.findById(examId);
@@ -82,7 +82,7 @@ class ExamAttemptService {
 			const attempt = await ExamAttempt.findOne({
 				_id: attemptId,
 				userId,
-			}).populate("examId", "title description subjects");
+			}).populate("examId");
 
 			if (!attempt) {
 				throw new Error("Attempt not found");
@@ -95,11 +95,16 @@ class ExamAttemptService {
 
 			const currentSubject = attempt.getCurrentSubjectAttempt();
 			const timeRemaining = attempt.getTimeRemainingForCurrentSubject();
+            let currentSubjectIndex = currentSubject?.subjectIndex;
+
+            if (currentSubjectIndex === undefined && attempt.status === 'in_progress') {
+                currentSubjectIndex = 0;
+            }
 
 			return {
 				attemptId: attempt._id,
 				status: attempt.status,
-				currentSubject: currentSubject?.subjectIndex || null,
+				currentSubject: currentSubjectIndex ?? null,
 				timeRemaining,
 				totalSubjects: attempt.subjectAttempts.length,
 				completedSubjects: attempt.subjectAttempts.filter((s) => s.isCompleted)
@@ -112,7 +117,7 @@ class ExamAttemptService {
 	}
 
 	// Submit answer for a question
-	async submitAnswer(
+	  async submitAnswer(
 		attemptId,
 		userId,
 		subjectIndex,
@@ -183,6 +188,62 @@ class ExamAttemptService {
 			throw error;
 		}
 	}
+
+    async submitAllAnswers(attemptId, userId, subjectIndex, answers) {
+        try {
+            const attempt = await ExamAttempt.findOne({ _id: attemptId, userId });
+            if (!attempt) {
+                throw new Error("Attempt not found");
+            }
+
+            if (attempt.status !== "in_progress") {
+                throw new Error("Exam is not in progress");
+            }
+
+            const subjectAttempt = attempt.subjectAttempts.find(
+                (s) => s.subjectIndex === subjectIndex
+            );
+            if (!subjectAttempt || subjectAttempt.isCompleted) {
+                throw new Error("Subject is not available for answering");
+            }
+
+            // Iterate through the answers array and update/add each answer
+            for (const submittedAnswer of answers) {
+                const { questionIndex, answer, type } = submittedAnswer;
+
+                const existingAnswerIndex = subjectAttempt.answers.findIndex(
+                    (a) => a.questionIndex === questionIndex
+                );
+
+                if (existingAnswerIndex >= 0) {
+                    subjectAttempt.answers[existingAnswerIndex].answer = answer;
+                    // timeSpent is not passed from frontend for batch submission, so we don't update it here
+                } else {
+                    subjectAttempt.answers.push({
+                        questionIndex,
+                        subjectIndex,
+                        answer,
+                        timeSpent: 0, // Default to 0 for batch submission
+                    });
+                }
+
+                // Update result for each answer
+                await this.updateResult(
+                    attemptId,
+                    subjectIndex,
+                    questionIndex,
+                    answer,
+                    0 // timeSpent is 0 for batch submission
+                );
+            }
+
+            await attempt.save();
+
+            return { success: true };
+        } catch (error) {
+            throw error;
+        }
+    }
 
 	// Complete a subject
 	async completeSubject(attemptId, userId, subjectIndex) {
@@ -277,7 +338,7 @@ class ExamAttemptService {
 			const attempt = await ExamAttempt.findOne({
 				_id: attemptId,
 				userId,
-			}).populate("examId", "title description subjects");
+			}).populate("examId");
 
 			const result = await Result.findOne({ attemptId }).populate(
 				"examId",
@@ -351,6 +412,14 @@ class ExamAttemptService {
 		const result = await Result.findOne({ attemptId });
 		if (!result) return;
 
+		const attempt = await ExamAttempt.findById(attemptId).populate('examId'); // Fetch attempt to get exam details
+		if (!attempt || !attempt.examId) return;
+
+		const exam = attempt.examId;
+		const subject = exam.subjects[subjectIndex];
+		const question = subject.questions[questionIndex];
+
+
 		const questionResult = result.questionResults.find(
 			(q) =>
 				q.subjectIndex === subjectIndex && q.questionIndex === questionIndex
@@ -362,20 +431,29 @@ class ExamAttemptService {
 
 			// Auto-grade MCQ questions
 			if (questionResult.questionType === "mcq-single") {
-				if (
-					Array.isArray(answer) &&
-					Array.isArray(questionResult.correctAnswer)
-				) {
-					const userAnswers = answer.sort();
-					const correctAnswers = questionResult.correctAnswer.sort();
+				// Correct answer is stored as an array of indices, e.g., [0] for the first option
+				// User answer is the text of the selected option
+				const correctOptionIndex = questionResult.correctAnswer[0]; // Assuming single correct answer
+				const correctOptionText = question.options[correctOptionIndex];
 
-					questionResult.isCorrect =
-						JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
-					questionResult.marksObtained = questionResult.isCorrect
-						? questionResult.maxMarks
-						: 0;
-				}
-			}
+				questionResult.isCorrect = (answer === correctOptionText);
+				questionResult.marksObtained = questionResult.isCorrect
+					? questionResult.maxMarks
+					: 0;
+			} else if (questionResult.questionType === "mcq-multiple") {
+                // For multiple choice, answer is an array of selected option texts
+                // Correct answer is an array of indices
+                const userAnswers = Array.isArray(answer) ? answer.sort() : [];
+                const correctOptionTexts = questionResult.correctAnswer.map(index => question.options[index]).sort();
+
+                questionResult.isCorrect =
+                    JSON.stringify(userAnswers) === JSON.stringify(correctOptionTexts);
+                questionResult.marksObtained = questionResult.isCorrect
+                    ? questionResult.maxMarks
+                    : 0;
+            }
+			// For other question types (short, image), isCorrect and marksObtained remain null/0
+			// unless there's a specific grading logic for them.
 
 			await result.save();
 		}

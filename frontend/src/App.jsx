@@ -84,6 +84,10 @@ import ViewAllClassPage from "./pagesUser/ViewAllClassPage.jsx";
 import ExamListPage from "./pagesAdmin/ExamListPage.jsx";
 import CreateExamPage from "./pagesAdmin/CreateExamPage.jsx";
 import EditExamPage from "./pagesAdmin/EditExamPage.jsx";
+import LiveExam from "./component/componentGeneral/LiveExam.jsx";
+import ExamResults from "./component/componentGeneral/ExamResults.jsx";
+import LiveExamPage from "./pagesUser/LiveExamPage.jsx";
+import ExamResultPage from "./pagesUser/ExamResultPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -185,6 +189,8 @@ function App() {
             path="/user/change-password"
             element={<ChangePasswordPage />}
           />
+          <Route path="/exam/attempt/:attemptId" element={<LiveExamPage />} />
+          <Route path="/exam/results/:attemptId" element={<ExamResultPage />} />
         </Route>
 
         {/* Protected Admin Routes */}

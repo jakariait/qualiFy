@@ -72,8 +72,7 @@ const ExamAttemptSchema = new mongoose.Schema(
 	}
 );
 
-// Index for unique user-exam combination (one attempt per user per exam)
-ExamAttemptSchema.index({ examId: 1, userId: 1 }, { unique: true });
+
 
 // Pre-save middleware to calculate results
 ExamAttemptSchema.pre("save", function (next) {
