@@ -11,6 +11,7 @@ const ExamSchema = new mongoose.Schema({
   },
 
   productIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+
   subjects: [
     {
       title: { type: String, required: true },
@@ -27,6 +28,7 @@ const ExamSchema = new mongoose.Schema({
       ]
     }
   ],
+
   durationMin: { type: Number, default: 0 }, // auto-calculated from subjects
   totalMarks: { type: Number, default: 0 }   // auto-calculated from questions
 }, { timestamps: true, versionKey: false });

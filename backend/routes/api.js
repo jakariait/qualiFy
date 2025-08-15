@@ -675,10 +675,10 @@ router.delete(
 );
 
 // Exam Routes
-router.post("/exams", upload, examController.createExam);
+router.post("/exams",  examController.createExam);
 router.get("/exams", examController.getAllExams);
 router.get("/exams/:id", examController.getExamById);
-router.put("/exams/:id", upload, examController.updateExam);
+router.put("/exams/:id",  examController.updateExam);
 router.delete("/exams/:id", examController.deleteExam);
 
 module.exports = router;

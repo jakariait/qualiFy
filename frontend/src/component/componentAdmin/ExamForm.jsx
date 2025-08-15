@@ -309,9 +309,9 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
               </Grid>
 
               <Grid item xs={12}>
-                <small className="p-d-block pb-2 text-gray-500">
+                <p className="p-d-block pb-2 text-gray-500">
                   Provide a brief description of the exam
-                </small>
+                </p>
                 <Editor
                   value={form.description}
                   onTextChange={(e) => handleChange("description", e.htmlValue)}
@@ -637,23 +637,21 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                       )}
 
                       {/* Solution */}
-                      <TextField
-                        label="Solution/Explanation"
+                      <p className="p-d-block pt-2 pb-2 text-gray-500">
+                        Provide the correct answer or explanation for this
+                        question:
+                      </p>
+                      <Editor
                         value={question.solution || ""}
-                        onChange={(e) =>
+                        onTextChange={(e) =>
                           handleQuestionChange(
                             sIndex,
                             qIndex,
                             "solution",
-                            e.target.value,
+                            e.htmlValue,
                           )
                         }
-                        fullWidth
-                        multiline
-                        rows={2}
-                        variant="outlined"
-                        sx={{ mt: 2 }}
-                        helperText="Provide the correct answer or explanation for this question"
+                        style={{ height: "120px", marginTop: "8px" }}
                       />
                     </Card>
                   ))}
