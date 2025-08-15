@@ -74,9 +74,28 @@ const ExamResults = () => {
                     <div key={index} className="border-b py-2">
                         <p className="font-semibold" dangerouslySetInnerHTML={{ __html: qResult.questionText }}></p>
                         <p><strong>Your Answer:</strong> {JSON.stringify(qResult.userAnswer)}</p>
-                        <p><strong>Correct Answer:</strong> {JSON.stringify(qResult.correctAnswer)}</p>
-                        <p><strong>Status:</strong> {qResult.isCorrect ? <span className='text-green-500'>Correct</span> : <span className='text-red-500'>Incorrect</span>}</p>
+                        <p><strong>Correct Answer:</strong> {(() => {
+                            let displayCorrectAnswer = JSON.stringify(qResult.correctAnswer);
+                            const subject = exam.subjects[qResult.subjectIndex];
+                            const question = subject?.questions[qResult.questionIndex];
+
+                            if (question && (qResult.questionType === "mcq-single" || qResult.questionType === "mcq-multiple")) {
+                                if (Array.isArray(qResult.correctAnswer) && question.options) {
+                                    displayCorrectAnswer = qResult.correctAnswer.map(idx => question.options[idx]).join(', ');
+                                }
+                            }
+                            return displayCorrectAnswer;
+                        })()}</p>
+                        <p><strong>Status:</strong> {qResult.isCorrect === true ? <span className='text-green-500'>Correct</span> : qResult.isCorrect === false ? <span className='text-red-500'>Incorrect</span> : <span className='text-yellow-500'>Pending Review</span>}</p>
                         <p><strong>Marks Obtained:</strong> {qResult.marksObtained} / {qResult.maxMarks}</p>
+                        {(() => {
+                            const subject = exam.subjects[qResult.subjectIndex];
+                            const question = subject?.questions[qResult.questionIndex];
+                            if (question && question.solution) {
+                                return <p><strong>Solution:</strong> <span dangerouslySetInnerHTML={{ __html: question.solution }}></span></p>;
+                            }
+                            return null;
+                        })()}
                     </div>
                 ))}
             </div>

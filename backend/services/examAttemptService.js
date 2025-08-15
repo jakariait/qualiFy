@@ -79,27 +79,35 @@ class ExamAttemptService {
 	// Get current exam attempt status
 	async getAttemptStatus(attemptId, userId) {
 		try {
+            console.log(`[getAttemptStatus] Fetching status for attemptId: ${attemptId}`);
 			const attempt = await ExamAttempt.findOne({
 				_id: attemptId,
 				userId,
 			}).populate("examId");
 
 			if (!attempt) {
+                console.log(`[getAttemptStatus] Attempt not found for attemptId: ${attemptId}`);
 				throw new Error("Attempt not found");
 			}
 
+            console.log(`[getAttemptStatus] Raw attempt status: ${attempt.status}`);
+
 			// Check for timeout
 			if (attempt.autoSubmitOnTimeout && attempt.isTimedOut()) {
+                console.log(`[getAttemptStatus] Attempt timed out. Handling timeout.`);
 				await this.handleTimeout(attempt);
 			}
 
 			const currentSubject = attempt.getCurrentSubjectAttempt();
+            console.log(`[getAttemptStatus] Current subject from getCurrentSubjectAttempt(): ${currentSubject?.subjectIndex}, isCompleted: ${currentSubject?.isCompleted}`);
+
 			const timeRemaining = attempt.getTimeRemainingForCurrentSubject();
             let currentSubjectIndex = currentSubject?.subjectIndex;
 
             if (currentSubjectIndex === undefined && attempt.status === 'in_progress') {
                 currentSubjectIndex = 0;
             }
+            console.log(`[getAttemptStatus] Returning currentSubjectIndex: ${currentSubjectIndex}`);
 
 			return {
 				attemptId: attempt._id,
@@ -524,6 +532,63 @@ class ExamAttemptService {
 			throw error;
 		}
 	}
+
+    async advanceSubject(attemptId, userId) {
+        try {
+            console.log(`[advanceSubject] Attempting to advance subject for attemptId: ${attemptId}, userId: ${userId}`);
+            const attempt = await ExamAttempt.findOne({ _id: attemptId, userId });
+            if (!attempt) {
+                console.log(`[advanceSubject] Attempt not found for attemptId: ${attemptId}`);
+                throw new Error("Attempt not found");
+            }
+
+            console.log(`[advanceSubject] Attempt found. Status: ${attempt.status}`);
+            if (attempt.status !== "in_progress") {
+                console.log(`[advanceSubject] Exam not in progress. Status: ${attempt.status}`);
+                throw new Error("Exam is not in progress");
+            }
+
+            const currentSubjectAttempt = attempt.getCurrentSubjectAttempt();
+            console.log(`[advanceSubject] Current subject before advance: ${currentSubjectAttempt?.subjectIndex}, isCompleted: ${currentSubjectAttempt?.isCompleted}`);
+
+            if (!currentSubjectAttempt) {
+                console.log(`[advanceSubject] No active subject to advance from.`);
+                throw new Error("No active subject to advance from.");
+            }
+
+            // Mark the current subject as completed
+            currentSubjectAttempt.isCompleted = true;
+            currentSubjectAttempt.endTime = new Date();
+            currentSubjectAttempt.timeRemaining = 0; // Ensure time remaining is 0 for completed subject
+            console.log(`[advanceSubject] Marked subject ${currentSubjectAttempt.subjectIndex} as completed.`);
+
+            // Save the attempt to persist the completion of the current subject
+            await attempt.save();
+            console.log(`[advanceSubject] Attempt saved after marking current subject completed. Attempt object after save: ${JSON.stringify(attempt.subjectAttempts)}`);
+
+            // Check if there's a next subject
+            const nextSubjectAttempt = attempt.getCurrentSubjectAttempt();
+            console.log(`[advanceSubject] Next subject found: ${nextSubjectAttempt?.subjectIndex}`);
+
+            if (nextSubjectAttempt) {
+                // If there's a next subject, update its start time to now
+                // This effectively "starts" the timer for the next subject
+                nextSubjectAttempt.startTime = new Date();
+                await attempt.save(); // Save again to update the next subject's start time
+                console.log(`[advanceSubject] Attempt saved after updating next subject ${nextSubjectAttempt.subjectIndex} start time.`);
+            } else {
+                // If no next subject, all subjects are completed, so complete the exam
+                console.log(`[advanceSubject] No next subject. Calling completeExam.`);
+                await this.completeExam(attempt);
+            }
+
+            console.log(`[advanceSubject] Subject advanced successfully.`);
+            return { success: true };
+        } catch (error) {
+            console.error(`[advanceSubject] Error: ${error.message}`);
+            throw error;
+        }
+    }
 }
 
 module.exports = new ExamAttemptService();

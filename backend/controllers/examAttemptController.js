@@ -272,6 +272,23 @@ class ExamAttemptController {
 			res.status(400).json({ success: false, message: error.message });
 		}
 	}
+
+    async advanceSubject(req, res) {
+        try {
+            const { attemptId } = req.params;
+            const userId = req.user.id;
+
+            const result = await examAttemptService.advanceSubject(attemptId, userId);
+
+            res.status(200).json({
+                success: true,
+                message: "Advanced to next subject successfully",
+                data: result,
+            });
+        } catch (error) {
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = new ExamAttemptController();

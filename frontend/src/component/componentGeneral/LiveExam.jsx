@@ -12,9 +12,11 @@ const LiveExam = () => {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchExamStatus = useCallback(async () => {
-    setLoading(true);
+    // Don't set loading to true on auto-fetches, only initial
+    // setLoading(true);
     try {
       const response = await fetch(`/api/exam-attempts/${attemptId}/status`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -26,6 +28,7 @@ const LiveExam = () => {
       const data = await response.json();
       if (data.success) {
         setAttempt(data.data);
+        setAnswers({}); // Reset answers when fetching new subject/status
       } else {
         throw new Error(data.message || "Failed to fetch exam status");
       }
@@ -38,12 +41,14 @@ const LiveExam = () => {
 
   useEffect(() => {
     if (token) {
+      setLoading(true);
       fetchExamStatus();
     }
   }, [fetchExamStatus, token]);
 
+  // Timer countdown
   useEffect(() => {
-    if (attempt && attempt.timeRemaining) {
+    if (attempt && attempt.timeRemaining > 0 && attempt.status === "in_progress") {
       const timer = setInterval(() => {
         setAttempt((prevAttempt) => ({
           ...prevAttempt,
@@ -55,6 +60,86 @@ const LiveExam = () => {
     }
   }, [attempt]);
 
+  const submitCurrentSubjectAnswers = useCallback(async () => {
+    if (!attempt) return;
+    const { exam, currentSubject: currentSubjectIndex } = attempt;
+    const currentSubject = exam.subjects[currentSubjectIndex];
+    const answersToSubmit = [];
+
+    currentSubject.questions.forEach((question, qIndex) => {
+      const answer = answers[qIndex] !== undefined ? answers[qIndex] : null;
+      answersToSubmit.push({
+        questionIndex: qIndex,
+        answer: answer,
+        type: question.type,
+      });
+    });
+
+    try {
+      await fetch(`/api/exam-attempts/${attemptId}/submit-all-answers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          subjectIndex: currentSubjectIndex,
+          answers: answersToSubmit,
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to submit answers for the subject", error);
+      setError("Failed to submit answers. Please try again.");
+      throw error;
+    }
+  }, [attempt, answers, attemptId, token]);
+
+  // Auto-submit on timeout
+  useEffect(() => {
+    const handleTimeout = async () => {
+      setIsSubmitting(true);
+      await submitCurrentSubjectAnswers();
+
+      if (!attempt) return;
+
+      const isLastSubject = attempt.currentSubject >= attempt.exam.subjects.length - 1;
+      if (isLastSubject) {
+        await fetch(`/api/exam-attempts/${attemptId}/submit`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        navigate(`/exam/results/${attemptId}`);
+      } else {
+        // Call backend to advance to the next subject on timeout
+        const advanceResponse = await fetch(`/api/exam-attempts/${attemptId}/advance-subject`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!advanceResponse.ok) {
+          const errorData = await advanceResponse.json();
+          throw new Error(errorData.message || 'Failed to advance to next subject on timeout');
+        }
+
+        await fetchExamStatus();
+        setIsSubmitting(false);
+      }
+    };
+
+    if (
+      attempt &&
+      attempt.status === "in_progress" &&
+      attempt.timeRemaining <= 0 &&
+      !isSubmitting
+    ) {
+      handleTimeout();
+    }
+  }, [attempt, isSubmitting, submitCurrentSubjectAnswers, fetchExamStatus, attemptId, navigate, token]);
+
+
+  // Time sync with server
   useEffect(() => {
     const syncTime = setInterval(async () => {
       if (attempt && attempt.status === "in_progress") {
@@ -94,42 +179,40 @@ const LiveExam = () => {
     }
   };
 
-  const submitAllAnswers = async () => {
-    const { exam, currentSubject: currentSubjectIndex } = attempt;
-    const currentSubject = exam.subjects[currentSubjectIndex];
-    const answersToSubmit = [];
+  const handleNextSubject = async () => {
+    if (window.confirm("Are you sure you want to submit this subject and move to the next?")) {
+      setIsSubmitting(true);
+      try {
+        await submitCurrentSubjectAnswers(); // Submit answers for the current subject
 
-    currentSubject.questions.forEach((question, qIndex) => {
-      const answer = answers[qIndex] !== undefined ? answers[qIndex] : null; // Ensure answer is null if not present
-      answersToSubmit.push({
-        questionIndex: qIndex,
-        answer: answer,
-        type: question.type, // Include question type for backend processing
-      });
-    });
+        // Call backend to advance to the next subject
+        const advanceResponse = await fetch(`/api/exam-attempts/${attemptId}/advance-subject`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
 
-    try {
-      await fetch(`/api/exam-attempts/${attemptId}/submit-all-answers`, {
-        // Assuming a new endpoint
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          subjectIndex: currentSubjectIndex,
-          answers: answersToSubmit,
-        }),
-      });
-    } catch (error) {
-      console.error("Failed to submit all answers", error);
+        if (!advanceResponse.ok) {
+          const errorData = await advanceResponse.json();
+          throw new Error(errorData.message || 'Failed to advance to next subject');
+        }
+
+        await fetchExamStatus(); // Fetch the updated attempt status with the new subject
+      } catch (error) {
+        console.error("Failed to move to next subject", error);
+        setError("Failed to move to next subject. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   const handleCompleteExam = async () => {
     if (window.confirm("Are you sure you want to submit the exam?")) {
+      setIsSubmitting(true);
       try {
-        await submitAllAnswers(); // Submit all answers before completing the exam
+        await submitCurrentSubjectAnswers();
         await fetch(`/api/exam-attempts/${attemptId}/submit`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -137,6 +220,8 @@ const LiveExam = () => {
         navigate(`/exam/results/${attemptId}`);
       } catch (error) {
         console.error("Failed to submit exam", error);
+        setError("Failed to submit exam. Please try again.");
+        setIsSubmitting(false);
       }
     }
   };
@@ -242,6 +327,8 @@ const LiveExam = () => {
     return <div>This subject has no questions.</div>;
   }
 
+  const isLastSubject = currentSubjectIndex >= exam.subjects.length - 1;
+
   return (
       <div className="p-4 grid grid-cols-12 gap-4">
         <div className="col-span-9">
@@ -272,12 +359,23 @@ const LiveExam = () => {
             ))}
           </div>
           <div className="mt-8">
-            <button
-              onClick={handleCompleteExam}
-              className="bg-green-500 text-white py-2 px-4 rounded"
-            >
-              Submit Exam
-            </button>
+           {isLastSubject ? (
+              <button
+                onClick={handleCompleteExam}
+                disabled={isSubmitting}
+                className="bg-green-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Exam"}
+              </button>
+            ) : (
+              <button
+                onClick={handleNextSubject}
+                disabled={isSubmitting}
+                className="bg-blue-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
+              >
+                {isSubmitting ? "Submitting..." : "Submit & Next Subject"}
+              </button>
+            )}
           </div>
         </div>
         <div className="col-span-3">

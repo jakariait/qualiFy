@@ -681,8 +681,8 @@ router.delete(
 router.post("/exams",  examController.createExam);
 router.get("/exams", examController.getAllExams);
 router.get("/exams/:id", examController.getExamById);
-router.put("/exams/:id", adminProtect, examController.updateExam);
-router.delete("/exams/:id", adminProtect, examController.deleteExam);
+router.put("/exams/:id",  examController.updateExam);
+router.delete("/exams/:id", examController.deleteExam);
 
 
 // Exam Attempt Routes (User)
@@ -736,6 +736,7 @@ router.get(
   examAttemptController.syncTime,
 );
 router.get("/user/exam-attempts", examAttemptController.getUserAttempts);
+router.post("/exam-attempts/:attemptId/advance-subject", userProtect, examAttemptController.advanceSubject);
 
 // Result Routes (Admin)
 router.get("/results", adminProtect, resultController.getAllResults);
