@@ -681,6 +681,7 @@ router.delete(
 router.post("/exams",  examController.createExam);
 router.get("/exams", examController.getAllExams);
 router.get("/exams/:id", examController.getExamById);
+router.get("/exams/product/:productId", examController.getExamsByProductId);
 router.put("/exams/:id",  examController.updateExam);
 router.delete("/exams/:id", examController.deleteExam);
 

@@ -1,19 +1,40 @@
-
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
+import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
+import DOMPurify from "dompurify";
+
+import { Snackbar, Alert } from "@mui/material"; // ✅ MUI Snackbar
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const LiveExamList = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
   const { token } = useAuthUserStore();
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const showSnackbar = (message, severity = "error") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await fetch("/api/exams");
+        const response = await fetch(`${API_URL}/exams/product/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch exams");
         }
@@ -21,21 +42,23 @@ const LiveExamList = () => {
         if (Array.isArray(data.exams)) {
           setExams(data.exams);
         } else {
-          setError("Received invalid data from server");
+          showSnackbar("Received invalid data from server");
         }
       } catch (err) {
-        setError(err.message);
+        showSnackbar(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchExams();
-  }, []);
+    if (id) {
+      fetchExams();
+    }
+  }, [id]);
 
   const handleStartExam = async (examId) => {
     try {
-      const response = await fetch(`/api/exams/${examId}/start`, {
+      const response = await fetch(`${API_URL}/exams/${examId}/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,36 +78,67 @@ const LiveExamList = () => {
         throw new Error(result.message || "Failed to start exam");
       }
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      showSnackbar(err.message);
     }
   };
 
-  if (loading) {
-    return <div>Loading exams...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Live Exams</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {exams.map((exam) => (
-          <div key={exam._id} className="border p-4 rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold">{exam.title}</h3>
-            <p className="text-gray-600">{exam.description}</p>
-            <button
-              onClick={() => handleStartExam(exam._id)}
-              className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Start Exam
-            </button>
-          </div>
-        ))}
+    <section className="bg-gray-50 shadow-inner rounded-2xl p-6">
+      <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
+        Live Exams
+      </h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <ExamCardSkeleton key={index} />
+            ))
+          : exams.map((exam) => (
+              <div
+                key={exam._id}
+                className="bg-white border border-gray-200 p-3 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
+              >
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  {exam.title}
+                </h3>
+
+                <p
+                  className="text-gray-600 mt-2 mb-4"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(exam.description),
+                  }}
+                ></p>
+
+                <div className="flex justify-between text-sm text-gray-600 mt-4">
+                  <span>Total Marks: {exam.totalMarks}</span>
+                  <span>Duration: {exam.durationMin} mins</span>
+                </div>
+                <button
+                  onClick={() => handleStartExam(exam._id)}
+                  className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+                >
+                  Start Exam
+                </button>
+              </div>
+            ))}
       </div>
-    </div>
+
+      {/* ✅ MUI Snackbar for alerts */}
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </section>
   );
 };
 

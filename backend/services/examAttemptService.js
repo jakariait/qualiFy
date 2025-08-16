@@ -8,7 +8,7 @@ class ExamAttemptService {
 	async startExamAttempt(examId, userId, clientInfo = {}) {
 		try {
 			// Check if user already has an attempt for this exam
-		const existingAttempt = await ExamAttempt.findOne({ examId, userId, status: 'in_progress' });
+		        const existingAttempt = await ExamAttempt.findOne({ examId, userId, status: 'in_progress' });
 		if (existingAttempt) {
 			throw new Error("User already has an in-progress attempt for this exam");
 		}

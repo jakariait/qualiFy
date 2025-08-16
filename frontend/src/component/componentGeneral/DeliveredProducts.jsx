@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ImageComponent from "./ImageComponent.jsx";
+import { Link } from 'react-router-dom';
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -65,54 +67,52 @@ const DeliveredProducts = ({ userId, token }) => {
 
   const { deliveredProducts, totalQuantityPurchased } = data;
 
-  if (!deliveredProducts.length) {
+  const nonBookProducts = deliveredProducts.filter(
+    (item) => item.product.type !== "book",
+  );
+
+  if (!nonBookProducts.length) {
     return null;
   }
 
   return (
-    <section className="shadow rounded-xl p-4">
-      <h2 className="text-2xl font-bold mb-4">
-        Purchased Books & Courses (Total Items Bought: {totalQuantityPurchased})
-      </h2>
-
-      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {deliveredProducts.map(({ product, quantity, orderNo, orderDate }) => (
+    <section className="bg-gray-50 shadow-inner rounded-2xl p-3">
+      <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
+        Purchased Courses & Exams
+      </h1>
+      <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {nonBookProducts.map(({ product, orderNo, orderDate }) => (
           <li
             key={`${product._id}-${orderNo}`}
-            className="flex gap-4 rounded-xl shadow-sm"
+            className="flex gap-4 rounded-xl shadow-md bg-white transition-transform transform hover:-translate-y-1 overflow-hidden"
           >
-            <ImageComponent
-              imageName={product.thumbnailImage}
-              altName={product.name}
-              showSkeleton={false}
-              className={"h-44 w-44 object-contain"}
-            />
+            <div className="w-36 h-full">
+              <ImageComponent
+                imageName={product.thumbnailImage}
+                altName={product.name}
+                showSkeleton={false}
+                className={"w-full h-full object-cover"}
+              />
+            </div>
 
-            <div className="flex flex-col px-4 py-4 justify-between">
-              <h3 className=" font-semibold">{product.name}</h3>
-              <p>
-                <strong>Type:</strong>{" "}
-                {product.type.charAt(0).toUpperCase() + product.type.slice(1)}
-              </p>
-              {product.type === "book" && (
-                <p>
-                  <strong>Quantity:</strong> {quantity}
+            <div className="flex flex-col p-4 justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  {product.name}
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  <strong>Type:</strong>{" "}
+                  {product.type.charAt(0).toUpperCase() + product.type.slice(1)}
                 </p>
-              )}
-
-              <p>
-                <strong>Order No:</strong> {orderNo}
-              </p>
-              <p>
-                <strong>Purchased:</strong>{" "}
-                {new Date(orderDate).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Price:</strong> Tk.
-                {product.finalDiscount > 0
-                  ? product.finalDiscount
-                  : product.finalPrice}
-              </p>
+              </div>
+              <div className="mt-4">
+                <Link
+                  to={`/user/courses/${product._id}/exams`}
+                  className="inline-block primaryBgColor accentTextColor px-4 py-2 rounded-lg text-sm font-semibold  transition-colors shadow-md"
+                >
+                  View Exams
+                </Link>
+              </div>
             </div>
           </li>
         ))}

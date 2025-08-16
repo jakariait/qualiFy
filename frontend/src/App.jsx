@@ -177,7 +177,6 @@ function App() {
         <Route element={<UserProtectedRoute />}>
           <Route path="/resource-viewer/:id" element={<ResourceViewerPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-
           <Route path="/user/home" element={<UserHomePage />} />
           <Route path="/user/orders" element={<UserAllOrdersPage />} />
           <Route
@@ -189,7 +188,8 @@ function App() {
             path="/user/change-password"
             element={<ChangePasswordPage />}
           />
-          <Route path="/exam/attempt/:attemptId" element={<LiveExamPage />} />
+          <Route path="/user/courses/:id/exams" element={<LiveExamPage />} />{" "}
+          <Route path="/exam/attempt/:attemptId" element={<LiveExamPage />} />{" "}
           <Route path="/exam/results/:attemptId" element={<ExamResultPage />} />
         </Route>
 

@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import QuestionPalette from "./QuestionPalette.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const LiveExam = () => {
   const { attemptId } = useParams();
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ const LiveExam = () => {
     // Don't set loading to true on auto-fetches, only initial
     // setLoading(true);
     try {
-      const response = await fetch(`/api/exam-attempts/${attemptId}/status`, {
+      const response = await fetch(`${API_URL}/exam-attempts/${attemptId}/status`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) {
@@ -76,7 +78,7 @@ const LiveExam = () => {
     });
 
     try {
-      await fetch(`/api/exam-attempts/${attemptId}/submit-all-answers`, {
+      await fetch(`${API_URL}/exam-attempts/${attemptId}/submit-all-answers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,14 +106,14 @@ const LiveExam = () => {
 
       const isLastSubject = attempt.currentSubject >= attempt.exam.subjects.length - 1;
       if (isLastSubject) {
-        await fetch(`/api/exam-attempts/${attemptId}/submit`, {
+        await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
         navigate(`/exam/results/${attemptId}`);
       } else {
         // Call backend to advance to the next subject on timeout
-        const advanceResponse = await fetch(`/api/exam-attempts/${attemptId}/advance-subject`, {
+        const advanceResponse = await fetch(`${API_URL}/exam-attempts/${attemptId}/advance-subject`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -145,7 +147,7 @@ const LiveExam = () => {
       if (attempt && attempt.status === "in_progress") {
         try {
           const response = await fetch(
-            `/api/exam-attempts/${attemptId}/sync-time`,
+            `${API_URL}/exam-attempts/${attemptId}/sync-time`,
             {
               headers: { Authorization: `Bearer ${token}` },
             },
@@ -186,7 +188,7 @@ const LiveExam = () => {
         await submitCurrentSubjectAnswers(); // Submit answers for the current subject
 
         // Call backend to advance to the next subject
-        const advanceResponse = await fetch(`/api/exam-attempts/${attemptId}/advance-subject`, {
+        const advanceResponse = await fetch(`${API_URL}/exam-attempts/${attemptId}/advance-subject`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -213,11 +215,11 @@ const LiveExam = () => {
       setIsSubmitting(true);
       try {
         await submitCurrentSubjectAnswers();
-        await fetch(`/api/exam-attempts/${attemptId}/submit`, {
+        await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
-        navigate(`/exam/results/${attemptId}`);
+        navigate(`/user/exam/results/${attemptId}`);
       } catch (error) {
         console.error("Failed to submit exam", error);
         setError("Failed to submit exam. Please try again.");

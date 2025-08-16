@@ -54,10 +54,21 @@ const deleteExam = asyncHandler(async (req, res) => {
   }
 });
 
+// Get exams by product ID
+const getExamsByProductId = asyncHandler(async (req, res) => {
+  try {
+    const exams = await examService.getExamsByProductId(req.params.productId);
+    res.status(200).json({ message: 'Exams retrieved successfully', exams });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch exams', error: error.message });
+  }
+});
+
 module.exports = {
   createExam,
   getAllExams,
   getExamById,
   updateExam,
   deleteExam,
+  getExamsByProductId,
 };

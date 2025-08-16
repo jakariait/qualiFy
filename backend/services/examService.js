@@ -22,10 +22,18 @@ const deleteExam = async (id) => {
   return Exam.findByIdAndDelete(id);
 };
 
+const getExamsByProductId = async (productId) => {
+  return Exam.find({
+    productIds: productId,
+    status: 'published',
+  }).sort({ createdAt: -1 });
+};
+
 module.exports = {
   createExam,
   getAllExams,
   getExamById,
   updateExam,
   deleteExam,
+  getExamsByProductId,
 };
