@@ -188,9 +188,15 @@ function App() {
             path="/user/change-password"
             element={<ChangePasswordPage />}
           />
-          <Route path="/user/courses/:id/exams" element={<LiveExamPage />} />{" "}
-          <Route path="/exam/attempt/:attemptId" element={<LiveExamPage />} />{" "}
-          <Route path="/exam/results/:attemptId" element={<ExamResultPage />} />
+          <Route path="/user/courses/:id/exams" element={<LiveExamPage />} />
+          <Route
+            path="/user/exam/attempt/:attemptId"
+            element={<LiveExamPage />}
+          />
+          <Route
+            path="/user/exam/results/:attemptId"
+            element={<ExamResultPage />}
+          />
         </Route>
 
         {/* Protected Admin Routes */}

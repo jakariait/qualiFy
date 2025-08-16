@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ImageComponent from "./ImageComponent.jsx";
-import { Link } from 'react-router-dom';
-
+import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -110,7 +109,7 @@ const DeliveredProducts = ({ userId, token }) => {
                   to={`/user/courses/${product._id}/exams`}
                   className="inline-block primaryBgColor accentTextColor px-4 py-2 rounded-lg text-sm font-semibold  transition-colors shadow-md"
                 >
-                  View Exams
+                  View All Exams
                 </Link>
               </div>
             </div>

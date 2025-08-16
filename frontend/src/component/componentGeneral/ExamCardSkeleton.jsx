@@ -4,7 +4,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 
 const ExamCardSkeleton = () => {
   return (
-    <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-md">
+    <div className="bg-white  p-6 rounded-xl shadow-md">
       <Skeleton height={28} width="80%" />
       <Skeleton height={20} width="90%" className="mt-4" />
       <div className="flex justify-between mt-4">

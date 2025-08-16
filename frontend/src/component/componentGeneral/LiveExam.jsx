@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import QuestionPalette from "./QuestionPalette.jsx";
+import DOMPurify from "dompurify";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -20,9 +21,12 @@ const LiveExam = () => {
     // Don't set loading to true on auto-fetches, only initial
     // setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/exam-attempts/${attemptId}/status`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${API_URL}/exam-attempts/${attemptId}/status`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to fetch exam status");
@@ -50,7 +54,11 @@ const LiveExam = () => {
 
   // Timer countdown
   useEffect(() => {
-    if (attempt && attempt.timeRemaining > 0 && attempt.status === "in_progress") {
+    if (
+      attempt &&
+      attempt.timeRemaining > 0 &&
+      attempt.status === "in_progress"
+    ) {
       const timer = setInterval(() => {
         setAttempt((prevAttempt) => ({
           ...prevAttempt,
@@ -104,25 +112,31 @@ const LiveExam = () => {
 
       if (!attempt) return;
 
-      const isLastSubject = attempt.currentSubject >= attempt.exam.subjects.length - 1;
+      const isLastSubject =
+        attempt.currentSubject >= attempt.exam.subjects.length - 1;
       if (isLastSubject) {
         await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
-        navigate(`/exam/results/${attemptId}`);
+        navigate(`/user/exam/results/${attemptId}`);
       } else {
         // Call backend to advance to the next subject on timeout
-        const advanceResponse = await fetch(`${API_URL}/exam-attempts/${attemptId}/advance-subject`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const advanceResponse = await fetch(
+          `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
         if (!advanceResponse.ok) {
           const errorData = await advanceResponse.json();
-          throw new Error(errorData.message || 'Failed to advance to next subject on timeout');
+          throw new Error(
+            errorData.message || "Failed to advance to next subject on timeout",
+          );
         }
 
         await fetchExamStatus();
@@ -138,8 +152,15 @@ const LiveExam = () => {
     ) {
       handleTimeout();
     }
-  }, [attempt, isSubmitting, submitCurrentSubjectAnswers, fetchExamStatus, attemptId, navigate, token]);
-
+  }, [
+    attempt,
+    isSubmitting,
+    submitCurrentSubjectAnswers,
+    fetchExamStatus,
+    attemptId,
+    navigate,
+    token,
+  ]);
 
   // Time sync with server
   useEffect(() => {
@@ -182,22 +203,31 @@ const LiveExam = () => {
   };
 
   const handleNextSubject = async () => {
-    if (window.confirm("Are you sure you want to submit this subject and move to the next?")) {
+    if (
+      window.confirm(
+        "Are you sure you want to submit this subject and move to the next?",
+      )
+    ) {
       setIsSubmitting(true);
       try {
         await submitCurrentSubjectAnswers(); // Submit answers for the current subject
 
         // Call backend to advance to the next subject
-        const advanceResponse = await fetch(`${API_URL}/exam-attempts/${attemptId}/advance-subject`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const advanceResponse = await fetch(
+          `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
         if (!advanceResponse.ok) {
           const errorData = await advanceResponse.json();
-          throw new Error(errorData.message || 'Failed to advance to next subject');
+          throw new Error(
+            errorData.message || "Failed to advance to next subject",
+          );
         }
 
         await fetchExamStatus(); // Fetch the updated attempt status with the new subject
@@ -232,35 +262,29 @@ const LiveExam = () => {
     const answer = answers[qIndex];
     switch (question.type) {
       case "mcq-single":
-        return question.options.map((option, index) => (
-          <div key={index}>
-            <input
-              type="radio"
-              name={`question-${qIndex}`}
-              value={option}
-              checked={answer === option}
-              onChange={(e) =>
-                handleAnswerChange(qIndex, e.target.value, question.type)
-              }
-            />
-            <label className="ml-2">{option}</label>
+        return (
+          <div>
+            {question.options.map((option, index) => (
+              <div key={index} className="mb-2">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`question-${qIndex}`}
+                    value={option}
+                    checked={answer === option}
+                    onChange={(e) =>
+                      handleAnswerChange(qIndex, e.target.value, question.type)
+                    }
+                    className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                  />
+                  <span className="ml-2 text-gray-700">
+                    {String.fromCharCode(65 + index)}. {option}
+                  </span>
+                </label>
+              </div>
+            ))}
           </div>
-        ));
-      case "mcq-multiple":
-        return question.options.map((option, index) => (
-          <div key={index}>
-            <input
-              type="checkbox"
-              name={`question-${qIndex}`}
-              value={option}
-              checked={answer?.includes(option)}
-              onChange={(e) =>
-                handleAnswerChange(qIndex, e.target.value, question.type)
-              }
-            />
-            <label className="ml-2">{option}</label>
-          </div>
-        ));
+        );
       case "short":
         return (
           <textarea
@@ -299,7 +323,7 @@ const LiveExam = () => {
           This exam attempt is now complete. Status: {attempt.status}
         </p>
         <Link
-          to={`/exam/results/${attemptId}`}
+          to={`/user/exam/results/${attemptId}`}
           className="text-blue-500 hover:underline"
         >
           View Results
@@ -331,62 +355,77 @@ const LiveExam = () => {
 
   const isLastSubject = currentSubjectIndex >= exam.subjects.length - 1;
 
+  const formattedAnswersForPalette = currentSubject.questions.map(
+    (_, qIndex) => {
+      return answers[qIndex];
+    },
+  );
+
   return (
-      <div className="p-4 grid grid-cols-12 gap-4">
-        <div className="col-span-9">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">{exam.title}</h2>
-            <div className="text-xl font-bold">
-              Time Remaining: {Math.floor(timeRemaining / 60)}:
-              {(timeRemaining % 60).toString().padStart(2, "0")}
-            </div>
-          </div>
-          <div className="mb-4">
-            <h3 className="text-xl font-semibold">{currentSubject.title}</h3>
-          </div>
-          <div>
-            {currentSubject.questions.map((question, qIndex) => (
-              <div
-                key={qIndex}
-                className="mb-8 p-4 border rounded-lg shadow-sm"
-              >
-                <h4 className="text-lg font-semibold mb-2">
-                  Question {qIndex + 1}:{" "}
-                  <span
-                    dangerouslySetInnerHTML={{ __html: question.text }}
-                  ></span>
-                </h4>
-                <div>{renderQuestion(question, qIndex)}</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8">
-           {isLastSubject ? (
-              <button
-                onClick={handleCompleteExam}
-                disabled={isSubmitting}
-                className="bg-green-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Exam"}
-              </button>
-            ) : (
-              <button
-                onClick={handleNextSubject}
-                disabled={isSubmitting}
-                className="bg-blue-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
-              >
-                {isSubmitting ? "Submitting..." : "Submit & Next Subject"}
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="col-span-3">
-          <QuestionPalette
-            questions={currentSubject.questions}
-            answers={answers}
-          />
+    <div className="bg-orange-100 shadow-inner rounded-2xl p-3 grid grid-cols-1 gap-4">
+      <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center">
+        <h2 className="text-xl primaryTextColor">{exam.title}</h2>
+        <h2
+          className=""
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(exam.description),
+          }}
+        ></h2>
+        <div className="primaryTextColor">
+          Time Remaining: {Math.floor(timeRemaining / 60)}:
+          {(timeRemaining % 60).toString().padStart(2, "0")}
         </div>
       </div>
+
+      <div>
+        <QuestionPalette
+          questions={currentSubject.questions}
+          answers={formattedAnswersForPalette}
+          subjectName={currentSubject.title}
+        />
+      </div>
+
+      <div>
+        {currentSubject.questions.map((question, qIndex) => (
+          <div
+            key={qIndex}
+            className="mb-2 p-4 bg-white shadow-inner rounded-2xl"
+          >
+            <h4 className="text-lg font-semibold mb-2 whitespace-nowrap overflow-ellipsis overflow-hidden">
+              {qIndex + 1}:{" "}
+              <span
+                className="primaryTextColor inline-block"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(question.text),
+                }}
+              />
+            </h4>
+
+            <div>{renderQuestion(question, qIndex)}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className={"flex flex-col items-center justify-center"}>
+        {isLastSubject ? (
+          <button
+            onClick={handleCompleteExam}
+            disabled={isSubmitting}
+            className="bg-green-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
+          >
+            {isSubmitting ? "Submitting..." : "Submit Exam"}
+          </button>
+        ) : (
+          <button
+            onClick={handleNextSubject}
+            disabled={isSubmitting}
+            className="bg-blue-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
+          >
+            {isSubmitting ? "Submitting..." : "Submit & Next Subject"}
+          </button>
+        )}
+      </div>
+    </div>
   );
 };
 

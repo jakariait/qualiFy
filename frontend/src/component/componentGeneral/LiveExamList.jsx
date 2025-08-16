@@ -73,7 +73,7 @@ const LiveExamList = () => {
 
       const result = await response.json();
       if (result.success) {
-        navigate(`/exam/attempt/${result.data.attemptId}`);
+        navigate(`/user/exam/attempt/${result.data.attemptId}`);
       } else {
         throw new Error(result.message || "Failed to start exam");
       }
@@ -83,7 +83,7 @@ const LiveExamList = () => {
   };
 
   return (
-    <section className="bg-gray-50 shadow-inner rounded-2xl p-6">
+    <section className="bg-gray-50 shadow-inner rounded-2xl p-3">
       <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
         Live Exams
       </h1>
