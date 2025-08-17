@@ -122,7 +122,7 @@ const LiveExamList = () => {
             ))
           : exams.map((exam) => {
               const userAttempt = userAttempts.find(
-                (attempt) => attempt.examId === exam._id
+                (attempt) => attempt.examId === exam._id,
               );
               const hasAttempted = !!userAttempt;
               const attemptId = userAttempt ? userAttempt._id : null;
@@ -145,7 +145,7 @@ const LiveExamList = () => {
 
                   <div className="flex justify-between text-sm text-gray-600 mt-4">
                     <span>Total Marks: {exam.totalMarks}</span>
-                    <span>Duration: {exam.durationMin} mins</span>
+                    <span>Duration: {exam.durationMin} Mins</span>
                   </div>
                   {hasAttempted ? (
                     <button

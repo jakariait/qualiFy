@@ -741,7 +741,9 @@ router.get(
   userProtect,
   examAttemptController.syncTime,
 );
+
 router.get("/user/exam-attempts", examAttemptController.getUserAttempts);
+
 router.post(
   "/exam-attempts/:attemptId/advance-subject",
   userProtect,
@@ -749,33 +751,22 @@ router.post(
 );
 
 // Result Routes (Admin)
-router.get("/results", adminProtect, resultController.getAllResults);
-router.get("/results/:resultId", adminProtect, resultController.getResultById);
+router.get("/results", resultController.getAllResults);
+router.get("/results/:resultId", resultController.getResultById);
 router.post(
   "/results/:resultId/review-question",
-  adminProtect,
   resultController.reviewQuestion,
 );
 router.post(
   "/results/:resultId/review-multiple",
-  adminProtect,
   resultController.reviewMultipleQuestions,
 );
-router.post(
-  "/results/:resultId/finalize",
-  adminProtect,
-  resultController.finalizeResult,
-);
+router.post("/results/:resultId/finalize", resultController.finalizeResult);
 router.get(
   "/results/:resultId/pending-questions",
-  adminProtect,
   resultController.getPendingReviewQuestions,
 );
-router.get(
-  "/results/statistics",
-  adminProtect,
-  resultController.getResultStatistics,
-);
-router.get("/results/export", adminProtect, resultController.exportResults);
+router.get("/results/statistics", resultController.getResultStatistics);
+router.get("/results/export", resultController.exportResults);
 
 module.exports = router;

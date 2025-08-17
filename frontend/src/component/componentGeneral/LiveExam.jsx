@@ -131,9 +131,7 @@ const LiveExam = () => {
       }
     });
 
-    // The backend is inconsistent, but we try to satisfy both router and controller.
-    // Controller wants subjectIndex and answers in a single JSON string.
-    // Router wants a single file in a field named 'answer'.
+
     if (imageFiles.length > 1) {
       showSnackbar(
         "Warning: This exam allows only one image upload per subject.",

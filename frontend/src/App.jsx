@@ -84,8 +84,6 @@ import ViewAllClassPage from "./pagesUser/ViewAllClassPage.jsx";
 import ExamListPage from "./pagesAdmin/ExamListPage.jsx";
 import CreateExamPage from "./pagesAdmin/CreateExamPage.jsx";
 import EditExamPage from "./pagesAdmin/EditExamPage.jsx";
-import LiveExam from "./component/componentGeneral/LiveExam.jsx";
-import ExamResults from "./component/componentGeneral/ExamResults.jsx";
 import LiveExamPage from "./pagesUser/LiveExamPage.jsx";
 import ExamResultPage from "./pagesUser/ExamResultPage.jsx";
 

@@ -67,7 +67,8 @@ const ExamResults = () => {
         <div className="bg-gray-50 shadow-inner rounded-2xl p-3 flex flex-col items-center justify-center">
           <h3 className="text-xl primaryTextColor font-bold">Summary</h3>
           <p>
-            <strong>Status:</strong> {attempt.status}
+            <strong>Status:</strong>{" "}
+            {attempt.status.charAt(0).toUpperCase() + attempt.status.slice(1)}
           </p>
           <p>
             <strong>Total Marks:</strong> {result.totalMarks}
@@ -107,33 +108,46 @@ const ExamResults = () => {
               dangerouslySetInnerHTML={{ __html: qResult.questionText }}
             ></p>
             <p>
-              <strong>Your Answer:</strong> {JSON.stringify(qResult.userAnswer)}
+              <strong>Your Answer:</strong>{" "}
+              {qResult.questionType === "image" ? (
+                <a
+                  href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${qResult.userAnswer}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={"primaryTextColor underline"}
+                >
+                  View Uploaded Image
+                </a>
+              ) : (
+                JSON.stringify(qResult.userAnswer)
+              )}
             </p>
-            <p>
-              <strong>Correct Answer:</strong>{" "}
-              {(() => {
-                let displayCorrectAnswer = JSON.stringify(
-                  qResult.correctAnswer,
-                );
-                const subject = exam.subjects[qResult.subjectIndex];
-                const question = subject?.questions[qResult.questionIndex];
 
-                if (
-                  question &&
-                  (qResult.questionType === "mcq-single" ||
-                    qResult.questionType === "mcq-multiple")
-                ) {
-                  if (
-                    Array.isArray(qResult.correctAnswer) &&
-                    question.options
-                  ) {
-                    displayCorrectAnswer = qResult.correctAnswer
-                      .map((idx) => question.options[idx])
-                      .join(", ");
-                  }
-                }
-                return displayCorrectAnswer;
-              })()}
+            <p>
+              {qResult.questionType === "mcq-single" && (
+                <p>
+                  <strong>Correct Answer:</strong>{" "}
+                  {(() => {
+                    let displayCorrectAnswer = JSON.stringify(
+                      qResult.correctAnswer,
+                    );
+                    const subject = exam.subjects[qResult.subjectIndex];
+                    const question = subject?.questions[qResult.questionIndex];
+
+                    if (
+                      question &&
+                      Array.isArray(qResult.correctAnswer) &&
+                      question.options
+                    ) {
+                      displayCorrectAnswer = qResult.correctAnswer
+                        .map((idx) => question.options[idx])
+                        .join(", ");
+                    }
+
+                    return displayCorrectAnswer;
+                  })()}
+                </p>
+              )}
             </p>
             <p>
               <strong>Status:</strong>{" "}

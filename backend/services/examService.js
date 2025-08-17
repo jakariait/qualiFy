@@ -15,7 +15,17 @@ const getExamById = async (id) => {
 };
 
 const updateExam = async (id, data) => {
-  return Exam.findByIdAndUpdate(id, data, { new: true });
+  const exam = await Exam.findById(id);
+  if (!exam) {
+    return null;
+  }
+
+  // Update exam properties based on data
+  // This will trigger the pre('save') hook when exam.save() is called
+  Object.assign(exam, data);
+
+  await exam.save();
+  return exam;
 };
 
 const deleteExam = async (id) => {
