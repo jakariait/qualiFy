@@ -100,6 +100,39 @@ ResultSchema.pre("save", function (next) {
 	next();
 });
 
+// Post-save hook for debugging and updating ExamAttempt
+ResultSchema.post("save", async function (doc) {
+    console.log(`Result saved: Attempt ID - ${doc.attemptId}, Total Marks - ${doc.totalMarks}, Obtained Marks - ${doc.obtainedMarks}`);
+
+    // Find the corresponding ExamAttempt
+    const ExamAttempt = mongoose.model('ExamAttempt');
+    const examAttempt = await ExamAttempt.findById(doc.attemptId);
+
+    if (examAttempt) {
+        // Iterate through questionResults in the Result document
+        for (const qr of doc.questionResults) {
+            // Find the corresponding answer in the ExamAttempt
+            const subjectAttempt = examAttempt.subjectAttempts.find(
+                (sa) => sa.subjectIndex === qr.subjectIndex
+            );
+
+            if (subjectAttempt) {
+                const answer = subjectAttempt.answers.find(
+                    (ans) => ans.questionIndex === qr.questionIndex
+                );
+
+                if (answer) {
+                    // Update isCorrect and marksObtained in ExamAttempt's answer
+                    answer.isCorrect = qr.isCorrect;
+                    answer.marksObtained = qr.marksObtained;
+                }
+            }
+        }
+        // Save the ExamAttempt to trigger its pre('save') hook and recalculate results
+        await examAttempt.save();
+    }
+});
+
 // Method to calculate statistics
 ResultSchema.methods.calculateStatistics = function () {
 	// Calculate MCQ statistics
@@ -132,6 +165,16 @@ ResultSchema.methods.calculateStatistics = function () {
 	} else if (this.reviewedCount > 0) {
 		this.status = "partially_reviewed";
 	}
+
+	// Ensure marksObtained is consistent with isCorrect for all questions
+	this.questionResults.forEach((question) => {
+		if (question.isCorrect === true) {
+			question.marksObtained = question.maxMarks;
+		} else if (question.isCorrect === false) {
+			question.marksObtained = 0;
+		}
+		// If isCorrect is null, marksObtained remains 0 (default)
+	});
 
 	// Calculate total marks and percentage
 	this.totalMarks = this.questionResults.reduce(

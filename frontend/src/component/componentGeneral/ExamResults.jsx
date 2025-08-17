@@ -110,18 +110,23 @@ const ExamResults = () => {
             <p>
               <strong>Your Answer:</strong>{" "}
               {qResult.questionType === "image" ? (
-                <a
-                  href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${qResult.userAnswer}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={"primaryTextColor underline"}
-                >
-                  View Uploaded Image
-                </a>
+                qResult.userAnswer ? (
+                  <a
+                    href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${qResult.userAnswer}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="primaryTextColor underline"
+                  >
+                    View Uploaded Image
+                  </a>
+                ) : (
+                  <span>No image uploaded</span>
+                )
               ) : (
                 JSON.stringify(qResult.userAnswer)
               )}
             </p>
+
 
             <p>
               {qResult.questionType === "mcq-single" && (

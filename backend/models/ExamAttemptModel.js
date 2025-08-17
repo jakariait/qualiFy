@@ -75,33 +75,44 @@ const ExamAttemptSchema = new mongoose.Schema(
 
 
 // Pre-save middleware to calculate results
-ExamAttemptSchema.pre("save", function (next) {
+ExamAttemptSchema.pre("save", async function (next) {
 	if (
 		this.status === "completed" ||
 		this.status === "submitted" ||
 		this.status === "timeout"
 	) {
-		this.calculateResults();
+		await this.calculateResults();
 	}
 	next();
 });
 
 // Method to calculate results
-ExamAttemptSchema.methods.calculateResults = function () {
-	let totalMarks = 0;
-	let obtainedMarks = 0;
+ExamAttemptSchema.methods.calculateResults = async function () {
+	let calculatedObtainedMarks = 0;
 
 	this.subjectAttempts.forEach((subjectAttempt) => {
 		subjectAttempt.answers.forEach((answer) => {
 			if (answer.isCorrect !== null) {
 				// Only count reviewed answers
-				totalMarks += answer.marksObtained || 0;
+				calculatedObtainedMarks += answer.marksObtained || 0;
 			}
 		});
 	});
 
-	this.obtainedMarks = obtainedMarks;
-	this.percentage = totalMarks > 0 ? (obtainedMarks / totalMarks) * 100 : 0;
+	this.obtainedMarks = calculatedObtainedMarks;
+
+	// Fetch the Exam document to get total possible marks
+	const Exam = this.model('Exam'); // Get the Exam model
+	const exam = await Exam.findById(this.examId);
+
+	if (exam && exam.totalMarks !== undefined) {
+		this.totalMarks = exam.totalMarks;
+	} else {
+		console.warn(`Exam ${this.examId} or its totalMarks not found for ExamAttempt ${this._id}. Setting totalMarks to 0.`);
+		this.totalMarks = 0;
+	}
+
+	this.percentage = this.totalMarks > 0 ? (this.obtainedMarks / this.totalMarks) * 100 : 0;
 };
 
 // Method to check if exam is timed out

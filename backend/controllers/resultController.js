@@ -1,8 +1,26 @@
 const Result = require("../models/Result");
 const ExamAttempt = require("../models/ExamAttemptModel");
 const Exam = require("../models/ExamModel");
+const resultService = require("../services/resultService");
 
 class ResultController {
+	// Get all results for a specific exam
+	async getResultsByExamId(req, res) {
+		try {
+			const { examId } = req.params;
+			const results = await resultService.getResultsByExamId(examId);
+			res.status(200).json({
+				success: true,
+				data: results,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: error.message,
+			});
+		}
+	}
+
 	// Get all results for admin review
 	async getAllResults(req, res) {
 		try {

@@ -751,6 +751,7 @@ router.post(
 );
 
 // Result Routes (Admin)
+router.get("/results/exam/:examId", resultController.getResultsByExamId);
 router.get("/results", resultController.getAllResults);
 router.get("/results/:resultId", resultController.getResultById);
 router.post(
