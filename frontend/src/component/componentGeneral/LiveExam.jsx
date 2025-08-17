@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import QuestionPalette from "./QuestionPalette.jsx";
 import DOMPurify from "dompurify";
+import { Snackbar, Alert, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from "@mui/material"; // ✅ MUI Snackbar and Dialog
+import LiveExamSkeleton from "./LiveExamSkeleton.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -16,6 +18,25 @@ const LiveExam = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmDialogTitle, setConfirmDialogTitle] = useState("");
+  const [confirmDialogMessage, setConfirmDialogMessage] = useState("");
+  const [confirmDialogCallback, setConfirmDialogCallback] = useState(null);
+
+  const showSnackbar = (message, severity = "error") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const fetchExamStatus = useCallback(async () => {
     // Don't set loading to true on auto-fetches, only initial
@@ -39,7 +60,7 @@ const LiveExam = () => {
         throw new Error(data.message || "Failed to fetch exam status");
       }
     } catch (err) {
-      setError(err.message);
+      showSnackbar(err.message);
     } finally {
       setLoading(false);
     }
@@ -99,7 +120,7 @@ const LiveExam = () => {
       });
     } catch (error) {
       console.error("Failed to submit answers for the subject", error);
-      setError("Failed to submit answers. Please try again.");
+      showSnackbar("Failed to submit answers. Please try again.");
       throw error;
     }
   }, [attempt, answers, attemptId, token]);
@@ -119,6 +140,7 @@ const LiveExam = () => {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
+        showSnackbar("Time's up! Exam submitted automatically.", "info");
         navigate(`/user/exam/results/${attemptId}`);
       } else {
         // Call backend to advance to the next subject on timeout
@@ -138,7 +160,7 @@ const LiveExam = () => {
             errorData.message || "Failed to advance to next subject on timeout",
           );
         }
-
+        showSnackbar("Time's up! Moving to next subject automatically.", "info");
         await fetchExamStatus();
         setIsSubmitting(false);
       }
@@ -203,11 +225,11 @@ const LiveExam = () => {
   };
 
   const handleNextSubject = async () => {
-    if (
-      window.confirm(
-        "Are you sure you want to submit this subject and move to the next?",
-      )
-    ) {
+    setConfirmDialogTitle("Confirm Subject Submission");
+    setConfirmDialogMessage(
+      "Are you sure you want to submit this subject and move to the next?",
+    );
+    setConfirmDialogCallback(async () => {
       setIsSubmitting(true);
       try {
         await submitCurrentSubjectAnswers(); // Submit answers for the current subject
@@ -231,17 +253,21 @@ const LiveExam = () => {
         }
 
         await fetchExamStatus(); // Fetch the updated attempt status with the new subject
+        showSnackbar("Subject submitted and moved to next.", "success");
       } catch (error) {
         console.error("Failed to move to next subject", error);
-        setError("Failed to move to next subject. Please try again.");
+        showSnackbar("Failed to move to next subject. Please try again.");
       } finally {
         setIsSubmitting(false);
       }
-    }
+    });
+    setConfirmDialogOpen(true);
   };
 
   const handleCompleteExam = async () => {
-    if (window.confirm("Are you sure you want to submit the exam?")) {
+    setConfirmDialogTitle("Confirm Exam Submission");
+    setConfirmDialogMessage("Are you sure you want to submit the exam?");
+    setConfirmDialogCallback(async () => {
       setIsSubmitting(true);
       try {
         await submitCurrentSubjectAnswers();
@@ -249,13 +275,15 @@ const LiveExam = () => {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
+        showSnackbar("Exam submitted successfully!", "success");
         navigate(`/user/exam/results/${attemptId}`);
       } catch (error) {
         console.error("Failed to submit exam", error);
-        setError("Failed to submit exam. Please try again.");
+        showSnackbar("Failed to submit exam. Please try again.");
         setIsSubmitting(false);
       }
-    }
+    });
+    setConfirmDialogOpen(true);
   };
 
   const renderQuestion = (question, qIndex) => {
@@ -311,7 +339,7 @@ const LiveExam = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LiveExamSkeleton />;
   if (error) return <div>Error: {error}</div>;
   if (!attempt) return <div>No attempt data found.</div>;
 
@@ -411,7 +439,7 @@ const LiveExam = () => {
           <button
             onClick={handleCompleteExam}
             disabled={isSubmitting}
-            className="bg-green-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
+            className="primaryBgColor accentTextColor cursor-pointer py-2 px-4 rounded disabled:bg-gray-400"
           >
             {isSubmitting ? "Submitting..." : "Submit Exam"}
           </button>
@@ -419,12 +447,60 @@ const LiveExam = () => {
           <button
             onClick={handleNextSubject}
             disabled={isSubmitting}
-            className="bg-blue-500 text-white py-2 px-4 rounded disabled:bg-gray-400"
+            className="primaryBgColor accentTextColor cursor-pointer py-2 px-4 rounded disabled:bg-gray-400"
           >
             {isSubmitting ? "Submitting..." : "Submit & Next Subject"}
           </button>
         )}
       </div>
+
+      {/* ✅ MUI Snackbar for alerts */}
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+      >
+        <DialogTitle id="confirm-dialog-title">{confirmDialogTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-dialog-description">
+            {confirmDialogMessage}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              if (confirmDialogCallback) {
+                confirmDialogCallback();
+              }
+              setConfirmDialogOpen(false);
+            }}
+            color="primary"
+            autoFocus
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

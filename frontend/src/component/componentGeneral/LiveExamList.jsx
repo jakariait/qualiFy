@@ -11,7 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const LiveExamList = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [userAttempts, setUserAttempts] = useState([]);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -51,10 +51,33 @@ const LiveExamList = () => {
       }
     };
 
+    const fetchUserAttempts = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_URL}/user/exam-attempts`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch user attempts");
+        }
+        const data = await response.json();
+        if (Array.isArray(data.attempts)) {
+          setUserAttempts(data.attempts);
+        } else {
+          showSnackbar("Received invalid user attempts data from server");
+        }
+      } catch (err) {
+        showSnackbar(err.message);
+      }
+    };
+
     if (id) {
       fetchExams();
     }
-  }, [id]);
+    fetchUserAttempts();
+  }, [id, token]);
 
   const handleStartExam = async (examId) => {
     try {
@@ -82,6 +105,10 @@ const LiveExamList = () => {
     }
   };
 
+  const handleViewResults = (attemptId) => {
+    navigate(`/user/exam/result/${attemptId}`);
+  };
+
   return (
     <section className="bg-gray-50 shadow-inner rounded-2xl p-3">
       <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
@@ -93,34 +120,51 @@ const LiveExamList = () => {
           ? Array.from({ length: 3 }).map((_, index) => (
               <ExamCardSkeleton key={index} />
             ))
-          : exams.map((exam) => (
-              <div
-                key={exam._id}
-                className="bg-white border border-gray-200 p-3 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
-              >
-                <h3 className="text-2xl font-semibold text-gray-900">
-                  {exam.title}
-                </h3>
+          : exams.map((exam) => {
+              const userAttempt = userAttempts.find(
+                (attempt) => attempt.examId === exam._id
+              );
+              const hasAttempted = !!userAttempt;
+              const attemptId = userAttempt ? userAttempt._id : null;
 
-                <p
-                  className="text-gray-600 mt-2 mb-4"
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(exam.description),
-                  }}
-                ></p>
-
-                <div className="flex justify-between text-sm text-gray-600 mt-4">
-                  <span>Total Marks: {exam.totalMarks}</span>
-                  <span>Duration: {exam.durationMin} mins</span>
-                </div>
-                <button
-                  onClick={() => handleStartExam(exam._id)}
-                  className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+              return (
+                <div
+                  key={exam._id}
+                  className="bg-white border border-gray-200 p-3 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
-                  Start Exam
-                </button>
-              </div>
-            ))}
+                  <h3 className="text-2xl font-semibold text-gray-900">
+                    {exam.title}
+                  </h3>
+
+                  <p
+                    className="text-gray-600 mt-2 mb-4"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(exam.description),
+                    }}
+                  ></p>
+
+                  <div className="flex justify-between text-sm text-gray-600 mt-4">
+                    <span>Total Marks: {exam.totalMarks}</span>
+                    <span>Duration: {exam.durationMin} mins</span>
+                  </div>
+                  {hasAttempted ? (
+                    <button
+                      onClick={() => handleViewResults(attemptId)}
+                      className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+                    >
+                      View Results
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleStartExam(exam._id)}
+                      className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+                    >
+                      Start Exam
+                    </button>
+                  )}
+                </div>
+              );
+            })}
       </div>
 
       {/* ✅ MUI Snackbar for alerts */}
