@@ -3,7 +3,16 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import QuestionPalette from "./QuestionPalette.jsx";
 import DOMPurify from "dompurify";
-import { Snackbar, Alert, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from "@mui/material"; // ✅ MUI Snackbar and Dialog
+import {
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+} from "@mui/material"; // ✅ MUI Snackbar and Dialog
 import LiveExamSkeleton from "./LiveExamSkeleton.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -16,8 +25,8 @@ const LiveExam = () => {
   const [attempt, setAttempt] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -28,7 +37,7 @@ const LiveExam = () => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmDialogTitle, setConfirmDialogTitle] = useState("");
   const [confirmDialogMessage, setConfirmDialogMessage] = useState("");
-  const [confirmDialogCallback, setConfirmDialogCallback] = useState(null);
+  const confirmCallbackRef = React.useRef(null);
 
   const showSnackbar = (message, severity = "error") => {
     setSnackbar({ open: true, message, severity });
@@ -160,7 +169,10 @@ const LiveExam = () => {
             errorData.message || "Failed to advance to next subject on timeout",
           );
         }
-        showSnackbar("Time's up! Moving to next subject automatically.", "info");
+        showSnackbar(
+          "Time's up! Moving to next subject automatically.",
+          "info",
+        );
         await fetchExamStatus();
         setIsSubmitting(false);
       }
@@ -229,10 +241,40 @@ const LiveExam = () => {
     setConfirmDialogMessage(
       "Are you sure you want to submit this subject and move to the next?",
     );
-    setConfirmDialogCallback(async () => {
+    confirmCallbackRef.current = async () => {
       setIsSubmitting(true);
       try {
-        await submitCurrentSubjectAnswers(); // Submit answers for the current subject
+        // Submit answers for the current subject
+        if (attempt) {
+          const { exam, currentSubject: currentSubjectIndex } = attempt;
+          const currentSubject = exam.subjects[currentSubjectIndex];
+          const answersToSubmit = [];
+
+          currentSubject.questions.forEach((question, qIndex) => {
+            const answer =
+              answers[qIndex] !== undefined ? answers[qIndex] : null;
+            answersToSubmit.push({
+              questionIndex: qIndex,
+              answer: answer,
+              type: question.type,
+            });
+          });
+
+          await fetch(
+            `${API_URL}/exam-attempts/${attemptId}/submit-all-answers`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                subjectIndex: currentSubjectIndex,
+                answers: answersToSubmit,
+              }),
+            },
+          );
+        }
 
         // Call backend to advance to the next subject
         const advanceResponse = await fetch(
@@ -259,18 +301,51 @@ const LiveExam = () => {
         showSnackbar("Failed to move to next subject. Please try again.");
       } finally {
         setIsSubmitting(false);
+        setAwaitingConfirmation(false); // Reset after submission attempt
       }
-    });
+    };
     setConfirmDialogOpen(true);
+    setAwaitingConfirmation(true); // Set when dialog is opened
   };
 
   const handleCompleteExam = async () => {
     setConfirmDialogTitle("Confirm Exam Submission");
     setConfirmDialogMessage("Are you sure you want to submit the exam?");
-    setConfirmDialogCallback(async () => {
+    confirmCallbackRef.current = async () => {
       setIsSubmitting(true);
       try {
-        await submitCurrentSubjectAnswers();
+        // Submit answers for the current subject
+        if (attempt) {
+          const { exam, currentSubject: currentSubjectIndex } = attempt;
+          const currentSubject = exam.subjects[currentSubjectIndex];
+          const answersToSubmit = [];
+
+          currentSubject.questions.forEach((question, qIndex) => {
+            const answer =
+              answers[qIndex] !== undefined ? answers[qIndex] : null;
+            answersToSubmit.push({
+              questionIndex: qIndex,
+              answer: answer,
+              type: question.type,
+            });
+          });
+
+          await fetch(
+            `${API_URL}/exam-attempts/${attemptId}/submit-all-answers`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                subjectIndex: currentSubjectIndex,
+                answers: answersToSubmit,
+              }),
+            },
+          );
+        }
+
         await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -281,9 +356,12 @@ const LiveExam = () => {
         console.error("Failed to submit exam", error);
         showSnackbar("Failed to submit exam. Please try again.");
         setIsSubmitting(false);
+      } finally {
+        setAwaitingConfirmation(false); // Reset after submission attempt
       }
-    });
+    };
     setConfirmDialogOpen(true);
+    setAwaitingConfirmation(true); // Set when dialog is opened
   };
 
   const renderQuestion = (question, qIndex) => {
@@ -340,7 +418,6 @@ const LiveExam = () => {
   };
 
   if (loading) return <LiveExamSkeleton />;
-  if (error) return <div>Error: {error}</div>;
   if (!attempt) return <div>No attempt data found.</div>;
 
   if (attempt.status !== "in_progress") {
@@ -477,22 +554,31 @@ const LiveExam = () => {
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-description"
       >
-        <DialogTitle id="confirm-dialog-title">{confirmDialogTitle}</DialogTitle>
+        <DialogTitle id="confirm-dialog-title">
+          {confirmDialogTitle}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-dialog-description">
             {confirmDialogMessage}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDialogOpen(false)} color="primary">
+          <Button
+            onClick={() => {
+              setConfirmDialogOpen(false);
+              setAwaitingConfirmation(false); // Reset on cancel
+            }}
+            color="primary"
+          >
             Cancel
           </Button>
           <Button
             onClick={() => {
-              if (confirmDialogCallback) {
-                confirmDialogCallback();
+              if (confirmCallbackRef.current) {
+                confirmCallbackRef.current();
               }
               setConfirmDialogOpen(false);
+              // setAwaitingConfirmation(false); // Reset is handled by the callback's finally block
             }}
             color="primary"
             autoFocus
