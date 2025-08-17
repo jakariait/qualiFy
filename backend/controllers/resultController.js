@@ -31,7 +31,7 @@ class ResultController {
 			if (examId) filter.examId = examId;
 
 			const results = await Result.find(filter)
-				.populate("userId", "name email")
+				.populate("userId", "name email fullName")
 				.populate("examId", "title description")
 				.populate("attemptId", "startTime endTime status")
 				.sort({ createdAt: -1 })
@@ -63,7 +63,7 @@ class ResultController {
 			const { resultId } = req.params;
 
 			const result = await Result.findById(resultId)
-				.populate("userId", "name email")
+				.populate("userId", "name email fullName")
 				.populate("examId", "title description subjects")
 				.populate("attemptId", "startTime endTime status totalDuration");
 

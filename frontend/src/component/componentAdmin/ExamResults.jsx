@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { CircularProgress, Alert } from "@mui/material";
+import { Link } from "react-router-dom";
 
 export default function ExamResults() {
   const { examId } = useParams();
@@ -48,50 +49,35 @@ export default function ExamResults() {
     );
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-lg font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
+    <div className="shadow rounded-lg p-3">
+      <h1 className="text-lg mb-4 font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
         Exam Results
       </h1>
-
-      {results.map((result) => (
-        <div key={result._id} className="p-4 shadow rounded space-y-2">
-          <p>
-            <strong>User:</strong> {result.userId.email}
-          </p>
-          <p>
-            <strong>Status:</strong>{" "}
-            {result.status.charAt(0).toUpperCase() + result.status.slice(1)}
-          </p>
-          <p>
-            <strong>Total Marks:</strong> {result.totalMarks} |{" "}
-            <strong>Obtained:</strong> {result.obtainedMarks}
-          </p>
-
-          {result.subjectAttempts.map((subject, i) => (
-            <div key={i} className="pl-4 border-l-2 border-gray-300 space-y-1">
-              <p>
-                <strong>Subject {subject.subjectIndex + 1}:</strong>{" "}
-                {subject.isCompleted ? "Completed" : "In Progress"}
-              </p>
-              <p>
-                <strong>Time Limit:</strong> {subject.timeLimitMin} min
-              </p>
-
-              {subject.answers.map((ans, j) => (
-                <div key={j} className="pl-4 space-y-0.5">
-                  <p>
-                    <strong>Q{ans.questionIndex + 1} Answer:</strong>{" "}
-                    {ans.answer ? ans.answer : "Not answered"}
-                  </p>
-                  <p>
-                    <strong>Marks Obtained:</strong> {ans.marksObtained}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      ))}
+      <div className="grid grid-cols-2 gap-2">
+        {results.map((result) => (
+          <div key={result._id} className="p-4 shadow rounded space-y-1">
+            <p>
+              <strong>Name:</strong> {result.userId.fullName}
+            </p>
+            <p>
+              <strong>Email:</strong> {result.userId.email}
+            </p>
+            <p>
+              <strong>Total Marks:</strong> {result.totalMarks} |{" "}
+              <strong>Obtained:</strong> {result.obtainedMarks} |{" "}
+              <strong>Percentage:</strong> {result.percentage} %
+            </p>
+            <Link
+              className={"flex items-center justify-center pt-4"}
+              to={`/admin/user-results/${result._id}`}
+            >
+              <button className="primaryBgColor cursor-pointer accentTextColor px-4 py-2 rounded">
+                View Details
+              </button>
+            </Link>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
