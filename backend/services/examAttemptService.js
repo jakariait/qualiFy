@@ -125,13 +125,14 @@ class ExamAttemptService {
 	}
 
 	// Submit answer for a question
-	  async submitAnswer(
+	  	  async submitAnswer(
 		attemptId,
 		userId,
 		subjectIndex,
 		questionIndex,
 		answer,
-		timeSpent = 0
+		timeSpent = 0,
+		answerFile = null
 	) {
 		try {
 			const attempt = await ExamAttempt.findOne({ _id: attemptId, userId });
@@ -168,12 +169,16 @@ class ExamAttemptService {
 			if (existingAnswerIndex >= 0) {
 				subjectAttempt.answers[existingAnswerIndex].answer = answer;
 				subjectAttempt.answers[existingAnswerIndex].timeSpent = timeSpent;
+				if (answerFile) {
+					subjectAttempt.answers[existingAnswerIndex].answerFile = answerFile;
+				}
 			} else {
 				subjectAttempt.answers.push({
 					questionIndex,
 					subjectIndex,
 					answer,
 					timeSpent,
+					answerFile,
 				});
 			}
 

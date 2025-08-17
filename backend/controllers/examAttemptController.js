@@ -43,7 +43,7 @@ class ExamAttemptController {
 		}
 	}
 
-	  async submitAnswer(req, res) {
+	async submitAnswer(req, res) {
 		try {
 			const { attemptId } = req.params;
 			const { subjectIndex, questionIndex, answer, timeSpent } = req.body;
@@ -75,35 +75,77 @@ class ExamAttemptController {
 		}
 	}
 
-    async submitAllAnswers(req, res) {
-        try {
-            const { attemptId } = req.params;
-            const { subjectIndex, answers } = req.body; // answers will be an array
-            const userId = req.user.id;
+	// async submitAllAnswers(req, res) {
+	// 	try {
+	// 		const { attemptId } = req.params;
+	// 		const { subjectIndex, answers } = req.body; // answers will be an array
+	// 		const userId = req.user.id;
+	//
+	// 		if (subjectIndex === undefined || !Array.isArray(answers)) {
+	// 			return res.status(400).json({
+	// 				success: false,
+	// 				message: "Missing required fields: subjectIndex, and answers array",
+	// 			});
+	// 		}
+	//
+	// 		const result = await examAttemptService.submitAllAnswers(
+	// 			attemptId,
+	// 			userId,
+	// 			subjectIndex,
+	// 			answers
+	// 		);
+	//
+	// 		res.status(200).json({
+	// 			success: true,
+	// 			message: "All answers submitted successfully",
+	// 			data: result,
+	// 		});
+	// 	} catch (error) {
+	// 		res.status(400).json({ success: false, message: error.message });
+	// 	}
+	// }
 
-            if (subjectIndex === undefined || !Array.isArray(answers)) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Missing required fields: subjectIndex, and answers array",
-                });
-            }
+	async submitAllAnswers(req, res) {
+		try {
+			const { attemptId } = req.params;
+			const { subjectIndex, answers } = JSON.parse(req.body.answers); // answers sent as JSON string
+			const userId = req.user.id;
 
-            const result = await examAttemptService.submitAllAnswers(
-                attemptId,
-                userId,
-                subjectIndex,
-                answers
-            );
+			if (subjectIndex === undefined || !Array.isArray(answers)) {
+				return res.status(400).json({
+					success: false,
+					message: "Missing required fields: subjectIndex, and answers array",
+				});
+			}
 
-            res.status(200).json({
-                success: true,
-                message: "All answers submitted successfully",
-                data: result,
-            });
-        } catch (error) {
-            res.status(400).json({ success: false, message: error.message });
-        }
-    }
+			// Attach uploaded image to the corresponding answer
+			if (req.files && req.files.answer && req.files.answer[0]) {
+				const savedFile = req.files.answer[0];
+				// Find the first image-type question in the answers payload
+				const imageAnswer = answers.find(ans => ans.type === 'image');
+				if (imageAnswer) {
+					// Set the answer to the stored filename
+					imageAnswer.answer = savedFile.filename;
+				}
+			}
+
+			const result = await examAttemptService.submitAllAnswers(
+				attemptId,
+				userId,
+				subjectIndex,
+				answers
+			);
+
+			res.status(200).json({
+				success: true,
+				message: "All answers submitted successfully",
+				data: result,
+			});
+		} catch (error) {
+			res.status(400).json({ success: false, message: error.message });
+		}
+	}
+
 
 	async completeSubject(req, res) {
 		try {
@@ -273,22 +315,22 @@ class ExamAttemptController {
 		}
 	}
 
-    async advanceSubject(req, res) {
-        try {
-            const { attemptId } = req.params;
-            const userId = req.user.id;
+	async advanceSubject(req, res) {
+		try {
+			const { attemptId } = req.params;
+			const userId = req.user.id;
 
-            const result = await examAttemptService.advanceSubject(attemptId, userId);
+			const result = await examAttemptService.advanceSubject(attemptId, userId);
 
-            res.status(200).json({
-                success: true,
-                message: "Advanced to next subject successfully",
-                data: result,
-            });
-        } catch (error) {
-            res.status(400).json({ success: false, message: error.message });
-        }
-    }
+			res.status(200).json({
+				success: true,
+				message: "Advanced to next subject successfully",
+				data: result,
+			});
+		} catch (error) {
+			res.status(400).json({ success: false, message: error.message });
+		}
+	}
 }
 
 module.exports = new ExamAttemptController();

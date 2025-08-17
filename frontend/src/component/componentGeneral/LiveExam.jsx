@@ -104,10 +104,14 @@ const LiveExam = () => {
     if (!attempt) return;
     const { exam, currentSubject: currentSubjectIndex } = attempt;
     const currentSubject = exam.subjects[currentSubjectIndex];
-    const answersToSubmit = [];
 
+    const answersToSubmit = [];
+    let hasImage = false;
     currentSubject.questions.forEach((question, qIndex) => {
       const answer = answers[qIndex] !== undefined ? answers[qIndex] : null;
+      if (question.type === "image" && answer instanceof File) {
+        hasImage = true;
+      }
       answersToSubmit.push({
         questionIndex: qIndex,
         answer: answer,
@@ -115,65 +119,125 @@ const LiveExam = () => {
       });
     });
 
-    try {
-      await fetch(`${API_URL}/exam-attempts/${attemptId}/submit-all-answers`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          subjectIndex: currentSubjectIndex,
-          answers: answersToSubmit,
-        }),
+    const formData = new FormData();
+    const plainAnswersPayload = [];
+    const imageFiles = [];
+
+    answersToSubmit.forEach((ans) => {
+      if (ans.type === "image" && ans.answer instanceof File) {
+        imageFiles.push(ans);
+      } else {
+        plainAnswersPayload.push(ans);
+      }
+    });
+
+    // The backend is inconsistent, but we try to satisfy both router and controller.
+    // Controller wants subjectIndex and answers in a single JSON string.
+    // Router wants a single file in a field named 'answer'.
+    if (imageFiles.length > 1) {
+      showSnackbar(
+        "Warning: This exam allows only one image upload per subject.",
+        "warning",
+      );
+    }
+
+    if (imageFiles.length > 0) {
+      // Add the first file under the key 'answer' for the router.
+      formData.append("answer", imageFiles[0].answer);
+      // Add placeholders for all images for the controller.
+      imageFiles.forEach((imgAns) => {
+        plainAnswersPayload.push({ ...imgAns, answer: imgAns.answer.name });
       });
+    }
+
+    const bodyPayload = {
+      subjectIndex: currentSubjectIndex,
+      answers: plainAnswersPayload,
+    };
+
+    formData.append("answers", JSON.stringify(bodyPayload));
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    try {
+      const response = await fetch(
+        `${API_URL}/exam-attempts/${attemptId}/submit-all-answers`,
+        {
+          method: "POST",
+          headers,
+          body: formData,
+        },
+      );
+
+      if (!response.ok) {
+        let message;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await response.json();
+          message = errorData.message || "Failed to submit answers.";
+        } else {
+          const textError = await response.text();
+          console.error("Server returned non-JSON response:", textError);
+          message = `Failed to submit answers. Server returned an unexpected response. Status: ${response.status}`;
+        }
+        throw new Error(message);
+      }
     } catch (error) {
       console.error("Failed to submit answers for the subject", error);
-      showSnackbar("Failed to submit answers. Please try again.");
-      throw error;
+      showSnackbar(
+        error.message || "Failed to submit answers. Please try again.",
+      );
+      throw error; // Re-throw to be caught by callers
     }
-  }, [attempt, answers, attemptId, token]);
+  }, [attempt, answers, attemptId, token, showSnackbar]);
 
   // Auto-submit on timeout
   useEffect(() => {
     const handleTimeout = async () => {
       setIsSubmitting(true);
-      await submitCurrentSubjectAnswers();
+      try {
+        await submitCurrentSubjectAnswers();
 
-      if (!attempt) return;
+        if (!attempt) return;
 
-      const isLastSubject =
-        attempt.currentSubject >= attempt.exam.subjects.length - 1;
-      if (isLastSubject) {
-        await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        showSnackbar("Time's up! Exam submitted automatically.", "info");
-        navigate(`/user/exam/results/${attemptId}`);
-      } else {
-        // Call backend to advance to the next subject on timeout
-        const advanceResponse = await fetch(
-          `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
-          {
+        const isLastSubject =
+            attempt.currentSubject >= attempt.exam.subjects.length - 1;
+        if (isLastSubject) {
+          await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
             method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (!advanceResponse.ok) {
-          const errorData = await advanceResponse.json();
-          throw new Error(
-            errorData.message || "Failed to advance to next subject on timeout",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          showSnackbar("Time's up! Exam submitted automatically.", "info");
+          navigate(`/user/exam/results/${attemptId}`);
+        } else {
+          // Call backend to advance to the next subject on timeout
+          const advanceResponse = await fetch(
+              `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
           );
+
+          if (!advanceResponse.ok) {
+            const errorData = await advanceResponse.json();
+            throw new Error(
+                errorData.message || "Failed to advance to next subject on timeout",
+            );
+          }
+          showSnackbar(
+              "Time's up! Moving to next subject automatically.",
+              "info",
+          );
+          await fetchExamStatus();
         }
-        showSnackbar(
-          "Time's up! Moving to next subject automatically.",
-          "info",
-        );
-        await fetchExamStatus();
+      } catch (error) {
+        // Error is already shown by submitCurrentSubjectAnswers
+      } finally {
         setIsSubmitting(false);
       }
     };
@@ -244,37 +308,7 @@ const LiveExam = () => {
     confirmCallbackRef.current = async () => {
       setIsSubmitting(true);
       try {
-        // Submit answers for the current subject
-        if (attempt) {
-          const { exam, currentSubject: currentSubjectIndex } = attempt;
-          const currentSubject = exam.subjects[currentSubjectIndex];
-          const answersToSubmit = [];
-
-          currentSubject.questions.forEach((question, qIndex) => {
-            const answer =
-              answers[qIndex] !== undefined ? answers[qIndex] : null;
-            answersToSubmit.push({
-              questionIndex: qIndex,
-              answer: answer,
-              type: question.type,
-            });
-          });
-
-          await fetch(
-            `${API_URL}/exam-attempts/${attemptId}/submit-all-answers`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                subjectIndex: currentSubjectIndex,
-                answers: answersToSubmit,
-              }),
-            },
-          );
-        }
+        await submitCurrentSubjectAnswers();
 
         // Call backend to advance to the next subject
         const advanceResponse = await fetch(
@@ -298,7 +332,7 @@ const LiveExam = () => {
         showSnackbar("Subject submitted and moved to next.", "success");
       } catch (error) {
         console.error("Failed to move to next subject", error);
-        showSnackbar("Failed to move to next subject. Please try again.");
+        // Error is already shown by submitCurrentSubjectAnswers
       } finally {
         setIsSubmitting(false);
         setAwaitingConfirmation(false); // Reset after submission attempt
@@ -314,37 +348,7 @@ const LiveExam = () => {
     confirmCallbackRef.current = async () => {
       setIsSubmitting(true);
       try {
-        // Submit answers for the current subject
-        if (attempt) {
-          const { exam, currentSubject: currentSubjectIndex } = attempt;
-          const currentSubject = exam.subjects[currentSubjectIndex];
-          const answersToSubmit = [];
-
-          currentSubject.questions.forEach((question, qIndex) => {
-            const answer =
-              answers[qIndex] !== undefined ? answers[qIndex] : null;
-            answersToSubmit.push({
-              questionIndex: qIndex,
-              answer: answer,
-              type: question.type,
-            });
-          });
-
-          await fetch(
-            `${API_URL}/exam-attempts/${attemptId}/submit-all-answers`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                subjectIndex: currentSubjectIndex,
-                answers: answersToSubmit,
-              }),
-            },
-          );
-        }
+        await submitCurrentSubjectAnswers();
 
         await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
           method: "POST",
@@ -354,7 +358,7 @@ const LiveExam = () => {
         navigate(`/user/exam/results/${attemptId}`);
       } catch (error) {
         console.error("Failed to submit exam", error);
-        showSnackbar("Failed to submit exam. Please try again.");
+        // Error is already shown by submitCurrentSubjectAnswers
         setIsSubmitting(false);
       } finally {
         setAwaitingConfirmation(false); // Reset after submission attempt

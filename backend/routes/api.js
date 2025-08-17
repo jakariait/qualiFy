@@ -112,6 +112,7 @@ const upload = multer({ storage }).fields([
   { name: "resourcePdf", maxCount: 1 },
   { name: "resourceThumbnailImage", maxCount: 1 },
   { name: "platformThumbnail", maxCount: 1 },
+  { name: "answer", maxCount: 1 },
 ]);
 
 // Serve images from the 'uploads' folder as static files
@@ -678,16 +679,19 @@ router.delete(
 );
 
 // Exam Routes
-router.post("/exams",  examController.createExam);
+router.post("/exams", examController.createExam);
 router.get("/exams", examController.getAllExams);
 router.get("/exams/:id", examController.getExamById);
 router.get("/exams/product/:productId", examController.getExamsByProductId);
-router.put("/exams/:id",  examController.updateExam);
+router.put("/exams/:id", examController.updateExam);
 router.delete("/exams/:id", examController.deleteExam);
 
-
 // Exam Attempt Routes (User)
-router.post("/exams/:examId/start",userProtect, examAttemptController.startExamAttempt);
+router.post(
+  "/exams/:examId/start",
+  userProtect,
+  examAttemptController.startExamAttempt,
+);
 
 router.get(
   "/exam-attempts/:attemptId/status",
@@ -707,6 +711,7 @@ router.post(
 );
 router.post(
   "/exam-attempts/:attemptId/submit-all-answers",
+  upload,
   userProtect,
   examAttemptController.submitAllAnswers,
 );
@@ -737,7 +742,11 @@ router.get(
   examAttemptController.syncTime,
 );
 router.get("/user/exam-attempts", examAttemptController.getUserAttempts);
-router.post("/exam-attempts/:attemptId/advance-subject", userProtect, examAttemptController.advanceSubject);
+router.post(
+  "/exam-attempts/:attemptId/advance-subject",
+  userProtect,
+  examAttemptController.advanceSubject,
+);
 
 // Result Routes (Admin)
 router.get("/results", adminProtect, resultController.getAllResults);
