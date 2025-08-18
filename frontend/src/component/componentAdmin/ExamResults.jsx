@@ -48,8 +48,6 @@ export default function ExamResults() {
       </Alert>
     );
 
-  console.log(results);
-
   return (
     <div className="shadow rounded-lg p-3">
       <h1 className="text-lg mb-4 font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
@@ -59,15 +57,16 @@ export default function ExamResults() {
         {results.map((result) => (
           <div key={result._id} className="p-4 shadow rounded space-y-1">
             <p>
-              <strong>Name:</strong> {result.userId.fullName}
+              <strong>User:</strong> {result.userId.fullName} (
+              {result.userId.email})
             </p>
-            <p>
-              <strong>Email:</strong> {result.userId.email}
-            </p>
+
             <p>
               <strong>Total Marks:</strong> {result.totalMarks} |{" "}
               <strong>Obtained:</strong> {result.obtainedMarks} |{" "}
-              <strong>Percentage:</strong> {result.percentage} %
+              <p>
+                <strong>Percentage:</strong> {result.percentage?.toFixed(2)} %
+              </p>
             </p>
             <Link
               className={"flex items-center justify-center pt-4"}

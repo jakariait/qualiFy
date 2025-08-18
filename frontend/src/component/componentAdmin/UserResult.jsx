@@ -110,7 +110,7 @@ const UserResult = () => {
   return (
     <div className="bg-gray-50 shadow-inner rounded-2xl p-4 space-y-4">
       {/* Summary */}
-      <div className="space-y-1">
+      <div className="flex flex-col items-center justify-center space-y-1">
         <h2 className="text-2xl primaryTextColor font-bold">Result Summary</h2>
         <p>
           <strong>User:</strong> {userId.fullName} ({userId.email})
@@ -142,7 +142,7 @@ const UserResult = () => {
 
       {/* Questions */}
       <h3 className="text-xl primaryTextColor font-semibold mt-4 mb-2">
-        Question Results
+        Question Results:
       </h3>
       {questionResults.map((qr, index) => {
         const subject = examId.subjects[qr.subjectIndex];

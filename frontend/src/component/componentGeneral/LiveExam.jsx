@@ -131,7 +131,6 @@ const LiveExam = () => {
       }
     });
 
-
     if (imageFiles.length > 1) {
       showSnackbar(
         "Warning: This exam allows only one image upload per subject.",
@@ -201,7 +200,7 @@ const LiveExam = () => {
         if (!attempt) return;
 
         const isLastSubject =
-            attempt.currentSubject >= attempt.exam.subjects.length - 1;
+          attempt.currentSubject >= attempt.exam.subjects.length - 1;
         if (isLastSubject) {
           await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
             method: "POST",
@@ -212,24 +211,25 @@ const LiveExam = () => {
         } else {
           // Call backend to advance to the next subject on timeout
           const advanceResponse = await fetch(
-              `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+            `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
               },
+            },
           );
 
           if (!advanceResponse.ok) {
             const errorData = await advanceResponse.json();
             throw new Error(
-                errorData.message || "Failed to advance to next subject on timeout",
+              errorData.message ||
+                "Failed to advance to next subject on timeout",
             );
           }
           showSnackbar(
-              "Time's up! Moving to next subject automatically.",
-              "info",
+            "Time's up! Moving to next subject automatically.",
+            "info",
           );
           await fetchExamStatus();
         }
@@ -424,14 +424,14 @@ const LiveExam = () => {
 
   if (attempt.status !== "in_progress") {
     return (
-      <div className="p-4 text-center">
+      <div className="bg-orange-100 shadow-inner rounded-2xl text-center p-3 py-10">
         <h2 className="text-2xl font-bold mb-4">Exam Over</h2>
         <p className="mb-4">
           This exam attempt is now complete. Status: {attempt.status}
         </p>
         <Link
           to={`/user/exam/results/${attemptId}`}
-          className="text-blue-500 hover:underline"
+          className="primaryBgColor accentTextColor px-4 py-2 rounded cursor-pointer "
         >
           View Results
         </Link>
@@ -506,6 +506,11 @@ const LiveExam = () => {
                   __html: DOMPurify.sanitize(question.text),
                 }}
               />
+              {question.marks > 0 && (
+                <span className="ml-2 font-normal text-sm text-gray-500">
+                  (Marks: {question.marks})
+                </span>
+              )}
             </h4>
 
             <div>{renderQuestion(question, qIndex)}</div>
