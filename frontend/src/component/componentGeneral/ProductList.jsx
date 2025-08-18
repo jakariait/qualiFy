@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ImageComponent from "./ImageComponent.jsx";
 import { GraduationCap, BookOpen, User, Book, Calendar } from "lucide-react";
 import useCartStore from "../../store/useCartStore.js";
+import OrderCountBadge from "./OrderCountBadge.jsx";
 
 const formatPrice = (price) => {
   if (isNaN(price)) return price;
@@ -29,6 +30,8 @@ const ProductList = ({ products, loading }) => {
   };
 
   const activeProducts = products.filter((product) => product.isActive);
+
+
 
   if (loading) {
     return (
@@ -98,8 +101,9 @@ const ProductList = ({ products, loading }) => {
                   <div className="mt-2 p-2 primaryTextColor flex flex-col items-center gap-1">
                     {product.enrolledStudents && (
                       <div className="flex items-center gap-1">
-                        <GraduationCap className="w-4 h-4 text-indigo-600" />
-                        <span>Enrolled: {product.enrolledStudents}</span>
+
+                        <OrderCountBadge productId={product._id} enrolledStudents={product.enrolledStudents} />
+
                       </div>
                     )}
                     {product.lessons && (

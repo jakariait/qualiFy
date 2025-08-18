@@ -317,6 +317,7 @@ router.delete(
 // Routes for Products
 router.get("/products", productController.getAllProducts); // All Products Without Sorting
 router.get("/products/:id", productController.getProductById);
+router.get("/products/:id/order-count", productController.getProductOrderCount);
 router.get("/products/slug/:slug", productController.getProductBySlug);
 
 // Similar products by type, excluding current one
@@ -692,7 +693,6 @@ router.post(
   userProtect,
   examAttemptController.startExamAttempt,
 );
-
 router.get(
   "/exam-attempts/:attemptId/status",
   userProtect,
@@ -703,7 +703,6 @@ router.post(
   userProtect,
   examAttemptController.submitAnswer,
 );
-
 router.post(
   "/exam-attempts/:attemptId/complete-subject",
   userProtect,
@@ -715,7 +714,6 @@ router.post(
   userProtect,
   examAttemptController.submitAllAnswers,
 );
-
 router.post(
   "/exam-attempts/:attemptId/submit",
   userProtect,
@@ -741,9 +739,11 @@ router.get(
   userProtect,
   examAttemptController.syncTime,
 );
-
-router.get("/user/exam-attempts", userProtect, examAttemptController.getUserAttempts);
-
+router.get(
+  "/user/exam-attempts",
+  userProtect,
+  examAttemptController.getUserAttempts,
+);
 router.post(
   "/exam-attempts/:attemptId/advance-subject",
   userProtect,
@@ -751,22 +751,33 @@ router.post(
 );
 
 // Result Routes (Admin)
-router.get("/results/exam/:examId", resultController.getResultsByExamId);
-router.get("/results", resultController.getAllResults);
+router.get(
+  "/results/exam/:examId",
+  adminProtect,
+  resultController.getResultsByExamId,
+);
+router.get("/results", adminProtect, resultController.getAllResults);
 router.get("/results/:resultId", resultController.getResultById);
-
 router.post(
   "/results/:resultId/review-question",
   adminProtect,
   resultController.reviewQuestion,
 );
+router.put(
+  "/results/:resultId/marks",
+  adminProtect,
+  resultController.updateMarks,
+);
+router.post(
+  "/results/:resultId/finalize",
+  adminProtect,
+  resultController.finalizeResult,
+);
 
-router.put("/results/:resultId/marks", adminProtect, resultController.updateMarks);
-
-
-router.post("/results/:resultId/finalize", adminProtect, resultController.finalizeResult);
-
-
-
+// Result Routes (User)
+router.get(
+  "/user/:userId/exam/:examId",
+  resultController.getResultByUserAndExam,
+);
 
 module.exports = router;

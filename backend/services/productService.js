@@ -1,4 +1,5 @@
 const ProductModel = require("../models/ProductModel");
+const OrderModel = require("../models/OrderModel");
 const mongoose = require("mongoose");
 
 // ✅ Create a new product
@@ -110,6 +111,15 @@ const getSimilarProductsByType = async (type, excludeId) => {
 		.sort({ createdAt: -1 });
 };
 
+const countOrdersByProduct = async (productId) => {
+	try {
+		const count = await OrderModel.countDocuments({ "items.productId": productId });
+		return count;
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
 
 module.exports = {
 	createProduct,
@@ -118,5 +128,6 @@ module.exports = {
 	getProductById,
 	deleteProduct,
 	getSimilarProductsByType,
-	updateProduct
+	updateProduct,
+	countOrdersByProduct
 };

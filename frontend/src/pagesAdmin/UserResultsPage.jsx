@@ -6,7 +6,7 @@ import UserResult from "../component/componentAdmin/UserResult.jsx";
 const UserResultsPage = () => {
   return (
     <LayoutAdmin>
-      <Breadcrumb pageDetails="ABOUT US" title="Update About Us" />
+      <Breadcrumb pageDetails="EXAM MANAGMENT" title="View And Update User Results" />
       <UserResult/>
     </LayoutAdmin>
   );

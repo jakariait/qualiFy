@@ -155,7 +155,6 @@ class ResultController {
     }
   }
 
-
   // Update marks for a question
   async updateMarks(req, res) {
     try {
@@ -184,7 +183,7 @@ class ResultController {
 
       const questionResult = result.questionResults.find(
         (q) =>
-          q.questionIndex === questionIndex && q.subjectIndex === subjectIndex
+          q.questionIndex === questionIndex && q.subjectIndex === subjectIndex,
       );
 
       if (!questionResult) {
@@ -203,13 +202,14 @@ class ResultController {
       // Recalculate total marks
       result.obtainedMarks = result.questionResults.reduce(
         (acc, cur) => acc + (cur.marksObtained || 0),
-        0
+        0,
       );
       result.percentage = (result.obtainedMarks / result.totalMarks) * 100;
-      
-      const pendingReviewCount = result.questionResults.filter(q => q.isCorrect === null).length;
-      result.pendingReviewCount = pendingReviewCount;
 
+      const pendingReviewCount = result.questionResults.filter(
+        (q) => q.isCorrect === null,
+      ).length;
+      result.pendingReviewCount = pendingReviewCount;
 
       await result.save();
 
@@ -234,7 +234,6 @@ class ResultController {
       });
     }
   }
-
 
   // Finalize result (mark as complete)
   async finalizeResult(req, res) {
@@ -275,6 +274,42 @@ class ResultController {
           status: result.status,
           finalizedAt: result.finalizedAt,
         },
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  // Get result by userId and examId
+  async getResultByUserAndExam(req, res) {
+    try {
+      const { userId, examId } = req.params;
+
+      if (!userId || !examId) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing userId or examId",
+        });
+      }
+
+      const result = await Result.findOne({ userId, examId })
+        .populate("userId", "name email fullName")
+        .populate("examId", "title description subjects")
+        .populate("attemptId", "startTime endTime status totalDuration");
+
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          message: "Result not found for this user and exam",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: result,
       });
     } catch (error) {
       res.status(500).json({

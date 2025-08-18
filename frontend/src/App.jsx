@@ -88,6 +88,7 @@ import LiveExamPage from "./pagesUser/LiveExamPage.jsx";
 import ExamResultPage from "./pagesUser/ExamResultPage.jsx";
 import ViewResultsExamWisePage from "./pagesAdmin/ViewResultsExamWisePage.jsx";
 import UserResultsPage from "./pagesAdmin/UserResultsPage.jsx";
+import ResultByUserIdExamIdPage from "./pagesUser/ResultByUserIdExamIdPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -197,6 +198,11 @@ function App() {
             path="/user/exam/results/:attemptId"
             element={<ExamResultPage />}
           />
+
+          <Route
+            path="/user/exam/result/:examId"
+            element={<ResultByUserIdExamIdPage/>}
+          />
         </Route>
 
         {/* Protected Admin Routes */}
@@ -216,10 +222,12 @@ function App() {
           <Route path="/admin/exams/create" element={<CreateExamPage />} />
           <Route path="/admin/exams/edit/:id" element={<EditExamPage />} />
 
-          <Route path="/admin/results/:examId" element={<ViewResultsExamWisePage/>} />
+          <Route
+            path="/admin/results/:examId"
+            element={<ViewResultsExamWisePage />}
+          />
 
-          <Route path="/admin/user-results/:id" element={<UserResultsPage/>} />
-
+          <Route path="/admin/user-results/:id" element={<UserResultsPage />} />
 
           <Route path="/admin/platform" element={<PlatformInfoPage />} />
           <Route

@@ -341,6 +341,24 @@ const getSimilarProducts = async (req, res) => {
   }
 };
 
+const getProductOrderCount = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const count = await productService.countOrdersByProduct(id);
+		res.status(200).json({
+			success: true,
+			message: "Order count retrieved successfully!",
+			data: { count },
+		});
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			message: "Failed to fetch order count",
+			error: error.message,
+		});
+	}
+};
+
 
 module.exports = {
   createProduct,
@@ -349,5 +367,6 @@ module.exports = {
   getProductById,
   deleteProduct,
   getSimilarProducts,
-  updateProduct
+  updateProduct,
+  getProductOrderCount
 };

@@ -68,6 +68,11 @@ export default function ExamResults() {
                 <strong>Percentage:</strong> {result.percentage?.toFixed(2)} %
               </p>
             </p>
+
+            <p>
+              <strong>Status:</strong> {result.status}
+            </p>
+
             <Link
               className={"flex items-center justify-center pt-4"}
               to={`/admin/user-results/${result._id}`}

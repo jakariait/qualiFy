@@ -5,6 +5,7 @@ import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
 import DOMPurify from "dompurify";
 import { Snackbar, Alert } from "@mui/material";
 import ExamStartDialog from "./ExamStartDialog.jsx";
+import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -69,7 +70,7 @@ const LiveExamList = () => {
           setUserAttempts(data.data);
         } else {
           showSnackbar(
-            data.message || "Received invalid user attempts data from server"
+            data.message || "Received invalid user attempts data from server",
           );
         }
       } catch (err) {
@@ -109,10 +110,6 @@ const LiveExamList = () => {
     }
   };
 
-  const handleViewResults = (attemptId) => {
-    navigate(`/user/exam/result/${attemptId}`);
-  };
-
   const handleStartExamClick = (exam) => {
     setSelectedExam(exam);
     setIsDialogOpen(true);
@@ -136,7 +133,7 @@ const LiveExamList = () => {
         Live Exams
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {loading
           ? Array.from({ length: 3 }).map((_, index) => (
               <ExamCardSkeleton key={index} />
@@ -144,7 +141,7 @@ const LiveExamList = () => {
           : exams.map((exam) => {
               const userAttempt = userAttempts.find(
                 (attempt) =>
-                  attempt.exam && String(attempt.exam._id) === String(exam._id)
+                  attempt.exam && String(attempt.exam._id) === String(exam._id),
               );
               const hasAttempted = !!userAttempt;
               const attemptId = userAttempt ? userAttempt.id : null;
@@ -154,28 +151,22 @@ const LiveExamList = () => {
                   key={exam._id}
                   className="bg-white border border-gray-200 p-3 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
-                  <h3 className="text-2xl font-semibold text-gray-900">
+                  <h3 className="text-xl  text-gray-900">
                     {exam.title}
                   </h3>
 
-                  <p
-                    className="text-gray-600 mt-2 mb-4"
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(exam.description),
-                    }}
-                  ></p>
 
                   <div className="flex justify-between text-sm text-gray-600 mt-4">
                     <span>Total Marks: {exam.totalMarks}</span>
                     <span>Duration: {exam.durationMin} Mins</span>
                   </div>
                   {hasAttempted ? (
-                    <button
-                      onClick={() => handleViewResults(attemptId)}
-                      className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+                    <Link
+                      to={`/user/exam/result/${exam._id}`}
+                      className="block text-center w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
                     >
                       View Results
-                    </button>
+                    </Link>
                   ) : (
                     <button
                       onClick={() => handleStartExamClick(exam)}
