@@ -754,20 +754,19 @@ router.post(
 router.get("/results/exam/:examId", resultController.getResultsByExamId);
 router.get("/results", resultController.getAllResults);
 router.get("/results/:resultId", resultController.getResultById);
+
 router.post(
   "/results/:resultId/review-question",
+  adminProtect,
   resultController.reviewQuestion,
 );
-router.post(
-  "/results/:resultId/review-multiple",
-  resultController.reviewMultipleQuestions,
-);
-router.post("/results/:resultId/finalize", resultController.finalizeResult);
-router.get(
-  "/results/:resultId/pending-questions",
-  resultController.getPendingReviewQuestions,
-);
-router.get("/results/statistics", resultController.getResultStatistics);
-router.get("/results/export", resultController.exportResults);
+
+router.put("/results/:resultId/marks", adminProtect, resultController.updateMarks);
+
+
+router.post("/results/:resultId/finalize", adminProtect, resultController.finalizeResult);
+
+
+
 
 module.exports = router;

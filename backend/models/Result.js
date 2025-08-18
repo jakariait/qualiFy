@@ -168,12 +168,16 @@ ResultSchema.methods.calculateStatistics = function () {
 
 	// Ensure marksObtained is consistent with isCorrect for all questions
 	this.questionResults.forEach((question) => {
-		if (question.isCorrect === true) {
-			question.marksObtained = question.maxMarks;
-		} else if (question.isCorrect === false) {
-			question.marksObtained = 0;
+		// Only override marks for non-reviewed questions (e.g. auto-graded MCQs)
+		if (!question.reviewedAt) {
+			if (question.isCorrect === true) {
+				question.marksObtained = question.maxMarks;
+			} else if (question.isCorrect === false) {
+				question.marksObtained = 0;
+			}
 		}
 		// If isCorrect is null, marksObtained remains 0 (default)
+		// If question.reviewedAt is set, we trust the marksObtained value that was set manually.
 	});
 
 	// Calculate total marks and percentage
