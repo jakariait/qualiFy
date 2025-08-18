@@ -48,6 +48,8 @@ export default function ExamResults() {
       </Alert>
     );
 
+  console.log(results);
+
   return (
     <div className="shadow rounded-lg p-3">
       <h1 className="text-lg mb-4 font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
