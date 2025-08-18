@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
 import DOMPurify from "dompurify";
-
-import { Snackbar, Alert } from "@mui/material"; // ✅ MUI Snackbar
+import { Snackbar, Alert } from "@mui/material";
+import ExamStartDialog from "./ExamStartDialog.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -12,6 +12,8 @@ const LiveExamList = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userAttempts, setUserAttempts] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedExam, setSelectedExam] = useState(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -59,14 +61,16 @@ const LiveExamList = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (!response.ok) {
-          throw new Error("Failed to fetch user attempts");
-        }
         const data = await response.json();
-        if (Array.isArray(data.attempts)) {
-          setUserAttempts(data.attempts);
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch user attempts");
+        }
+        if (data.success && Array.isArray(data.data)) {
+          setUserAttempts(data.data);
         } else {
-          showSnackbar("Received invalid user attempts data from server");
+          showSnackbar(
+            data.message || "Received invalid user attempts data from server"
+          );
         }
       } catch (err) {
         showSnackbar(err.message);
@@ -109,6 +113,23 @@ const LiveExamList = () => {
     navigate(`/user/exam/result/${attemptId}`);
   };
 
+  const handleStartExamClick = (exam) => {
+    setSelectedExam(exam);
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setSelectedExam(null);
+  };
+
+  const handleDialogConfirm = () => {
+    if (selectedExam) {
+      handleStartExam(selectedExam._id);
+    }
+    handleDialogClose();
+  };
+
   return (
     <section className="bg-gray-50 shadow-inner rounded-2xl p-3">
       <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
@@ -122,10 +143,11 @@ const LiveExamList = () => {
             ))
           : exams.map((exam) => {
               const userAttempt = userAttempts.find(
-                (attempt) => attempt.examId === exam._id,
+                (attempt) =>
+                  attempt.exam && String(attempt.exam._id) === String(exam._id)
               );
               const hasAttempted = !!userAttempt;
-              const attemptId = userAttempt ? userAttempt._id : null;
+              const attemptId = userAttempt ? userAttempt.id : null;
 
               return (
                 <div
@@ -156,7 +178,7 @@ const LiveExamList = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleStartExam(exam._id)}
+                      onClick={() => handleStartExamClick(exam)}
                       className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
                     >
                       Start Exam
@@ -166,6 +188,13 @@ const LiveExamList = () => {
               );
             })}
       </div>
+
+      <ExamStartDialog
+        open={isDialogOpen}
+        onClose={handleDialogClose}
+        onConfirm={handleDialogConfirm}
+        exam={selectedExam}
+      />
 
       {/* ✅ MUI Snackbar for alerts */}
       <Snackbar

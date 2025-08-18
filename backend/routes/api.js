@@ -742,7 +742,7 @@ router.get(
   examAttemptController.syncTime,
 );
 
-router.get("/user/exam-attempts", examAttemptController.getUserAttempts);
+router.get("/user/exam-attempts", userProtect, examAttemptController.getUserAttempts);
 
 router.post(
   "/exam-attempts/:attemptId/advance-subject",

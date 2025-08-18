@@ -7,6 +7,18 @@ class ExamAttemptController {
 			const { examId } = req.params;
 			const userId = req.user.id;
 
+			const existingAttempt = await require("../models/ExamAttemptModel").findOne({
+				examId: examId,
+				userId: userId,
+			});
+
+			if (existingAttempt) {
+				return res.status(403).json({
+					success: false,
+					message: "You have already attempted this exam.",
+				});
+			}
+
 			const clientInfo = {
 				ipAddress: req.ip || req.connection.remoteAddress,
 				userAgent: req.get("User-Agent"),
