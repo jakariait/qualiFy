@@ -201,7 +201,7 @@ function App() {
 
           <Route
             path="/user/exam/result/:examId"
-            element={<ResultByUserIdExamIdPage/>}
+            element={<ResultByUserIdExamIdPage />}
           />
         </Route>
 

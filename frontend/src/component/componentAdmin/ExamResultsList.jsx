@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import useAuthAdminStore from "../../store/AuthAdminStore.js";
 
 export default function ExamResultsList() {
+
+  const {token} = useAuthAdminStore()
+
   const [exams, setExams] = useState([]);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -16,7 +20,11 @@ export default function ExamResultsList() {
 
   const fetchExams = async () => {
     try {
-      const res = await axios.get(`${API_URL}/exams`);
+      const res = await axios.get(`${API_URL}/exams`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setExams(res.data.exams || res.data);
     } catch (err) {
       console.error(err);

@@ -39,8 +39,12 @@ import {
   Edit as EditIcon,
 } from "@mui/icons-material";
 import { Editor } from "primereact/editor";
+import useAuthAdminStore from "../../store/AuthAdminStore.js";
 
 export default function ExamForm({ initialData = {}, onSuccess }) {
+
+  const {token} = useAuthAdminStore()
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -240,10 +244,20 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
     setLoading(true);
     try {
       if (initialData?._id) {
-        await axios.put(`${API_URL}/exams/${initialData._id}`, form);
+        await axios.put(`${API_URL}/exams/${initialData._id}`, form, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // optional if sending JSON
+          },
+        });
         showSnackbar("Exam updated successfully!");
       } else {
-        await axios.post(`${API_URL}/exams`, form);
+        await axios.post(`${API_URL}/exams`, form, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // optional if sending JSON
+          },
+        });
         showSnackbar("Exam created successfully!");
       }
       onSuccess && onSuccess();

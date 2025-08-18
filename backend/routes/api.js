@@ -680,12 +680,12 @@ router.delete(
 );
 
 // Exam Routes
-router.post("/exams", examController.createExam);
-router.get("/exams", examController.getAllExams);
+router.post("/exams", adminProtect, examController.createExam);
+router.get("/exams", adminProtect, examController.getAllExams);
 router.get("/exams/:id", examController.getExamById);
 router.get("/exams/product/:productId", examController.getExamsByProductId);
-router.put("/exams/:id", examController.updateExam);
-router.delete("/exams/:id", examController.deleteExam);
+router.put("/exams/:id", adminProtect, examController.updateExam);
+router.delete("/exams/:id", adminProtect, examController.deleteExam);
 
 // Exam Attempt Routes (User)
 router.post(
@@ -777,6 +777,7 @@ router.post(
 // Result Routes (User)
 router.get(
   "/user/:userId/exam/:examId",
+  userProtect,
   resultController.getResultByUserAndExam,
 );
 

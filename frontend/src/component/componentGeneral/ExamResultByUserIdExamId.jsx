@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import ExamResultsSkeleton from "./ExamResultsSkeleton.jsx";
 import DOMPurify from "dompurify";
+import useAuthUserStore from "../../store/AuthUserStore.js";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ExamResultByUserIdExamId() {
   const { examId } = useParams();
-  const userId = "689ca0a30d1a82dfabd277cb"; // Replace or pass as prop if needed
+
+  const { token, user: loggedInUser } = useAuthUserStore();
+
+  const userId = loggedInUser?._id;
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,7 +21,14 @@ export default function ExamResultByUserIdExamId() {
   useEffect(() => {
     async function fetchResult() {
       try {
-        const res = await axios.get(`${API_URL}/user/${userId}/exam/${examId}`);
+        const res = await axios.get(
+          `${API_URL}/user/${userId}/exam/${examId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
         setResult(res.data.data);
       } catch (error) {
         console.error("Error fetching result:", error);
@@ -26,8 +37,11 @@ export default function ExamResultByUserIdExamId() {
         setLoading(false);
       }
     }
-    fetchResult();
-  }, [examId, userId]);
+
+    if (userId) {
+      fetchResult();
+    }
+  }, [examId, userId, token]);
 
   if (loading) return <ExamResultsSkeleton />;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -53,7 +67,6 @@ export default function ExamResultByUserIdExamId() {
     return `${minutes} min ${seconds} sec`;
   };
 
-
   return (
     <div className="bg-gray-50 shadow-inner rounded-2xl p-4 space-y-4">
       {/* Summary */}
@@ -75,7 +88,8 @@ export default function ExamResultByUserIdExamId() {
           <strong>Percentage:</strong> {percentage.toFixed(2)}%
         </p>
         <p>
-          <strong>Completed In:</strong> {formatDuration(attemptId.totalDuration)}
+          <strong>Completed In:</strong>{" "}
+          {formatDuration(attemptId.totalDuration)}
         </p>
         <p>
           <strong>Submitted At:</strong>{" "}

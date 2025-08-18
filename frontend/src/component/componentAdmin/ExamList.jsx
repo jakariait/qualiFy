@@ -10,8 +10,12 @@ import {
   DialogActions,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import useAuthAdminStore from "../../store/AuthAdminStore.js";
 
 export default function ExamList() {
+
+  const {token} = useAuthAdminStore()
+
   const [exams, setExams] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -25,7 +29,11 @@ export default function ExamList() {
 
   const fetchExams = async () => {
     try {
-      const res = await axios.get(`${API_URL}/exams`);
+      const res = await axios.get(`${API_URL}/exams`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setExams(res.data.exams || res.data);
     } catch (err) {
       console.error(err);
@@ -44,7 +52,11 @@ export default function ExamList() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      await axios.delete(`${API_URL}/exams/${deleteId}`);
+      await axios.delete(`${API_URL}/exams/${deleteId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       showSnackbar("Exam deleted successfully", "success");
       setDeleteId(null);
       fetchExams();
