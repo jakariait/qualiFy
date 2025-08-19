@@ -14,6 +14,7 @@ import {
   Button,
 } from "@mui/material"; // ✅ MUI Snackbar and Dialog
 import LiveExamSkeleton from "./LiveExamSkeleton.jsx";
+import QuestionPreview from "../QuestionPreview.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -499,13 +500,10 @@ const LiveExam = () => {
             className="mb-2 p-4 bg-white shadow-inner rounded-2xl"
           >
             <h4 className="text-lg font-semibold mb-2 whitespace-nowrap overflow-ellipsis overflow-hidden">
-              {qIndex + 1}:{" "}
-              <span
-                className="primaryTextColor inline-block"
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(question.text),
-                }}
-              />
+              {qIndex + 1}:
+              <span className="primaryTextColor ml-2 inline-block">
+                <QuestionPreview content={question.text} />
+              </span>
               {question.marks > 0 && (
                 <span className="ml-2 font-normal text-sm text-gray-500">
                   (Marks: {question.marks})

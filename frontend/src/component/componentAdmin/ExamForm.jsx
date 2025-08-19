@@ -40,6 +40,7 @@ import {
 } from "@mui/icons-material";
 import { Editor } from "primereact/editor";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
+import QuestionEditorWithLatex from "../QuestionEditorWithLatex.jsx";
 
 export default function ExamForm({ initialData = {}, onSuccess }) {
 
@@ -559,7 +560,19 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                       <p className="p-d-block pt-2 pb-2 text-gray-500">
                         Question Text:
                       </p>
-                      <Editor
+                      {/*<Editor*/}
+                      {/*  value={question.text}*/}
+                      {/*  onTextChange={(e) =>*/}
+                      {/*    handleQuestionChange(*/}
+                      {/*      sIndex,*/}
+                      {/*      qIndex,*/}
+                      {/*      "text",*/}
+                      {/*      e.htmlValue,*/}
+                      {/*    )*/}
+                      {/*  }*/}
+                      {/*  style={{ height: "120px", marginTop: "8px" }}*/}
+                      {/*/>*/}
+                      <QuestionEditorWithLatex
                         value={question.text}
                         onTextChange={(e) =>
                           handleQuestionChange(
@@ -569,7 +582,6 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                             e.htmlValue,
                           )
                         }
-                        style={{ height: "120px", marginTop: "8px" }}
                       />
 
                       {/* MCQ Options */}
