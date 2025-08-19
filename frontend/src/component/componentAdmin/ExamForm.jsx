@@ -43,8 +43,7 @@ import useAuthAdminStore from "../../store/AuthAdminStore.js";
 import QuestionEditorWithLatex from "../QuestionEditorWithLatex.jsx";
 
 export default function ExamForm({ initialData = {}, onSuccess }) {
-
-  const {token} = useAuthAdminStore()
+  const { token } = useAuthAdminStore();
 
   const [form, setForm] = useState({
     title: "",
@@ -560,18 +559,6 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                       <p className="p-d-block pt-2 pb-2 text-gray-500">
                         Question Text:
                       </p>
-                      {/*<Editor*/}
-                      {/*  value={question.text}*/}
-                      {/*  onTextChange={(e) =>*/}
-                      {/*    handleQuestionChange(*/}
-                      {/*      sIndex,*/}
-                      {/*      qIndex,*/}
-                      {/*      "text",*/}
-                      {/*      e.htmlValue,*/}
-                      {/*    )*/}
-                      {/*  }*/}
-                      {/*  style={{ height: "120px", marginTop: "8px" }}*/}
-                      {/*/>*/}
                       <QuestionEditorWithLatex
                         value={question.text}
                         onTextChange={(e) =>
@@ -600,23 +587,22 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                                 alignItems: "center",
                               }}
                             >
-                              <TextField
-                                label={`Option ${optIndex + 1}`}
-                                value={option}
-                                onChange={(e) => {
-                                  const newOpts = [...question.options];
-                                  newOpts[optIndex] = e.target.value;
-                                  handleQuestionChange(
-                                    sIndex,
-                                    qIndex,
-                                    "options",
-                                    newOpts,
-                                  );
-                                }}
-                                fullWidth
-                                variant="outlined"
-                                size="small"
-                              />
+                              <div key={optIndex} className="mb-2">
+                                <label className="block font-medium mb-1">{`Option ${optIndex + 1}`}</label>
+                                <QuestionEditorWithLatex
+                                  value={option}
+                                  onTextChange={(e) => {
+                                    const newOpts = [...question.options];
+                                    newOpts[optIndex] = e.htmlValue; // get HTML value from editor
+                                    handleQuestionChange(
+                                      sIndex,
+                                      qIndex,
+                                      "options",
+                                      newOpts,
+                                    );
+                                  }}
+                                />
+                              </div>
                               <Checkbox
                                 checked={question.correctAnswers.includes(
                                   optIndex,
@@ -667,7 +653,8 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                         Provide the correct answer or explanation for this
                         question:
                       </p>
-                      <Editor
+
+                      <QuestionEditorWithLatex
                         value={question.solution || ""}
                         onTextChange={(e) =>
                           handleQuestionChange(
@@ -677,7 +664,6 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                             e.htmlValue,
                           )
                         }
-                        style={{ height: "120px", marginTop: "8px" }}
                       />
                     </Card>
                   ))}

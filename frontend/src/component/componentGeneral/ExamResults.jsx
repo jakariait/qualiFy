@@ -4,6 +4,7 @@ import useAuthUserStore from "../../store/AuthUserStore.js";
 import DOMPurify from "dompurify";
 
 import ExamResultsSkeleton from "./ExamResultsSkeleton.jsx";
+import QuestionPreview from "../QuestionPreview.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -103,12 +104,12 @@ const ExamResults = () => {
             key={index}
             className="bg-gray-50 shadow-inner rounded-2xl py-4 p-3"
           >
-            <p
-              className="font-semibold primaryTextColor"
-              dangerouslySetInnerHTML={{ __html: qResult.questionText }}
-            ></p>
-            <p>
-              <strong>Your Answer:</strong>{" "}
+            <div className="font-semibold primaryTextColor">
+              <QuestionPreview content={qResult.questionText} />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <strong>Your Answer:</strong>
               {qResult.questionType === "image" ? (
                 qResult.userAnswer ? (
                   <a
@@ -123,35 +124,40 @@ const ExamResults = () => {
                   <span>No image uploaded</span>
                 )
               ) : (
-                JSON.stringify(qResult.userAnswer)
+                <QuestionPreview content={qResult.userAnswer || ""} />
               )}
-            </p>
+            </div>
 
 
             <p>
               {qResult.questionType === "mcq-single" && (
-                <p>
-                  <strong>Correct Answer:</strong>{" "}
-                  {(() => {
-                    let displayCorrectAnswer = JSON.stringify(
-                      qResult.correctAnswer,
-                    );
-                    const subject = exam.subjects[qResult.subjectIndex];
-                    const question = subject?.questions[qResult.questionIndex];
+                <div className="flex items-center space-x-2">
+                  <strong>Correct Answer:</strong>
+                  <div className="flex-1">
+                    <QuestionPreview
+                      content={(() => {
+                        let displayCorrectAnswer = JSON.stringify(
+                          qResult.correctAnswer,
+                        );
+                        const subject = exam.subjects[qResult.subjectIndex];
+                        const question =
+                          subject?.questions[qResult.questionIndex];
 
-                    if (
-                      question &&
-                      Array.isArray(qResult.correctAnswer) &&
-                      question.options
-                    ) {
-                      displayCorrectAnswer = qResult.correctAnswer
-                        .map((idx) => question.options[idx])
-                        .join(", ");
-                    }
+                        if (
+                          question &&
+                          Array.isArray(qResult.correctAnswer) &&
+                          question.options
+                        ) {
+                          displayCorrectAnswer = qResult.correctAnswer
+                            .map((idx) => question.options[idx])
+                            .join(", ");
+                        }
 
-                    return displayCorrectAnswer;
-                  })()}
-                </p>
+                        return displayCorrectAnswer;
+                      })()}
+                    />
+                  </div>
+                </div>
               )}
             </p>
             <p>

@@ -374,23 +374,23 @@ const LiveExam = () => {
         return (
           <div>
             {question.options.map((option, index) => (
-              <div key={index} className="mb-2">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`question-${qIndex}`}
-                    value={option}
-                    checked={answer === option}
-                    onChange={(e) =>
-                      handleAnswerChange(qIndex, e.target.value, question.type)
-                    }
-                    className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
-                  />
-                  <span className="ml-2 text-gray-700">
-                    {String.fromCharCode(65 + index)}. {option}
-                  </span>
-                </label>
-              </div>
+              <label className="flex items-start cursor-pointer space-x-2">
+                <input
+                  type="radio"
+                  name={`question-${qIndex}`}
+                  value={option}
+                  checked={answer === option}
+                  onChange={(e) =>
+                    handleAnswerChange(qIndex, e.target.value, question.type)
+                  }
+                  className="form-radio mt-1 h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                />
+                <div className="flex items-center space-x-1">
+                  <span className="font-semibold">{String.fromCharCode(65 + index)}.</span>
+                  <QuestionPreview content={option} />
+                </div>
+              </label>
+
             ))}
           </div>
         );

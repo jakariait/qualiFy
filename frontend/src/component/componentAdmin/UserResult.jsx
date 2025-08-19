@@ -4,6 +4,7 @@ import axios from "axios";
 import ExamResultsSkeleton from "../componentGeneral/ExamResultsSkeleton.jsx";
 import DOMPurify from "dompurify";
 import AuthAdminStore from "../../store/AuthAdminStore.js";
+import QuestionPreview from "../QuestionPreview.jsx";
 
 const UserResult = () => {
   const { id } = useParams(); // get result ID from URL
@@ -156,7 +157,7 @@ const UserResult = () => {
           <div key={index} className="bg-gray-50 shadow-inner rounded-2xl p-3 ">
             <p className="flex items-center">
               <strong className="mr-1">Question:</strong>
-              <span dangerouslySetInnerHTML={{ __html: qr.questionText }} />
+              <QuestionPreview content={qr.questionText} />
             </p>
 
             <p className="flex items-center">
@@ -175,14 +176,14 @@ const UserResult = () => {
                   <span className="ml-1">No image uploaded</span>
                 )
               ) : (
-                <span className="ml-1">{qr.userAnswer}</span>
+                <QuestionPreview content={qr.userAnswer} />
               )}
             </p>
 
             {qr.questionType === "mcq-single" && (
               <p className="flex items-center">
                 <strong className="mr-1">Correct Answer:</strong>
-                <span className="ml-1">{correctAnswerText}</span>
+                <QuestionPreview content={correctAnswerText} />
               </p>
             )}
 
@@ -241,12 +242,7 @@ const UserResult = () => {
             {question?.solution && (
               <p className="flex items-start">
                 <strong className="mr-1">Solution:</strong>
-                <span className="ml-1">
-                  {DOMPurify.sanitize(question.solution).replace(
-                    /<[^>]*>?/gm,
-                    " ",
-                  )}
-                </span>
+                <QuestionPreview content={question.solution} />
               </p>
             )}
           </div>

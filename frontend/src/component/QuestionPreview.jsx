@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import DOMPurify from "dompurify";
 
 const QuestionPreview = ({ content }) => {
   const previewRef = useRef(null);
@@ -21,10 +22,15 @@ const QuestionPreview = ({ content }) => {
     }
   }, [content]);
 
+  // Sanitize content with DOMPurify
+  const sanitizedContent = DOMPurify.sanitize(content, {
+    USE_PROFILES: { html: true }, // allow HTML tags
+  });
+
   return (
     <div
       ref={previewRef}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitizedContent }}
     />
   );
 };

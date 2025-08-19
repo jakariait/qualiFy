@@ -189,15 +189,6 @@ const Footer = () => {
             <p>
               © {currentYear} {GeneralInfoList?.FooterCopyright}
             </p>
-            <p>
-              Design and Developed by{" "}
-              <a
-                href="https://www.digiweb.digital/"
-                className="text-green-500 hover:underline"
-              >
-                DigiWeb
-              </a>
-            </p>
           </div>
         </div>
       )}
