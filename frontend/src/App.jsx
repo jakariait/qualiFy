@@ -91,6 +91,7 @@ import UserResultsPage from "./pagesAdmin/UserResultsPage.jsx";
 import ResultByUserIdExamIdPage from "./pagesUser/ResultByUserIdExamIdPage.jsx";
 import CourseExamNoticePage from "./pagesUser/CourseExamNoticePage.jsx";
 import NoticeForCourseExamPage from "./pagesAdmin/NoticeForCourseExamPage.jsx";
+import PageViewTracker from "./component/componentGeneral/PageViewTracker.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -141,10 +142,10 @@ function App() {
   }, [colors]); // ✅ This effect will run only when colors change
 
   setFaviconFromApi(GeneralInfoList?.Favicon); // Favicon
-
   return (
     <Router>
       <MetaProvider />
+      <PageViewTracker />
       <ScrollToTop />
       <ScrollToTopButton />
       <Routes>
