@@ -785,22 +785,32 @@ router.get(
 // Course Exam Notice Routes (Admin)
 router.post(
   "/course-exam-notices",
+  adminProtect,
+
   courseExamNoticeController.createNotice,
 );
 router.get(
   "/course-exam-notices",
+  adminProtect,
+
   courseExamNoticeController.getAllNotices,
 );
 router.get(
   "/course-exam-notices/:id",
+  adminProtect,
+
   courseExamNoticeController.getNoticeById,
 );
 router.put(
   "/course-exam-notices/:id",
+  adminProtect,
+
   courseExamNoticeController.updateNotice,
 );
 router.delete(
   "/course-exam-notices/:id",
+  adminProtect,
+
   courseExamNoticeController.deleteNotice,
 );
 

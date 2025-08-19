@@ -3,8 +3,19 @@ import axios from "axios";
 import DOMPurify from "dompurify";
 import { Trash2, Eye, Plus, Pencil } from "lucide-react";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
+import { Editor } from "primereact/editor";
+import {
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+} from "@mui/material";
 
-const API_URL = "http://localhost:5050/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const CourseExamNoticeManager = () => {
   const { token } = useAuthAdminStore();
@@ -15,6 +26,17 @@ const CourseExamNoticeManager = () => {
   const [editingNotice, setEditingNotice] = useState(null); // { _id, description }
   const [updatedNoticeText, setUpdatedNoticeText] = useState("");
 
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [noticeToDelete, setNoticeToDelete] = useState(null);
+
   // Fetch all products
   useEffect(() => {
     const fetchProducts = async () => {
@@ -22,9 +44,18 @@ const CourseExamNoticeManager = () => {
         const res = await axios.get(`${API_URL}/products`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setProducts(res.data.data || []);
+        const allProducts = res.data.data || [];
+        const filteredProducts = allProducts.filter(
+          (product) => product.type !== "book",
+        );
+        setProducts(filteredProducts);
       } catch (err) {
         console.error("Error fetching products:", err);
+        setSnackbar({
+          open: true,
+          message: "Failed to fetch products.",
+          severity: "error",
+        });
       }
     };
     fetchProducts();
@@ -44,6 +75,11 @@ const CourseExamNoticeManager = () => {
     } catch (err) {
       console.error("Error fetching notices:", err);
       setNotices([]); // Clear notices on error
+      setSnackbar({
+        open: true,
+        message: "Failed to fetch notices.",
+        severity: "error",
+      });
     }
   };
 
@@ -63,20 +99,44 @@ const CourseExamNoticeManager = () => {
       );
       setNewNotice("");
       fetchNotices(selectedProductId);
+      setSnackbar({
+        open: true,
+        message: "Notice added successfully!",
+        severity: "success",
+      });
     } catch (err) {
       console.error("Error adding notice:", err);
+      setSnackbar({
+        open: true,
+        message: "Failed to add notice.",
+        severity: "error",
+      });
     }
   };
 
   // Delete a notice
-  const handleDeleteNotice = async (id) => {
+  const handleDeleteNotice = async () => {
+    if (!noticeToDelete) return;
     try {
-      await axios.delete(`${API_URL}/course-exam-notices/${id}`, {
+      await axios.delete(`${API_URL}/course-exam-notices/${noticeToDelete}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchNotices(selectedProductId);
+      setSnackbar({
+        open: true,
+        message: "Notice deleted successfully!",
+        severity: "success",
+      });
     } catch (err) {
       console.error("Error deleting notice:", err);
+      setSnackbar({
+        open: true,
+        message: "Failed to delete notice.",
+        severity: "error",
+      });
+    } finally {
+      setDialogOpen(false);
+      setNoticeToDelete(null);
     }
   };
 
@@ -106,69 +166,89 @@ const CourseExamNoticeManager = () => {
       setEditingNotice(null);
       setUpdatedNoticeText("");
       fetchNotices(selectedProductId);
+      setSnackbar({
+        open: true,
+        message: "Notice updated successfully!",
+        severity: "success",
+      });
     } catch (err) {
       console.error("Error updating notice:", err);
+      setSnackbar({
+        open: true,
+        message: "Failed to update notice.",
+        severity: "error",
+      });
     }
   };
 
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleDeleteClick = (id) => {
+    setNoticeToDelete(id);
+    setDialogOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDialogOpen(false);
+    setNoticeToDelete(null);
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      <h2 className="text-xl font-bold">All Products</h2>
+    <div className="p-4 shadow rounded-lg">
+      <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-lg font-semibold">
+        Notice For Course and Exam
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {products.map((product) => (
-          <div
-            key={product._id}
-            className="border rounded p-4 space-y-2 shadow"
-          >
+          <div key={product._id} className="p-4 rounded space-y-2 shadow">
             <div className="font-semibold">
               {product.name || "Unnamed Product"}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => fetchNotices(product._id)}
-                className="text-blue-600 hover:underline flex items-center gap-1"
+                className="primaryBgColor accentTextColor cursor-pointer px-4 py-2  rounded flex items-center gap-1"
               >
-                <Eye size={16} /> View Notices
-              </button>
-              <button
-                onClick={() => setSelectedProductId(product._id)}
-                className="text-green-600 hover:underline flex items-center gap-1"
-              >
-                <Plus size={16} /> Add Notice
+                View And Add Notices
               </button>
             </div>
           </div>
         ))}
       </div>
-
       {selectedProductId && (
         <div className="mt-8">
-          <h3 className="text-lg font-bold mb-2">
-            Notices for selected product
+          <h3 className="text-lg primaryTextColor font-bold mb-2">
+            Notices for{" "}
+            {products.find((p) => p._id === selectedProductId)?.name}
           </h3>
           <div className="space-y-4">
             {notices.length === 0 && <p>No notices found.</p>}
             {notices.map((notice) => (
-              <div key={notice._id} className="border p-4 rounded space-y-2">
+              <div key={notice._id} className="shadow p-4 rounded space-y-2">
                 {editingNotice && editingNotice._id === notice._id ? (
                   // Editing UI
                   <div className="flex flex-col gap-2">
-                    <textarea
+                    <Editor
                       value={updatedNoticeText}
-                      onChange={(e) => setUpdatedNoticeText(e.target.value)}
-                      className="border rounded px-3 py-2 w-full"
-                      rows="4"
+                      onTextChange={(e) => setUpdatedNoticeText(e.htmlValue)}
+                      style={{ height: "260px", marginBottom: "1rem" }}
+                      theme="snow"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={handleUpdateNotice}
-                        className="bg-green-600 text-white px-4 py-2 rounded"
+                        className="primaryBgColor accentTextColor cursor-pointer px-4 py-2 rounded"
                       >
                         Save
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className="bg-gray-400 text-white px-4 py-2 rounded"
+                        className="bg-gray-400 cursor-pointer text-white px-4 py-2 rounded"
                       >
                         Cancel
                       </button>
@@ -186,13 +266,13 @@ const CourseExamNoticeManager = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditClick(notice)}
-                        className="text-blue-600"
+                        className="text-blue-600 cursor-pointer"
                       >
                         <Pencil size={18} />
                       </button>
                       <button
-                        onClick={() => handleDeleteNotice(notice._id)}
-                        className="text-red-600"
+                        onClick={() => handleDeleteClick(notice._id)}
+                        className="text-red-600 cursor-pointer"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -201,16 +281,16 @@ const CourseExamNoticeManager = () => {
                 )}
               </div>
             ))}
-            <div className="flex gap-2 items-center">
-              <input
+            <div className="flex flex-col gap-2 items-stretch">
+              <Editor
                 value={newNotice}
-                onChange={(e) => setNewNotice(e.target.value)}
-                placeholder="Enter notice HTML"
-                className="border rounded px-3 py-2 w-full"
+                onTextChange={(e) => setNewNotice(e.htmlValue)}
+                style={{ height: "260px", marginBottom: "1rem" }}
+                theme="snow"
               />
               <button
                 onClick={handleAddNotice}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="primaryBgColor accentTextColor px-4 py-2 rounded"
               >
                 Add
               </button>
@@ -218,6 +298,40 @@ const CourseExamNoticeManager = () => {
           </div>
         </div>
       )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this notice? This action cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteNotice} autoFocus color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

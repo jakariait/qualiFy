@@ -90,6 +90,7 @@ import ViewResultsExamWisePage from "./pagesAdmin/ViewResultsExamWisePage.jsx";
 import UserResultsPage from "./pagesAdmin/UserResultsPage.jsx";
 import ResultByUserIdExamIdPage from "./pagesUser/ResultByUserIdExamIdPage.jsx";
 import CourseExamNoticePage from "./pagesUser/CourseExamNoticePage.jsx";
+import NoticeForCourseExamPage from "./pagesAdmin/NoticeForCourseExamPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -216,6 +217,10 @@ function App() {
           <Route
             path="/admin/product-service"
             element={<ManageProductServicePage />}
+          />
+          <Route
+            path="/admin/notice"
+            element={<NoticeForCourseExamPage/>}
           />
           <Route
             path="/admin/free-resource"

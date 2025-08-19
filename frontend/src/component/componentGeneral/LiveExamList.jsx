@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
-import DOMPurify from "dompurify";
 import { Snackbar, Alert } from "@mui/material";
 import ExamStartDialog from "./ExamStartDialog.jsx";
 import { Link } from "react-router-dom";
@@ -33,6 +32,10 @@ const LiveExamList = () => {
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
+
+
+
+
 
   useEffect(() => {
     const fetchExams = async () => {

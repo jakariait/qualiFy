@@ -19,6 +19,34 @@ import QuestionPreview from "../QuestionPreview.jsx";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const LiveExam = () => {
+  // Copy Protection
+  useEffect(() => {
+    const disableContextMenu = (e) => e.preventDefault();
+    const disableCopyPaste = (e) => e.preventDefault();
+    const disableShortcuts = (e) => {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        ["c", "x", "v", "a"].includes(e.key.toLowerCase())
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("contextmenu", disableContextMenu);
+    document.addEventListener("copy", disableCopyPaste);
+    document.addEventListener("cut", disableCopyPaste);
+    document.addEventListener("paste", disableCopyPaste);
+    document.addEventListener("keydown", disableShortcuts);
+
+    return () => {
+      document.removeEventListener("contextmenu", disableContextMenu);
+      document.removeEventListener("copy", disableCopyPaste);
+      document.removeEventListener("cut", disableCopyPaste);
+      document.removeEventListener("paste", disableCopyPaste);
+      document.removeEventListener("keydown", disableShortcuts);
+    };
+  }, []);
+
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const { token } = useAuthUserStore();
@@ -386,11 +414,12 @@ const LiveExam = () => {
                   className="form-radio mt-1 h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
                 />
                 <div className="flex items-center space-x-1">
-                  <span className="font-semibold">{String.fromCharCode(65 + index)}.</span>
+                  <span className="font-semibold">
+                    {String.fromCharCode(65 + index)}.
+                  </span>
                   <QuestionPreview content={option} />
                 </div>
               </label>
-
             ))}
           </div>
         );
