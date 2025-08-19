@@ -35,6 +35,7 @@ const freeClassController = require("../controllers/freeClass.controller");
 const examController = require("../controllers/examController");
 const examAttemptController = require("../controllers/examAttemptController");
 const resultController = require("../controllers/resultController");
+const courseExamNoticeController = require("../controllers/courseExamNoticeController");
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
@@ -779,6 +780,41 @@ router.get(
   "/user/:userId/exam/:examId",
   userProtect,
   resultController.getResultByUserAndExam,
+);
+
+// Course Exam Notice Routes (Admin)
+router.post(
+  "/course-exam-notices",
+  courseExamNoticeController.createNotice,
+);
+router.get(
+  "/course-exam-notices",
+  courseExamNoticeController.getAllNotices,
+);
+router.get(
+  "/course-exam-notices/:id",
+  courseExamNoticeController.getNoticeById,
+);
+router.put(
+  "/course-exam-notices/:id",
+  courseExamNoticeController.updateNotice,
+);
+router.delete(
+  "/course-exam-notices/:id",
+  courseExamNoticeController.deleteNotice,
+);
+
+router.get(
+  "/admin/course-exam-notices/product/:productId",
+  adminProtect,
+  courseExamNoticeController.getNoticeByProductId,
+);
+
+// Course Exam Notice Routes (User)
+router.get(
+  "/course-exam-notices/product/:productId",
+  userProtect,
+  courseExamNoticeController.getNoticeByProductId,
 );
 
 module.exports = router;
