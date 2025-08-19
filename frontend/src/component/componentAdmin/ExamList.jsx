@@ -13,8 +13,7 @@ import { useNavigate } from "react-router-dom";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
 
 export default function ExamList() {
-
-  const {token} = useAuthAdminStore()
+  const { token } = useAuthAdminStore();
 
   const [exams, setExams] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
@@ -108,6 +107,14 @@ export default function ExamList() {
                 onClick={() => setDeleteId(exam._id)}
               >
                 Delete
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => navigate(`/admin/results/${exam._id}`)}
+              >
+                Results
               </Button>
             </div>
           </div>

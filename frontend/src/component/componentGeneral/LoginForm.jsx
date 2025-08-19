@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { User, Lock, Eye, EyeOff } from "lucide-react"; // Lucide icons
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import useCartStore from "../../store/useCartStore.js";
 
-const LoginForm = () => {
+const LoginForm = ({ message }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading, error } = useAuthUserStore();
   const { syncCartToDB, loadCartFromBackend } = useCartStore();
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +31,8 @@ const LoginForm = () => {
       try {
         await syncCartToDB(token);
         await loadCartFromBackend(token);
-        navigate("/user/home");
+        const from = location.state?.from?.pathname || "/user/home";
+        navigate(from, { replace: true });
       } catch (err) {
         setSnackbarMessage(
           "There was a problem loading your cart. Please try again.",
@@ -49,6 +51,13 @@ const LoginForm = () => {
             <Lock className="primaryTextColor w-8 h-8" />
           </div>
         </div>
+
+        {/* Message from protected route */}
+        {message && (
+          <div className="bg-blue-100 primaryTextColor px-4 py-2 mb-4 rounded">
+            {message}
+          </div>
+        )}
 
         {/* Heading */}
         <h2 className="text-2xl accentTextColor font-semibold m-7">Sign in</h2>
@@ -120,11 +129,11 @@ const LoginForm = () => {
         </form>
 
         {/* Register */}
-        <p className="text-sm mt-6 accentTextColor">
-          Don’t have any account?{" "}
+        <p className="text-lg mt-6 accentTextColor">
+          Don’t have any account ?{" "}
           <Link to="/register">
-            <button className="primaryTextColor font-medium hover:underline cursor-pointer">
-              Register account
+            <button className="ml-4 primaryBgColor accentTextColor px-4 py-2 rounded font-medium  cursor-pointer">
+              Register Account
             </button>
           </Link>
         </p>
