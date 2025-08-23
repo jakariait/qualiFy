@@ -175,6 +175,15 @@ export default function ExamResultByUserIdExamId() {
                 <QuestionPreview content={question.solution} />
               </p>
             )}
+
+            {qr.adminFeedback && (
+              <p className="flex items-start">
+                <strong className="mr-1">Feedback:</strong>
+                <QuestionPreview content={qr.adminFeedback} />
+              </p>
+            )}
+
+
           </div>
         );
       })}

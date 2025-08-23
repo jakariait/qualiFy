@@ -91,14 +91,14 @@ const RegisterForm = () => {
             navigate("/user/home");
           } catch (cartError) {
             setSnackbarMessage(
-              "Registration successful, but there was a problem loading your cart. Please try again."
+              "Registration successful, but there was a problem loading your cart. Please try again.",
             );
             setSnackbarOpen(true);
             navigate("/user/home");
           }
         } else {
           alert(
-            "Registration successful, but automatic login failed. Please log in manually."
+            "Registration successful, but automatic login failed. Please log in manually.",
           );
           navigate("/login");
         }
@@ -159,7 +159,7 @@ const RegisterForm = () => {
             />
           </div>
 
-          {/* Phone (Optional) */}
+          {/* Phone  */}
           <div className="flex items-center bg-white rounded-md shadow-sm px-4 py-4">
             <FaPhone className="primaryTextColor mr-5 text-2xl" />
             <input
@@ -167,7 +167,8 @@ const RegisterForm = () => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="Phone Number (optional)"
+              required={true}
+              placeholder="Phone Number*"
               className="w-full outline-none text-sm bg-transparent"
             />
           </div>

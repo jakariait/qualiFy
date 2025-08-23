@@ -14,6 +14,7 @@ const UserResult = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [marks, setMarks] = useState({});
+  const [feedback, setFeedback] = useState({});
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,6 +35,20 @@ const UserResult = () => {
     fetchResult();
   }, [id, API_URL]);
 
+  useEffect(() => {
+    if (result) {
+      const initialMarks = {};
+      const initialFeedback = {};
+      result.questionResults.forEach((qr) => {
+        const key = `${qr.subjectIndex}-${qr.questionIndex}`;
+        initialMarks[key] = qr.marksObtained;
+        initialFeedback[key] = qr.adminFeedback || "";
+      });
+      setMarks(initialMarks);
+      setFeedback(initialFeedback);
+    }
+  }, [result]);
+
   const handleMarksChange = (subjectIndex, questionIndex, value) => {
     setMarks((prev) => ({
       ...prev,
@@ -41,9 +56,17 @@ const UserResult = () => {
     }));
   };
 
+  const handleFeedbackChange = (subjectIndex, questionIndex, value) => {
+    setFeedback((prev) => ({
+      ...prev,
+      [`${subjectIndex}-${questionIndex}`]: value,
+    }));
+  };
+
   const handleUpdateMarks = async (subjectIndex, questionIndex) => {
     const marksValue = marks[`${subjectIndex}-${questionIndex}`];
-    if (marksValue === undefined || marksValue.trim() === "") {
+    const feedbackValue = feedback[`${subjectIndex}-${questionIndex}`];
+    if (marksValue === undefined || marksValue.toString().trim() === "") {
       alert("Please provide marks.");
       return;
     }
@@ -67,17 +90,13 @@ const UserResult = () => {
           subjectIndex,
           questionIndex,
           marksObtained: Number(marksValue),
+          feedback: feedbackValue,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
       setResult(res.data.data); // Update result with response from backend
-      setMarks((prev) => {
-        const newMarks = { ...prev };
-        delete newMarks[`${subjectIndex}-${questionIndex}`];
-        return newMarks;
-      });
     } catch (err) {
       console.error(
         "Failed to update marks:",
@@ -207,34 +226,57 @@ const UserResult = () => {
               </span>
             </p>
 
-            {qr.isCorrect === null && (
+            {qr.adminFeedback && (
+              <p className="flex items-start">
+                <strong className="mr-1">Feedback:</strong>
+                <QuestionPreview content={qr.adminFeedback} />
+              </p>
+            )}
+
+            {qr.questionType !== 'mcq-single' && (
               <div className="mt-2 p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
                 <p className="font-semibold text-yellow-800">Action</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    type="number"
-                    step="0.5"
-                    className="w-32 px-2 py-1 border border-gray-300 rounded-md"
-                    placeholder={`Max: ${qr.maxMarks}`}
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="0.5"
+                      className="w-32 px-2 py-1 border border-gray-300 rounded-md"
+                      placeholder={`Max: ${qr.maxMarks}`}
+                      value={
+                        marks[`${qr.subjectIndex}-${qr.questionIndex}`] ?? ""
+                      }
+                      onChange={(e) =>
+                        handleMarksChange(
+                          qr.subjectIndex,
+                          qr.questionIndex,
+                          e.target.value,
+                        )
+                      }
+                    />
+                    <button
+                      onClick={() =>
+                        handleUpdateMarks(qr.subjectIndex, qr.questionIndex)
+                      }
+                      className="px-4 py-1 primaryBgColor accentTextColor rounded cursor-pointer"
+                    >
+                      Update Marks
+                    </button>
+                  </div>
+                  <textarea
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md"
+                    placeholder="Provide feedback..."
                     value={
-                      marks[`${qr.subjectIndex}-${qr.questionIndex}`] || ""
+                      feedback[`${qr.subjectIndex}-${qr.questionIndex}`] ?? ""
                     }
                     onChange={(e) =>
-                      handleMarksChange(
+                      handleFeedbackChange(
                         qr.subjectIndex,
                         qr.questionIndex,
                         e.target.value,
                       )
                     }
                   />
-                  <button
-                    onClick={() =>
-                      handleUpdateMarks(qr.subjectIndex, qr.questionIndex)
-                    }
-                    className="px-4 py-1 primaryBgColor accentTextColor rounded cursor-pointer"
-                  >
-                    Submit Marks
-                  </button>
                 </div>
               </div>
             )}

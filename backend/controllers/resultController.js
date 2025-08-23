@@ -159,7 +159,7 @@ class ResultController {
   async updateMarks(req, res) {
     try {
       const { resultId } = req.params;
-      const { questionIndex, subjectIndex, marksObtained } = req.body;
+      const { questionIndex, subjectIndex, marksObtained, feedback } = req.body;
       const adminId = req.admin.id;
 
       if (
@@ -198,6 +198,9 @@ class ResultController {
       questionResult.isCorrect = Number(marksObtained) > 0;
       questionResult.reviewedBy = adminId;
       questionResult.reviewedAt = new Date();
+      if (feedback !== undefined) {
+        questionResult.adminFeedback = feedback;
+      }
 
       // Recalculate total marks
       result.obtainedMarks = result.questionResults.reduce(

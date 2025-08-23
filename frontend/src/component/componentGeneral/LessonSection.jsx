@@ -78,7 +78,7 @@ const LessonSection = ({ modules }) => {
       <h2 className="text-3xl md:text-4xl font-extrabold mb-6 leading-tight text-center">
         Course{" "}
         <span className="relative inline-block primaryTextColor">
-          Modules & Lessons
+          Modules & Resources
           <svg
             className="absolute -bottom-2 left-0 w-full h-3"
             viewBox="0 0 200 12"

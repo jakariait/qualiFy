@@ -69,10 +69,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage }).any();
 
-
-
-
-
 // Serve images from the 'uploads' folder as static files
 router.use("/uploads", express.static(path.join(__dirname, "uploads")));
 

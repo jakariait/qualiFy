@@ -5,6 +5,15 @@ const UserProtectedRoute = () => {
   const { token } = useAuthUserStore(); // Check if admin is logged in
   const location = useLocation();
 
+  let message;
+  if (location.pathname.includes("checkout")) {
+    message = "Please sign in to purchase.";
+  } else if (location.pathname.includes("free-resource")) {
+    message = "Please sign in to view free resources.";
+  } else {
+    message = "Please sign in to purchase or view free resources.";
+  }
+
   return token ? (
     <Outlet />
   ) : (
@@ -12,7 +21,7 @@ const UserProtectedRoute = () => {
       to="/login"
       state={{
         from: location,
-        message: "Please sign in to purchase or view free resources.",
+        message: message,
       }}
       replace
     />
