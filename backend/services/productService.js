@@ -18,14 +18,21 @@ const createProduct = async (data) => {
 
 const updateProduct = async (productId, productData) => {
 	try {
-		// Find product by id and update, return updated document
-		const updatedProduct = await ProductModel.findByIdAndUpdate(
-			productId,
-			{ $set: productData },
-			{ new: true, runValidators: true }
-		);
+		const product = await ProductModel.findById(productId);
+		if (!product) {
+			return null;
+		}
 
-		return updatedProduct;
+		// Overwrite product fields with productData fields
+		Object.assign(product, productData);
+
+		// Mongoose can track changes in nested arrays if you mark them as modified
+		if (productData.modules) {
+			product.markModified('modules');
+		}
+
+		await product.save({ runValidators: true });
+		return product;
 	} catch (error) {
 		console.error("Service error updating product:", error);
 		throw error;

@@ -86,32 +86,41 @@ const createProduct = async (req, res) => {
       else delete productData.isActive;
     }
 
-    // Handle thumbnailImage upload
-    if (req.files?.thumbnailImage) {
-      productData.thumbnailImage = req.files.thumbnailImage[0].filename;
+    // --- UNIFIED FILE HANDLING ---
+    const fileMap = {};
+    if (req.files && req.files.length > 0) {
+        req.files.forEach(file => {
+            fileMap[file.fieldname] = file.filename;
+        });
     }
 
-    // Handle previewPdf upload
-    if (req.files?.previewPdf) {
-      productData.previewPdf = req.files.previewPdf[0].filename;
+    // Handle single, named files
+    if (fileMap.thumbnailImage) {
+        productData.thumbnailImage = fileMap.thumbnailImage;
+    }
+    if (fileMap.previewPdf) {
+        productData.previewPdf = fileMap.previewPdf;
     }
 
     // Handle courseThumbnails inside modules
-    if (req.files?.courseThumbnails && productData.modules) {
-      const courseThumbnails = req.files.courseThumbnails.map((f) => f.filename);
-
-      let parsedModules = safeJSONParse(productData.modules);
-      if (!parsedModules) parsedModules = [];
-
-      parsedModules = parsedModules.map((module) => ({
-        ...module,
-        lessons: module.lessons.map((lesson) => ({
-          ...lesson,
-          courseThumbnail: courseThumbnails.shift() || lesson.courseThumbnail || "",
-        })),
-      }));
-
-      productData.modules = parsedModules;
+    if (productData.modules) {
+      const parsedModules = safeJSONParse(productData.modules);
+      if (parsedModules) {
+        const newModules = parsedModules.map(module => ({
+            ...module,
+            lessons: module.lessons.map(lesson => {
+                const newLesson = { ...lesson };
+                if (newLesson.fileKey && fileMap[newLesson.fileKey]) {
+                    newLesson.courseThumbnail = fileMap[newLesson.fileKey];
+                }
+                delete newLesson.fileKey;
+                return newLesson;
+            }),
+        }));
+        productData.modules = newModules;
+      } else {
+        productData.modules = [];
+      }
     } else if (productData.modules) {
       // If modules is string but no thumbnails uploaded, still parse it
       productData.modules = safeJSONParse(productData.modules) || [];
@@ -149,35 +158,42 @@ const updateProduct = async (req, res) => {
     const productId = req.params.id;
     const productData = { ...req.body };
 
-    // Handle thumbnailImage upload
-    if (req.files?.thumbnailImage) {
-      productData.thumbnailImage = req.files.thumbnailImage[0].filename;
+    // --- UNIFIED FILE HANDLING ---
+    const fileMap = {};
+    if (req.files && req.files.length > 0) {
+        req.files.forEach(file => {
+            fileMap[file.fieldname] = file.filename;
+        });
     }
 
-    // Handle previewPdf upload
-    if (req.files?.previewPdf) {
-      productData.previewPdf = req.files.previewPdf[0].filename;
+    // Handle single, named files
+    if (fileMap.thumbnailImage) {
+        productData.thumbnailImage = fileMap.thumbnailImage;
+    }
+    if (fileMap.previewPdf) {
+        productData.previewPdf = fileMap.previewPdf;
     }
 
     // Handle courseThumbnail(s) inside modules
-    if (req.files?.courseThumbnails && productData.modules) {
-      const courseThumbnails = req.files.courseThumbnails.map((f) => f.filename);
-
-
-      let parsedModules =
+    if (productData.modules) {
+      const parsedModules =
         typeof productData.modules === "string"
           ? JSON.parse(productData.modules)
           : productData.modules;
 
-      parsedModules = parsedModules.map((module) => ({
-        ...module,
-        lessons: module.lessons.map((lesson) => ({
-          ...lesson,
-          courseThumbnail: courseThumbnails.shift() || lesson.courseThumbnail || "",
-        })),
+      const newModules = parsedModules.map(module => ({
+          ...module,
+          lessons: module.lessons.map(lesson => {
+              const newLesson = { ...lesson };
+              if (newLesson.fileKey && fileMap[newLesson.fileKey]) {
+                  newLesson.courseThumbnail = fileMap[newLesson.fileKey];
+              }
+              delete newLesson.fileKey;
+              return newLesson;
+          }),
       }));
 
-      productData.modules = parsedModules;
+      productData.modules = newModules;
     } else if (typeof productData.modules === "string") {
       // Parse modules even if no files were uploaded
       productData.modules = JSON.parse(productData.modules);

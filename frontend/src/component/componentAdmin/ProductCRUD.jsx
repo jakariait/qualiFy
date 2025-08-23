@@ -318,6 +318,7 @@ const ProductCRUD = () => {
 						title: lesson.title || "",
 						duration: lesson.duration || "",
 						courseThumbnail: lesson.courseThumbnail || "",
+						link: lesson.link || "",
 						courseThumbnailFile: null,
 					})) || [],
 			})) || []
@@ -378,24 +379,40 @@ const ProductCRUD = () => {
 			formData.append("faqs", JSON.stringify(form.faqs));
 			formData.append("isActive", form.isActive);
 
+			// Create a version of modules with unique keys for file uploads
+			const modulesWithKeys = modules.map((mod, mIdx) => ({
+				...mod,
+				lessons: mod.lessons.map((lesson, lIdx) => ({
+					...lesson,
+					// Create a unique key if there's a file
+					fileKey: lesson.courseThumbnailFile
+						? `courseThumbnails_${mIdx}_${lIdx}`
+						: undefined,
+				})),
+			}));
+
+			// Append the modules JSON, sending the fileKey to the backend
 			formData.append(
 				"modules",
 				JSON.stringify(
-					modules.map((mod) => ({
+					modulesWithKeys.map((mod) => ({
 						subject: mod.subject,
-						lessons: mod.lessons.map(({ title, duration }) => ({
-							title,
-							duration,
+						lessons: mod.lessons.map((lesson) => ({
+							title: lesson.title,
+							duration: lesson.duration,
+							link: lesson.link,
+							courseThumbnail: lesson.courseThumbnail, // Send the old path too
+							fileKey: lesson.fileKey, // The unique key
 						})),
 					}))
 				)
 			);
 
-			// Append all courseThumbnail files under key 'courseThumbnails'
-			modules.forEach((mod) => {
+			// Append the files themselves, using the unique key as the fieldname
+			modulesWithKeys.forEach((mod) => {
 				mod.lessons.forEach((lesson) => {
-					if (lesson.courseThumbnailFile) {
-						formData.append("courseThumbnails", lesson.courseThumbnailFile);
+					if (lesson.courseThumbnailFile && lesson.fileKey) {
+						formData.append(lesson.fileKey, lesson.courseThumbnailFile);
 					}
 				});
 			});

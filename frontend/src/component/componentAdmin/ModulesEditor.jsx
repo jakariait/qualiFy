@@ -27,6 +27,7 @@ const ModulesEditor = ({ modules, setModules }) => {
     updated[moduleIdx].lessons.push({
       title: "",
       duration: "",
+      link: "",
       courseThumbnail: "",
       courseThumbnailFile: null,
     });
@@ -119,6 +120,17 @@ const ModulesEditor = ({ modules, setModules }) => {
                       updateLessonField(mIdx, lIdx, "duration", e.target.value)
                     }
                     className="px-4 py-2 bg-gray-50 shadow rounded-md w-full sm:w-32 focus:outline-none"
+                  />
+
+                  {/* Link */}
+                  <input
+                    type="text"
+                    placeholder="Lesson Link"
+                    value={lesson.link}
+                    onChange={(e) =>
+                      updateLessonField(mIdx, lIdx, "link", e.target.value)
+                    }
+                    className="px-4 py-2 bg-gray-50 shadow rounded-md flex-grow focus:outline-none"
                   />
 
                   {/* Upload + Preview */}

@@ -1,13 +1,76 @@
 import React, { useState } from "react";
-import { Clock } from "lucide-react";
+import { Clock, PlayCircle, Link as LinkIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Button,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const LessonSection = ({ modules }) => {
   const [activeIndex, setActiveIndex] = useState(0); // First module open by default
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeLink, setActiveLink] = useState("");
+  const [linkType, setLinkType] = useState("external"); // internal, youtube, external
 
   if (!Array.isArray(modules) || modules.length === 0) return null;
 
   const toggle = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
+  };
+
+  const isMobile = window.innerWidth < 640;
+
+  const handleLinkClick = (link) => {
+    if (link.includes("youtube.com/watch")) {
+      setLinkType("youtube");
+      try {
+        const url = new URL(link);
+        const videoId = url.searchParams.get("v");
+        if (videoId) {
+          const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+          setActiveLink(embedUrl);
+        } else {
+          setActiveLink(link);
+        }
+      } catch (error) {
+        setActiveLink(link);
+      }
+    } else {
+      let isInternal = false;
+      try {
+        const url = new URL(link);
+        if (url.origin === window.location.origin) {
+          isInternal = true;
+        }
+      } catch (e) {
+        if (link.startsWith("/")) {
+          isInternal = true;
+        }
+      }
+
+      if (isInternal) {
+        setLinkType("internal");
+        setActiveLink(link);
+      } else {
+        setLinkType("external");
+        setActiveLink(link);
+      }
+    }
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setActiveLink("");
+  };
+
+  const aspectRatios = {
+    youtube: "56.25%", // 16:9
+    internal: "225.25%", // your custom ratio
+    default: "100%", // square
   };
 
   return (
@@ -61,7 +124,10 @@ const LessonSection = ({ modules }) => {
                 {module.lessons.map((lesson) => (
                   <div
                     key={lesson._id}
-                    className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group"
+                    className={`bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group ${
+                      lesson.link ? "cursor-pointer" : ""
+                    }`}
+                    onClick={() => lesson.link && handleLinkClick(lesson.link)}
                   >
                     {/* Thumbnail */}
                     {lesson.courseThumbnail && (
@@ -74,6 +140,15 @@ const LessonSection = ({ modules }) => {
                           alt={lesson.title}
                           className="w-full object-cover group-hover:scale-102 transition-transform"
                         />
+                        {lesson.link && (
+                          <div className="absolute inset-0 bg-opacity-25 flex items-center justify-center transition-opacity duration-300">
+                            {lesson.link.includes("youtube.com/watch") ? (
+                              <PlayCircle className="w-16 h-16 primaryTextColor" />
+                            ) : (
+                              <LinkIcon className="w-16 h-16 primaryTextColor" />
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -82,10 +157,12 @@ const LessonSection = ({ modules }) => {
                       <h4 className="text-lg font-semibold primaryTextColor">
                         {lesson.title}
                       </h4>
-                      <div className="flex items-center text-gray-600 text-sm gap-1">
-                        <Clock className="w-4 h-4 text-blue-600" />
-                        <span>{lesson.duration || "N/A"}</span>
-                      </div>
+                      {lesson.duration && (
+                        <div className="flex items-center text-gray-600 text-sm gap-1">
+                          <Clock className="w-4 h-4 text-blue-600" />
+                          <span>{lesson.duration}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -94,6 +171,80 @@ const LessonSection = ({ modules }) => {
           </div>
         ))}
       </div>
+
+      <Dialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }}>
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseDialog}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {linkType === "youtube" || linkType === "internal" ? (
+            <div
+              style={{
+                position: "relative",
+                paddingBottom: aspectRatios[linkType] || aspectRatios.default,
+                height: 0,
+              }}
+            >
+              <iframe
+                src={activeLink}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="Lesson Content"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+              ></iframe>
+            </div>
+          ) : (
+            // external
+            <div className="p-8 text-center min-h-64 flex flex-col justify-center items-center">
+              <p className="mb-4 text-lg">
+                This lesson contains an external link:
+              </p>
+              <a
+                href={activeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline break-all text-xl"
+              >
+                {activeLink}
+              </a>
+              <div className="mt-8">
+                <Button
+                  variant="contained"
+                  size="large"
+                  href={activeLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open Link in New Tab
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

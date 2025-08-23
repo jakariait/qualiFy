@@ -16,6 +16,7 @@ import StudentReviewModel from "../models/StudentReviewModel.js";
 import TeacherProfileModel from "../models/TeacherProfileModel.js";
 import FreeResourceModel from "../models/FreeResourceModel.js";
 import PlatformInfoModel from "../models/PlatformInfoModel.js";
+import ExamAttemptModel from "../models/ExamAttemptModel.js";
 
 
 // Setup __dirname for ES module
@@ -110,6 +111,28 @@ const collectUsedImages = async () => {
     if (resource.resourcePdf) addImage(resource.resourcePdf); // use addImage here for PDF too
   });
 };
+
+// --- Collect from ExamAttempt answers ---
+const examAttempts = await ExamAttemptModel.find({}, "subjectAttempts");
+examAttempts.forEach((attempt) => {
+  attempt.subjectAttempts?.forEach((subject) => {
+    subject.answers?.forEach((ans) => {
+      if (ans.answer && typeof ans.answer === "string") {
+        const val = ans.answer.toLowerCase();
+        if (
+          val.endsWith(".jpg") ||
+          val.endsWith(".jpeg") ||
+          val.endsWith(".png") ||
+          val.endsWith(".gif") ||
+          val.endsWith(".webp") ||
+          val.endsWith(".pdf")
+        ) {
+          addImage(ans.answer);
+        }
+      }
+    });
+  });
+});
 
 await collectUsedImages();
 
