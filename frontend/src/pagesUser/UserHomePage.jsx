@@ -3,6 +3,7 @@ import UserLayout from "../component/componentGeneral/UserLayout.jsx";
 import UserStats from "../component/componentGeneral/UserStats.jsx";
 import DeliveredProducts from "../component/componentGeneral/DeliveredProducts.jsx";
 import useAuthUserStore from "../store/AuthUserStore.js";
+import FreeLiveExamList from "../component/componentGeneral/FreeLiveExam.jsx";
 
 const UserHomePage = () => {
   const { user, token } = useAuthUserStore();
@@ -10,7 +11,10 @@ const UserHomePage = () => {
   return (
     <UserLayout>
       <UserStats />
-      <DeliveredProducts userId={user?._id} token={token} />
+      <div className={"flex flex-col gap-4"}>
+        <DeliveredProducts userId={user?._id} token={token} />
+        <FreeLiveExamList />
+      </div>
     </UserLayout>
   );
 };

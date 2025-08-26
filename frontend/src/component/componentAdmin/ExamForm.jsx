@@ -26,6 +26,7 @@ import {
   AccordionDetails,
   FormHelperText,
   InputAdornment,
+  FormControlLabel,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -51,6 +52,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
     status: "draft",
     productIds: [],
     subjects: [],
+    isFree: false,
   });
   const [products, setProducts] = useState([]);
   const [totalMarks, setTotalMarks] = useState(0);
@@ -388,6 +390,18 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                     Select products this exam is associated with
                   </FormHelperText>
                 </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.isFree || false}
+                      onChange={(e) => handleChange("isFree", e.target.checked)}
+                    />
+                  }
+                  label="Is this a free exam?"
+                />
               </Grid>
             </Grid>
 

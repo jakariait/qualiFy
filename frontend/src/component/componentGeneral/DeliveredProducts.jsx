@@ -104,7 +104,7 @@ const DeliveredProducts = ({ userId, token }) => {
                   {product.type.charAt(0).toUpperCase() + product.type.slice(1)}
                 </p>
               </div>
-              <div className="space-y-4 mt-4">
+              <div className="flex flex-col gap-2 mt-4">
                 <Link
                   to={`/user/notice/${product._id}`}
                   className="inline-block primaryBgColor accentTextColor px-4 py-2 rounded-lg text-sm font-semibold  transition-colors shadow-md"

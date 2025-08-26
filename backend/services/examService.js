@@ -1,4 +1,4 @@
-const Exam = require('../models/ExamModel');
+const Exam = require("../models/ExamModel");
 
 const createExam = async (data) => {
   const exam = new Exam(data);
@@ -35,8 +35,14 @@ const deleteExam = async (id) => {
 const getExamsByProductId = async (productId) => {
   return Exam.find({
     productIds: productId,
-    status: 'published',
+    status: "published",
   }).sort({ createdAt: -1 });
+};
+
+const getFreeExams = async () => {
+  return Exam.find({ isFree: true, status: "published" }).sort({
+    createdAt: -1,
+  });
 };
 
 module.exports = {
@@ -46,4 +52,5 @@ module.exports = {
   updateExam,
   deleteExam,
   getExamsByProductId,
+  getFreeExams,
 };

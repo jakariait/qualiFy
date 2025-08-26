@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
 import { Snackbar, Alert } from "@mui/material";
@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const LiveExamList = () => {
+const FreeLiveExamList = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userAttempts, setUserAttempts] = useState([]);
@@ -23,7 +23,6 @@ const LiveExamList = () => {
 
   const { token } = useAuthUserStore();
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const showSnackbar = (message, severity = "error") => {
     setSnackbar({ open: true, message, severity });
@@ -33,20 +32,17 @@ const LiveExamList = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-
-
-
-
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await fetch(`${API_URL}/exams/product/${id}`, {
+        const response = await fetch(`${API_URL}/exams/free`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 👈 pass token here
+            Authorization: `Bearer ${token}`, // 👈 token here
           },
-        });        if (!response.ok) {
+        });
+        if (!response.ok) {
           throw new Error("Failed to fetch exams");
         }
         const data = await response.json();
@@ -86,11 +82,9 @@ const LiveExamList = () => {
       }
     };
 
-    if (id) {
-      fetchExams();
-    }
+    fetchExams();
     fetchUserAttempts();
-  }, [id, token]);
+  }, [token]);
 
   const handleStartExam = async (examId) => {
     try {
@@ -138,54 +132,59 @@ const LiveExamList = () => {
   return (
     <section className="bg-gray-50 shadow-inner rounded-2xl p-3">
       <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
-        Live Exams
+        Free Live Exams
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {loading
-          ? Array.from({ length: 3 }).map((_, index) => (
-              <ExamCardSkeleton key={index} />
-            ))
-          : exams.map((exam) => {
-              const userAttempt = userAttempts.find(
-                (attempt) =>
-                  attempt.exam && String(attempt.exam._id) === String(exam._id),
-              );
-              const hasAttempted = !!userAttempt;
-              const attemptId = userAttempt ? userAttempt.id : null;
+        {loading ? (
+          Array.from({ length: 3 }).map((_, index) => (
+            <ExamCardSkeleton key={index} />
+          ))
+        ) : exams.length > 0 ? (
+          exams.map((exam) => {
+            const userAttempt = userAttempts.find(
+              (attempt) =>
+                attempt.exam && String(attempt.exam._id) === String(exam._id),
+            );
+            const hasAttempted = !!userAttempt;
+            const attemptId = userAttempt ? userAttempt.id : null;
 
-              return (
-                <div
-                  key={exam._id}
-                  className="bg-white border border-gray-200 p-3 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
-                >
-                  <h3 className="text-xl  text-gray-900">
-                    {exam.title}
-                  </h3>
+            return (
+              <div
+                key={exam._id}
+                className="bg-white border border-gray-200 p-3 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
+              >
+                <h3 className="text-xl  text-gray-900">{exam.title}</h3>
 
-
-                  <div className="flex justify-between text-sm text-gray-600 mt-4">
-                    <span>Total Marks: {exam.totalMarks}</span>
-                    <span>Duration: {exam.durationMin} Mins</span>
-                  </div>
-                  {hasAttempted ? (
-                    <Link
-                      to={`/user/exam/result/${exam._id}`}
-                      className="block text-center w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
-                    >
-                      View Results
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => handleStartExamClick(exam)}
-                      className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
-                    >
-                      Start Exam
-                    </button>
-                  )}
+                <div className="flex justify-between text-sm text-gray-600 mt-4">
+                  <span>Total Marks: {exam.totalMarks}</span>
+                  <span>Duration: {exam.durationMin} Mins</span>
                 </div>
-              );
-            })}
+                {hasAttempted ? (
+                  <Link
+                    to={`/user/exam/result/${exam._id}`}
+                    className="block text-center w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+                  >
+                    View Results
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handleStartExamClick(exam)}
+                    className="w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+                  >
+                    Start Exam
+                  </button>
+                )}
+              </div>
+            );
+          })
+        ) : (
+          <div className="col-span-1 md:col-span-2 text-center py-10">
+            <p className="text-gray-500 text-lg">
+              No live exams available at the moment.
+            </p>
+          </div>
+        )}
       </div>
 
       <ExamStartDialog
@@ -214,4 +213,4 @@ const LiveExamList = () => {
   );
 };
 
-export default LiveExamList;
+export default FreeLiveExamList;

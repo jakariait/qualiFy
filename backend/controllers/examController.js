@@ -64,6 +64,15 @@ const getExamsByProductId = asyncHandler(async (req, res) => {
   }
 });
 
+const getFreeExams = asyncHandler(async (req, res) => {
+  try {
+    const exams = await examService.getFreeExams();
+    res.status(200).json({ message: 'Free exams retrieved successfully', exams });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch free exams', error: error.message });
+  }
+});
+
 module.exports = {
   createExam,
   getAllExams,
@@ -71,4 +80,5 @@ module.exports = {
   updateExam,
   deleteExam,
   getExamsByProductId,
+  getFreeExams,
 };

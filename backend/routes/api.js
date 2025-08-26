@@ -636,8 +636,9 @@ router.delete(
 // Exam Routes
 router.post("/exams", adminProtect, examController.createExam);
 router.get("/exams", adminProtect, examController.getAllExams);
-router.get("/exams/:id", examController.getExamById);
-router.get("/exams/product/:productId", examController.getExamsByProductId);
+router.get("/exams/free",userProtect, examController.getFreeExams);
+router.get("/exams/:id", adminProtect, examController.getExamById);
+router.get("/exams/product/:productId",userProtect, examController.getExamsByProductId);
 router.put("/exams/:id", adminProtect, examController.updateExam);
 router.delete("/exams/:id", adminProtect, examController.deleteExam);
 
