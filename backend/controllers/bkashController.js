@@ -6,6 +6,10 @@ const createPayment = async (req, res) => {
 
     const data = await bkashService.createPayment(amount, payerReference, callbackURL);
 
+
+    console.log("bKash Payment Response:", data);
+
+
     res.status(200).json({
       paymentID: data.paymentID,
       bkashURL: data.bkashURL,
