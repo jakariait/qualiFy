@@ -18,6 +18,7 @@ const ExamSchema = new mongoose.Schema(
     subjects: [
       {
         title: { type: String, required: true },
+        description: { type: String},
         timeLimitMin: { type: Number, default: null },
         questions: [
           {

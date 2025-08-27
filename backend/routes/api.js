@@ -67,7 +67,55 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname)), // Naming files uniquely
 });
 
-const upload = multer({ storage }).any();
+const upload = multer({ storage }).fields([
+  {
+    name: "PrimaryLogo",
+    maxCount: 1,
+  },
+  {
+    name: "SecondaryLogo",
+    maxCount: 1,
+  },
+  {
+    name: "Favicon",
+    maxCount: 1,
+  },
+  {
+    name: "imgSrc",
+    maxCount: 1,
+  },
+  {
+    name: "categoryIcon",
+    maxCount: 1,
+  },
+  {
+    name: "categoryBanner",
+    maxCount: 1,
+  },
+  {
+    name: "thumbnailImage",
+    maxCount: 1,
+  },
+  {
+    name: "images",
+    maxCount: 10,
+  },
+  {
+    name: "userImage",
+    maxCount: 1,
+  },
+  {
+    name: "teachersImg",
+    maxCount: 1,
+  },
+  { name: "previewPdf", maxCount: 1 },
+  { name: "courseThumbnails", maxCount: 50 },
+  { name: "resourcePdf", maxCount: 1 },
+  { name: "resourceThumbnailImage", maxCount: 1 },
+  { name: "platformThumbnail", maxCount: 1 },
+  { name: "answer", maxCount: 1 },
+]);
+
 
 // Serve images from the 'uploads' folder as static files
 router.use("/uploads", express.static(path.join(__dirname, "uploads")));

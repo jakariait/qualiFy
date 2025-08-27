@@ -75,6 +75,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
         subjects:
           initialData.subjects?.map((subject) => ({
             ...subject,
+            description: subject.description || "",
             questions: subject.questions || [],
           })) || [],
       };
@@ -151,6 +152,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
         ...(prev.subjects || []),
         {
           title: "",
+          description: "",
           timeLimitMin: 0,
           questions: [],
         },
@@ -482,6 +484,22 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                             <InputAdornment position="end">min</InputAdornment>
                           ),
                         }}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <p className="p-d-block pb-2 text-gray-500">
+                        Provide a brief description of the subject
+                      </p>
+                      <Editor
+                        value={subject.description || ""}
+                        onTextChange={(e) =>
+                          handleSubjectChange(
+                            sIndex,
+                            "description",
+                            e.htmlValue,
+                          )
+                        }
+                        style={{ height: "160px" }}
                       />
                     </Grid>
                   </Grid>

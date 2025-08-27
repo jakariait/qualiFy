@@ -25,6 +25,7 @@ const QuestionPalette = ({ questions, answers, subjectName }) => {
           <span className="font-bold text-red-600">{remainingQuestions}</span>
         </p>
       </div>
+
     </div>
   );
 };

@@ -15,6 +15,7 @@ import {
 } from "@mui/material"; // ✅ MUI Snackbar and Dialog
 import LiveExamSkeleton from "./LiveExamSkeleton.jsx";
 import QuestionPreview from "../QuestionPreview.jsx";
+import SubjectDescription from "./SubjectDescription.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -521,6 +522,8 @@ const LiveExam = () => {
           subjectName={currentSubject.title}
         />
       </div>
+
+      <SubjectDescription description={currentSubject.description} />
 
       <div>
         {currentSubject.questions.map((question, qIndex) => (
