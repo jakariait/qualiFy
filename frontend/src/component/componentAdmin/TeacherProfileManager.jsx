@@ -31,6 +31,7 @@ const TeacherProfilesCRUD = () => {
     title: "",
     bio: "",
     teacherUniversity: "",
+    scholarship: "",
     teachersImg: "", // existing filename string
     imageFile: null, // new image file
   });
@@ -61,6 +62,7 @@ const TeacherProfilesCRUD = () => {
       title: "",
       bio: "",
       teacherUniversity: "",
+      scholarship: "",
       teachersImg: "",
       imageFile: null,
     });
@@ -74,6 +76,7 @@ const TeacherProfilesCRUD = () => {
       title: teacher.title || "",
       bio: teacher.bio || "",
       teacherUniversity: teacher.teacherUniversity || "",
+      scholarship: teacher.scholarship || "",
       teachersImg: teacher.teachersImg || "",
       imageFile: null,
     });
@@ -98,6 +101,7 @@ const TeacherProfilesCRUD = () => {
       formData.append("title", form.title);
       formData.append("bio", form.bio);
       formData.append("teacherUniversity", form.teacherUniversity);
+      formData.append("scholarship", form.scholarship);
 
       // If new image file selected, append it, else don't (backend can keep old image)
       if (form.imageFile) {
@@ -184,8 +188,7 @@ const TeacherProfilesCRUD = () => {
               )}
               <div>
                 <h3 className="font-bold">{t.name}</h3>
-                <p className="text-sm">{t.title}</p>
-                <p className="text-sm italic">{t.teacherUniversity}</p>
+
               </div>
             </div>
 
@@ -232,7 +235,7 @@ const TeacherProfilesCRUD = () => {
           />
 
           <TextField
-            label="Title"
+            label="Experience"
             name="title"
             value={form.title}
             onChange={handleChange}
@@ -244,6 +247,15 @@ const TeacherProfilesCRUD = () => {
             label="University"
             name="teacherUniversity"
             value={form.teacherUniversity}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+
+          <TextField
+            label="Scholarship"
+            name="scholarship"
+            value={form.scholarship}
             onChange={handleChange}
             fullWidth
             margin="normal"

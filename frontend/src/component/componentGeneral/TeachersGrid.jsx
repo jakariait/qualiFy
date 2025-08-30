@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ImageComponent from "./ImageComponent.jsx";
+import {Award, Clock, GraduationCap} from "lucide-react";
 
 const TeachersGrid = () => {
   const [teachers, setTeachers] = useState([]);
@@ -75,13 +76,32 @@ const TeachersGrid = () => {
                   className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="py-3 text-center">
+              <div className="py-3 flex flex-col items-center gap-2">
                 <h3 className="text-xl font-semibold primaryTextColor">
                   {teacher.name}
                 </h3>
-                <p className="primaryTextColor">{teacher.teacherUniversity}</p>
-                <p className="primaryTextColor font-medium">{teacher.title}</p>
-                <p className=" mt-4 p-3 text-md">{teacher.bio}</p>
+                {teacher.scholarship && (
+                  <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                    <Award className="w-4 h-4 text-gray-500" />
+                    {teacher.scholarship}
+                  </p>
+                )}
+
+                {teacher.title && (
+                  <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    {teacher.title}
+                  </p>
+                )}
+
+                {teacher.teacherUniversity && (
+                  <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                    <GraduationCap className="w-4 h-4 text-gray-500" />
+                    {teacher.teacherUniversity}
+                  </p>
+                )}
+
+                {teacher.bio && (<p className={"text-center p-3"}>{teacher.bio}</p>)}
               </div>
             </div>
           ))}

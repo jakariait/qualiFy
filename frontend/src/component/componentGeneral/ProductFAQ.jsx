@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 const ProductFAQ = ({ faq = [] }) => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -29,7 +30,11 @@ const ProductFAQ = ({ faq = [] }) => {
                   {item.question}
                 </span>
                 <span className="text-2xl text-[#EF6C00]">
-                  {activeIndex === index ? "−" : "+"}
+                  {activeIndex === index ? (
+                    <ChevronUp className="h-6 w-6" />
+                  ) : (
+                    <ChevronDown className="h-6 w-6" />
+                  )}
                 </span>
               </button>
               <div

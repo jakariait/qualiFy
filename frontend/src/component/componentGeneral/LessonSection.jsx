@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Clock, PlayCircle, Link as LinkIcon } from "lucide-react";
+import {
+  Clock,
+  PlayCircle,
+  Link as LinkIcon,
+  ChevronUp,
+  ChevronDown,
+  Lock,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -110,7 +117,11 @@ const LessonSection = ({ modules }) => {
                 {module.subject}
               </h3>
               <span className="text-2xl text-[#EF6C00]">
-                {activeIndex === index ? "−" : "+"}
+                {activeIndex === index ? (
+                  <ChevronUp className="h-6 w-6" />
+                ) : (
+                  <ChevronDown className="h-6 w-6" />
+                )}
               </span>
             </button>
 
@@ -140,21 +151,28 @@ const LessonSection = ({ modules }) => {
                           alt={lesson.title}
                           className="w-full object-cover group-hover:scale-102 transition-transform"
                         />
-                        {lesson.link && (
-                          <div className="absolute inset-0 bg-opacity-25 flex items-center justify-center transition-opacity duration-300">
-                            {lesson.link.includes("youtube.com/watch") ? (
-                              <PlayCircle className="w-16 h-16 primaryTextColor" />
-                            ) : (
-                              <LinkIcon className="w-16 h-16 primaryTextColor" />
-                            )}
-                          </div>
-                        )}
+                        {/*{lesson.link && (*/}
+                        {/*  <div className="absolute inset-0 bg-opacity-25 flex items-center justify-center transition-opacity duration-300">*/}
+                        {/*    {lesson.link.includes("youtube.com/watch") ? (*/}
+                        {/*      <PlayCircle className="w-16 h-16 primaryTextColor" />*/}
+                        {/*    ) : (*/}
+                        {/*      <LinkIcon className="w-16 h-16 primaryTextColor" />*/}
+                        {/*    )}*/}
+                        {/*  </div>*/}
+                        {/*)}*/}
                       </div>
                     )}
 
                     {/* Content */}
                     <div className="p-4 space-y-2">
-                      <h4 className="text-lg font-semibold primaryTextColor">
+                      <h4 className="text-lg font-semibold primaryTextColor flex flex-col items-center gap-2">
+                        {lesson.link ? (
+                          <span className="text-sm font-medium text-green-600">
+                            Free Class
+                          </span>
+                        ) : (
+                          <Lock className="w-4 h-4 text-gray-500" />
+                        )}
                         {lesson.title}
                       </h4>
                       {lesson.duration && (

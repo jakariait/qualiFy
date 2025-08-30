@@ -109,13 +109,13 @@ const upload = multer({ storage }).fields([
     maxCount: 1,
   },
   { name: "previewPdf", maxCount: 1 },
-  { name: "courseThumbnails", maxCount: 50 },
   { name: "resourcePdf", maxCount: 1 },
   { name: "resourceThumbnailImage", maxCount: 1 },
   { name: "platformThumbnail", maxCount: 1 },
   { name: "answer", maxCount: 1 },
 ]);
 
+const productUpload = multer({ storage }).any();
 
 // Serve images from the 'uploads' folder as static files
 router.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -329,7 +329,7 @@ router.post(
   "/products",
   adminProtect,
   checkPermission("add_products"),
-  upload,
+  productUpload,
   productController.createProduct,
 );
 
@@ -337,7 +337,7 @@ router.put(
   "/products/:id",
   adminProtect,
   checkPermission("edit_products"),
-  upload,
+  productUpload,
   productController.updateProduct,
 );
 
@@ -684,9 +684,13 @@ router.delete(
 // Exam Routes
 router.post("/exams", adminProtect, examController.createExam);
 router.get("/exams", adminProtect, examController.getAllExams);
-router.get("/exams/free",userProtect, examController.getFreeExams);
+router.get("/exams/free", userProtect, examController.getFreeExams);
 router.get("/exams/:id", adminProtect, examController.getExamById);
-router.get("/exams/product/:productId",userProtect, examController.getExamsByProductId);
+router.get(
+  "/exams/product/:productId",
+  userProtect,
+  examController.getExamsByProductId,
+);
 router.put("/exams/:id", adminProtect, examController.updateExam);
 router.delete("/exams/:id", adminProtect, examController.deleteExam);
 

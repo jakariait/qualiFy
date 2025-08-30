@@ -1,5 +1,5 @@
 import React from "react";
-import { GraduationCap } from "lucide-react";
+import {Award, Clock, GraduationCap} from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
@@ -70,9 +70,20 @@ const InstructorSection = ({ instructors = [], loading }) => {
                     <h3 className="text-lg primaryTextColor font-semibold">
                       {instructor.name}
                     </h3>
-                    <p className="text-sm secondaryTextColor">
-                      {instructor.title}
-                    </p>
+                    {instructor.scholarship && (
+                      <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                        <Award className="w-4 h-4 primaryTextColor" />
+                        {instructor.scholarship}
+                      </p>
+                    )}
+
+                    {instructor.title && (
+                      <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                        <Clock className="w-4 h-4 primaryTextColor" />
+                        {instructor.title}
+                      </p>
+                    )}
+
                   </div>
                 </div>
 

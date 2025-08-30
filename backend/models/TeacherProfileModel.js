@@ -20,6 +20,9 @@ const TeacherProfileSchema = new mongoose.Schema(
     },
     teacherUniversity:{
       type: String
+    },
+    scholarship:{
+      type: String
     }
   },
   { timestamps: true, versionKey: false }

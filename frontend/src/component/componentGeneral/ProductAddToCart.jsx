@@ -22,6 +22,7 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import OrderCountBadge from "./OrderCountBadge.jsx";
 
 const ProductAddToCart = ({ product }) => {
   const [openPdf, setOpenPdf] = useState(false);
@@ -242,8 +243,10 @@ const ProductAddToCart = ({ product }) => {
         <div className="mt-4 p-2 secondaryTextColor flex flex-col gap-1">
           {product.enrolledStudents && (
             <div className="flex items-center gap-1">
-              <GraduationCap className="w-4 h-4 text-indigo-600" />
-              <span>Enrolled: {product.enrolledStudents}</span>
+              <OrderCountBadge
+                productId={product._id}
+                enrolledStudents={product.enrolledStudents}
+              />
             </div>
           )}
           {product.lessons && (

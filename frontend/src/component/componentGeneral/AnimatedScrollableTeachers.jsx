@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ImageComponent from "./ImageComponent.jsx";
+import { User, Award, Clock, GraduationCap } from "lucide-react";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -119,10 +120,34 @@ const AnimatedScrollableTeachers = () => {
                     className="w-full object-cover  transition-transform duration-500"
                   />
                 </div>
-                <div className="py-2 px-2 primaryTextColor text-center">
-                  <h3 className="text-md md:text-lg">{teacher.name}</h3>
-                  <p className="text-sm md:text-lg">{teacher.teacherUniversity}</p>
-                  <p className="text-sm md:text-lg">{teacher.title}</p>
+
+                <div className="py-2 px-2 primaryTextColor text-center flex flex-col items-center justify-center md:text-left">
+                  {teacher.name && (
+                    <h3 className="text-md md:text-lg font-semibold flex items-center justify-center md:justify-start gap-2">
+                      {teacher.name}
+                    </h3>
+                  )}
+
+                  {teacher.scholarship && (
+                    <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                      <Award className="w-4 h-4 text-gray-500" />
+                      {teacher.scholarship}
+                    </p>
+                  )}
+
+                  {teacher.title && (
+                    <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      {teacher.title}
+                    </p>
+                  )}
+
+                  {teacher.teacherUniversity && (
+                    <p className="text-sm md:text-md flex items-center justify-center md:justify-start gap-2">
+                      <GraduationCap className="w-4 h-4 text-gray-500" />
+                      {teacher.teacherUniversity}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
