@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { User, Lock, Eye, EyeOff } from "lucide-react"; // Lucide icons
+import { User, Lock, Eye, EyeOff } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import useCartStore from "../../store/useCartStore.js";
+import OrderTimeline from "./OrderTimeline.jsx";
 
 const LoginForm = ({ message }) => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const LoginForm = ({ message }) => {
 
   return (
     <div className="flex items-center justify-center  px-4 mt-20 mb-20 md:m-20">
-      <div className="secondaryBgColor rounded-2xl shadow-md p-8 w-full max-w-md text-center relative">
+      <div className="secondaryBgColor rounded-2xl shadow-md p-8 w-full max-w-xl text-center relative">
         {/* Lock Icon */}
         <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
           <div className="accentBgColor p-4 rounded-full">
@@ -54,8 +55,9 @@ const LoginForm = ({ message }) => {
 
         {/* Message from protected route */}
         {message && (
-          <div className="bg-blue-100 primaryTextColor px-4 py-2 mb-4 rounded">
+          <div className=" primaryTextColor px-4 py-2 mb-4 rounded">
             {message}
+            <OrderTimeline currentStep={1} />
           </div>
         )}
 

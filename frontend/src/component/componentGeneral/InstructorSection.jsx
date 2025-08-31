@@ -11,7 +11,7 @@ const InstructorSection = ({ instructors = [], loading }) => {
   return (
     <div className="py-5">
       <h2 className="text-3xl md:text-4xl font-extrabold mb-6 leading-tight text-center">
-        Meet Our{" "}
+       Course{" "}
         <span className="relative inline-block primaryTextColor">
           Instructor
           <svg

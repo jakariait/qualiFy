@@ -151,21 +151,13 @@ const LessonSection = ({ modules }) => {
                           alt={lesson.title}
                           className="w-full object-cover group-hover:scale-102 transition-transform"
                         />
-                        {/*{lesson.link && (*/}
-                        {/*  <div className="absolute inset-0 bg-opacity-25 flex items-center justify-center transition-opacity duration-300">*/}
-                        {/*    {lesson.link.includes("youtube.com/watch") ? (*/}
-                        {/*      <PlayCircle className="w-16 h-16 primaryTextColor" />*/}
-                        {/*    ) : (*/}
-                        {/*      <LinkIcon className="w-16 h-16 primaryTextColor" />*/}
-                        {/*    )}*/}
-                        {/*  </div>*/}
-                        {/*)}*/}
+
                       </div>
                     )}
 
                     {/* Content */}
                     <div className="p-4 space-y-2">
-                      <h4 className="text-lg font-semibold primaryTextColor flex flex-col items-center gap-2">
+                      <h4 className="text-lg font-semibold primaryTextColor flex flex-col items-center gap-1 text-center">
                         {lesson.link ? (
                           <span className="text-sm font-medium text-green-600">
                             Free Class
@@ -173,8 +165,9 @@ const LessonSection = ({ modules }) => {
                         ) : (
                           <Lock className="w-4 h-4 text-gray-500" />
                         )}
-                        {lesson.title}
+                        <span className="break-words leading-tight">{lesson.title}</span>
                       </h4>
+
                       {lesson.duration && (
                         <div className="flex items-center text-gray-600 text-sm gap-1">
                           <Clock className="w-4 h-4 text-blue-600" />
@@ -196,21 +189,11 @@ const LessonSection = ({ modules }) => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ m: 0, p: 2 }}>
-          <IconButton
-            aria-label="close"
-            onClick={handleCloseDialog}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
+        <DialogContent
+          sx={{
+            p: linkType === "youtube" || linkType === "internal" ? 0 : 3, // no padding for video
+          }}
+        >
           {linkType === "youtube" || linkType === "internal" ? (
             <div
               style={{

@@ -23,6 +23,7 @@ const ProductFAQ = ({ faq = [] }) => {
               className="border primaryBorderColor rounded-lg"
             >
               <button
+                type="button"   // 👈 add this
                 className="w-full text-left px-4 py-3 cursor-pointer flex justify-between items-center focus:outline-none"
                 onClick={() => toggle(index)}
               >

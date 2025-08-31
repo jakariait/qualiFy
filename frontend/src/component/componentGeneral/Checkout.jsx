@@ -16,6 +16,7 @@ import DeliveryMethod from "./DeliveryMethod.jsx";
 import OrderSummary from "./OrderSummary.jsx";
 import CheckoutHeader from "./CheckoutHeader.jsx";
 import PaymentMethod from "./PaymentMethod.jsx";
+import OrderTimeline from "./OrderTimeline.jsx";
 
 const Checkout = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -238,6 +239,11 @@ const Checkout = () => {
   return (
     <div className="xl:container xl:mx-auto p-4">
       <CheckoutHeader user={user} />
+      <div className="max-w-xl mx-auto pb-10">
+        <OrderTimeline currentStep={2} />
+      </div>
+
+
       <form onSubmit={handleOrderSubmit}>
         <div className="grid gap-12 md:grid-cols-2">
           {/* Left Column - Address & Shipping */}

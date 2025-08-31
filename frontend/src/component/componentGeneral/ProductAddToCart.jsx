@@ -91,10 +91,13 @@ const ProductAddToCart = ({ product }) => {
     <div>
       <div className="flex  flex-col gap-3">
         {/* Product Image */}
-        <ImageComponent
-          imageName={product.thumbnailImage}
-          className={" w-full object-cover"}
-        />
+        <div className={"hidden md:block"}>
+          <ImageComponent
+            imageName={product.thumbnailImage}
+            className={"w-full  object-cover"}
+          />
+        </div>
+
 
         {/* Product Name */}
         <h2 className="text-2xl heading primaryTextColor">{product.name}</h2>
