@@ -10,6 +10,7 @@ import ProductFAQ from "./ProductFAQ.jsx";
 import InstructorSection from "./InstructorSection.jsx";
 import LessonSection from "./LessonSection.jsx";
 import YouTubeVideoSection from "./YouTubeVideoSection.jsx";
+import SelfHostedVideo from "./SelfHostedVideo.jsx";
 
 const ProductDetails = () => {
   const hasPushedRef = useRef(false);
@@ -146,9 +147,36 @@ const ProductDetails = () => {
             <meta property="og:url" content={window.location.href} />
           </Helmet>
 
+          <div className={"md:hidden pt-4 pb-4"}>
+            <SelfHostedVideo
+              src={
+                product.courseIntroVideo
+                  ? `${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${product.courseIntroVideo}`
+                  : ""
+              }
+              // autoplay
+              // loop
+              // muted
+            />
+          </div>
+
           <div className="flex flex-col-reverse md:flex-row md:items-start md:gap-8">
             {/* Left content - product details */}
+
             <div className="flex-grow relative">
+              <div className={"hidden md:block pt-4 pb-4"}>
+                <SelfHostedVideo
+                  src={
+                    product.courseIntroVideo
+                      ? `${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${product.courseIntroVideo}`
+                      : ""
+                  }
+                  // autoplay
+                  // loop
+                  // muted
+                />
+              </div>
+
               {/* Description */}
               <div
                 className="rendered-html"
@@ -176,10 +204,12 @@ const ProductDetails = () => {
               {product?.type === "course" &&
                 Array.isArray(product.videoUrl) &&
                 product.videoUrl.some(
-                  (url) => typeof url === "string" && url.trim() !== "" && url !== "[]" && url !== "[\"[]\"]"
-                ) && (
-                  <YouTubeVideoSection videos={product.videoUrl} />
-                )}
+                  (url) =>
+                    typeof url === "string" &&
+                    url.trim() !== "" &&
+                    url !== "[]" &&
+                    url !== '["[]"]',
+                ) && <YouTubeVideoSection videos={product.videoUrl} />}
 
               {/* FAQ Section */}
               <ProductFAQ faq={product?.faqs} />

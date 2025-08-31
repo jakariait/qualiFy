@@ -56,6 +56,8 @@ const ProductCRUD = () => {
 		previewPdf: "",
 		thumbnailFile: null,
 		previewPdfFile: null,
+		courseIntroVideo: "",
+		courseIntroVideoFile: null,
 
 		// NEW fields:
 		videoUrl: [""], // start with one empty string
@@ -66,6 +68,7 @@ const ProductCRUD = () => {
 	const [modules, setModules] = useState([]);
 	const [thumbnailPreview, setThumbnailPreview] = useState("");
 	const [removedPreviewPdf, setRemovedPreviewPdf] = useState(false);
+	const [removedCourseIntroVideo, setRemovedCourseIntroVideo] = useState(false);
 
 	// Instructors fetched from API
 	const [instructorsList, setInstructorsList] = useState([]);
@@ -192,9 +195,12 @@ const ProductCRUD = () => {
 			previewPdf: "",
 			thumbnailFile: null,
 			previewPdfFile: null,
+			courseIntroVideo: "",
+			courseIntroVideoFile: null,
 		});
 		setModules([]);
 		setRemovedPreviewPdf(false);
+		setRemovedCourseIntroVideo(false);
 		setOpenDialog(true);
 	};
 
@@ -302,6 +308,8 @@ const ProductCRUD = () => {
 			previewPdf: product.previewPdf || "",
 			thumbnailFile: null,
 			previewPdfFile: null,
+			courseIntroVideo: product.courseIntroVideo || "",
+			courseIntroVideoFile: null,
 			videoUrl: cleanedVideoUrl.length > 0 ? cleanedVideoUrl : [],
 
 			faqs:
@@ -324,6 +332,7 @@ const ProductCRUD = () => {
 			})) || []
 		);
 		setRemovedPreviewPdf(false);
+		setRemovedCourseIntroVideo(false);
 		setOpenDialog(true);
 	};
 
@@ -333,6 +342,8 @@ const ProductCRUD = () => {
 			setForm((f) => ({ ...f, thumbnailFile: files[0] }));
 		} else if (name === "previewPdfFile") {
 			setForm((f) => ({ ...f, previewPdfFile: files[0] }));
+		} else if (name === "courseIntroVideoFile") {
+			setForm((f) => ({ ...f, courseIntroVideoFile: files[0] }));
 		} else {
 			setForm((f) => ({ ...f, [name]: value }));
 		}
@@ -423,9 +434,19 @@ const ProductCRUD = () => {
 			if (form.previewPdfFile) {
 				formData.append("previewPdf", form.previewPdfFile);
 			}
+			if (form.courseIntroVideoFile) {
+				formData.append("courseIntroVideo", form.courseIntroVideoFile);
+			}
 			// If user chose to remove existing PDF and did not upload a new one, send empty string to clear it
 			if (editingProduct && removedPreviewPdf && !form.previewPdfFile) {
 				formData.append("previewPdf", "");
+			}
+			if (
+				editingProduct &&
+				removedCourseIntroVideo &&
+				!form.courseIntroVideoFile
+			) {
+				formData.append("courseIntroVideo", "");
 			}
 
 			let res;
@@ -829,6 +850,45 @@ const ProductCRUD = () => {
 								fullWidth
 								margin="normal"
 							/>
+
+							{/* Course Intro Video */}
+							<div className="mb-4">
+								<label className="block mb-1 font-semibold">
+									Course Intro Video
+								</label>
+								{form.courseIntroVideo && !form.courseIntroVideoFile && (
+									<div className="flex items-center gap-3 mb-2">
+										<a
+											href={`${import.meta.env.VITE_API_URL.replace(
+												"/api",
+												""
+											)}/uploads/${form.courseIntroVideo}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="text-blue-600 underline"
+										>
+											View Current Intro Video
+										</a>
+										<button
+											type="button"
+											onClick={() => {
+												setForm((f) => ({ ...f, courseIntroVideo: "" }));
+												setRemovedCourseIntroVideo(true);
+											}}
+											className="text-red-600 underline"
+										>
+											Remove Video
+										</button>
+									</div>
+								)}
+								<input
+									type="file"
+									accept="video/*"
+									name="courseIntroVideoFile"
+									onChange={handleChange}
+									className="mt-1"
+								/>
+							</div>
 
 							{/* Video URLs */}
 							{form.type === "course" && (

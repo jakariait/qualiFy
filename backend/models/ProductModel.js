@@ -70,7 +70,7 @@ const productSchema = new mongoose.Schema(
     duration: { type: String, trim: true },
     quizzes: { type: Number, trim: true },
     classStartDate: { type: String, trim: true },
-
+    courseIntroVideo: { type: String, trim: true },
     modules: [
       {
         subject: { type: String }, // e.g., "English", "G.Math"

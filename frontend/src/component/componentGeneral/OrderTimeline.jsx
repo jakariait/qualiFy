@@ -3,8 +3,8 @@ import React from "react";
 const OrderTimeline = ({ currentStep }) => {
   const steps = [
     { id: 1, title: "Login/Register" },
-    { id: 2, title: "Payment" },
-    { id: 3, title: "Purchase" },
+    { id: 2, title: "Place Order" },
+    { id: 3, title: "Payment" },
   ];
 
   return (

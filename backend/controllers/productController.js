@@ -101,6 +101,9 @@ const createProduct = async (req, res) => {
     if (fileMap.previewPdf) {
         productData.previewPdf = fileMap.previewPdf;
     }
+    if (fileMap.courseIntroVideo) {
+        productData.courseIntroVideo = fileMap.courseIntroVideo;
+    }
 
     // Handle courseThumbnails inside modules
     if (productData.modules) {
@@ -172,6 +175,9 @@ const updateProduct = async (req, res) => {
     }
     if (fileMap.previewPdf) {
         productData.previewPdf = fileMap.previewPdf;
+    }
+    if (fileMap.courseIntroVideo) {
+        productData.courseIntroVideo = fileMap.courseIntroVideo;
     }
 
     // Handle courseThumbnail(s) inside modules

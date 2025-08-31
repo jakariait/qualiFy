@@ -6,21 +6,13 @@ import useCartStore from "../../store/useCartStore.js";
 import ImageComponent from "./ImageComponent.jsx";
 import {
   BookOpen,
-  GraduationCap,
   Clock,
   HelpCircle,
   Calendar,
   User,
   Book,
 } from "lucide-react";
-import {
-  Button,
-  Alert,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-} from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import OrderCountBadge from "./OrderCountBadge.jsx";
 
@@ -97,7 +89,6 @@ const ProductAddToCart = ({ product }) => {
             className={"w-full  object-cover"}
           />
         </div>
-
 
         {/* Product Name */}
         <h2 className="text-2xl heading primaryTextColor">{product.name}</h2>
