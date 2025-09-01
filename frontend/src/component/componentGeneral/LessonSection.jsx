@@ -1,34 +1,40 @@
-import React, { useState } from "react";
-import {
-  Clock,
-  PlayCircle,
-  Link as LinkIcon,
-  ChevronUp,
-  ChevronDown,
-  Lock,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Button,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import React, { useState, useRef } from "react";
+import { Clock, ChevronUp, ChevronDown, Lock } from "lucide-react";
+import { Dialog, DialogContent, Button } from "@mui/material";
 
 const LessonSection = ({ modules }) => {
-  const [activeIndex, setActiveIndex] = useState(0); // First module open by default
+  const [activeIndex, setActiveIndex] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeLink, setActiveLink] = useState("");
-  const [linkType, setLinkType] = useState("external"); // internal, youtube, external
+  const [linkType, setLinkType] = useState("external");
+
+  const moduleRefs = useRef([]); // store refs for each module
 
   if (!Array.isArray(modules) || modules.length === 0) return null;
 
   const toggle = (index) => {
-    setActiveIndex(activeIndex === index ? null : index);
+    setActiveIndex((prev) => {
+      const newIndex = prev === index ? null : index;
+
+      if (moduleRefs.current[index]) {
+        setTimeout(() => {
+          const element = moduleRefs.current[index];
+          // dynamically detect header height if present
+          const header = document.querySelector("header");
+          const offset = header ? header.offsetHeight + 20 : 80; // fallback 80px
+          const elementTop = element.getBoundingClientRect().top + window.scrollY;
+
+          window.scrollTo({
+            top: elementTop - offset,
+            behavior: "smooth",
+          });
+        }, newIndex !== null ? 250 : 100); // delay longer for open, shorter for close
+      }
+
+      return newIndex;
+    });
   };
 
-  const isMobile = window.innerWidth < 640;
 
   const handleLinkClick = (link) => {
     if (link.includes("youtube.com/watch")) {
@@ -42,7 +48,7 @@ const LessonSection = ({ modules }) => {
         } else {
           setActiveLink(link);
         }
-      } catch (error) {
+      } catch {
         setActiveLink(link);
       }
     } else {
@@ -76,8 +82,8 @@ const LessonSection = ({ modules }) => {
 
   const aspectRatios = {
     youtube: "56.25%", // 16:9
-    internal: "225.25%", // your custom ratio
-    default: "100%", // square
+    internal: "225.25%", // custom ratio
+    default: "100%",
   };
 
   return (
@@ -106,10 +112,11 @@ const LessonSection = ({ modules }) => {
         {modules.map((module, index) => (
           <div
             key={module._id || index}
+            ref={(el) => (moduleRefs.current[index] = el)} // attach ref
             className="border primaryBorderColor rounded-lg overflow-hidden"
           >
             {/* Header */}
-            <button
+            <p
               className="w-full text-left px-4 py-3 cursor-pointer flex justify-between items-center focus:outline-none"
               onClick={() => toggle(index)}
             >
@@ -123,7 +130,7 @@ const LessonSection = ({ modules }) => {
                   <ChevronDown className="h-6 w-6" />
                 )}
               </span>
-            </button>
+            </p>
 
             {/* Content */}
             <div
@@ -151,7 +158,6 @@ const LessonSection = ({ modules }) => {
                           alt={lesson.title}
                           className="w-full object-cover group-hover:scale-102 transition-transform"
                         />
-
                       </div>
                     )}
 
@@ -165,7 +171,9 @@ const LessonSection = ({ modules }) => {
                         ) : (
                           <Lock className="w-4 h-4 text-gray-500" />
                         )}
-                        <span className="break-words leading-tight">{lesson.title}</span>
+                        <span className="break-words leading-tight">
+                          {lesson.title}
+                        </span>
                       </h4>
 
                       {lesson.duration && (
@@ -183,17 +191,9 @@ const LessonSection = ({ modules }) => {
         ))}
       </div>
 
-      <Dialog
-        open={dialogOpen}
-        onClose={handleCloseDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogContent
-          sx={{
-            p: linkType === "youtube" || linkType === "internal" ? 0 : 3, // no padding for video
-          }}
-        >
+      {/* Dialog */}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogContent sx={{ p: linkType === "youtube" || linkType === "internal" ? 0 : 3 }}>
           {linkType === "youtube" || linkType === "internal" ? (
             <div
               style={{
@@ -208,21 +208,12 @@ const LessonSection = ({ modules }) => {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title="Lesson Content"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
               ></iframe>
             </div>
           ) : (
-            // external
             <div className="p-8 text-center min-h-64 flex flex-col justify-center items-center">
-              <p className="mb-4 text-lg">
-                This lesson contains an external link:
-              </p>
+              <p className="mb-4 text-lg">This lesson contains an external link:</p>
               <a
                 href={activeLink}
                 target="_blank"

@@ -1,14 +1,14 @@
 import React from "react";
 
 const SelfHostedVideo = ({
-                           src,
-                           width = "100%",
-                           height = "480",
-                           autoplay = true,
-                           loop = true,
-                           muted = false,
-                           controls = true,
-                         }) => {
+  src,
+  width = "100%",
+  height = "480",
+  autoplay = false,
+  loop = true,
+  muted = false,
+  controls = true,
+}) => {
   if (!src) return null; // Return null if no video source
 
   return (
@@ -35,6 +35,7 @@ const SelfHostedVideo = ({
         loop={loop}
         muted={muted}
         controls={controls}
+        playsInline
       >
         Your browser does not support the video tag.
       </video>
