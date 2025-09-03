@@ -18,9 +18,9 @@ const HomePage = () => {
       <AllCourses limit={3} showViewAll />
       <AllBooks limit={3} showViewAll />
       <AllLiveExam limit={3} showViewAll />
+      <AnimatedScrollableStudentReviews />
       <Feature />
       <FreeClassVideos limit={4} showViewAll={true} />
-      <AnimatedScrollableStudentReviews />
       <AnimatedScrollableTeachers />
     </Layout>
   );

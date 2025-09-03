@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from "@mui/material";
 
 const ProductFAQ = ({ faq = [] }) => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -16,38 +21,40 @@ const ProductFAQ = ({ faq = [] }) => {
         <h2 className="text-xl md:text-2xl font-bold mb-4 mt-10 primaryTextColor">
           FAQs
         </h2>
-        <div className="space-y-4 text-gray-100">
+        <div className="space-y-4">
           {faq.map((item, index) => (
-            <div
+            <Accordion
               key={item._id || index}
-              className="border primaryBorderColor rounded-lg"
+              expanded={activeIndex === index}
+              onChange={() => toggle(index)}
+              sx={{
+                backgroundColor: "transparent",
+                border: "1px solid #EF6C00",
+                borderRadius: "5px",
+                boxShadow: "none",
+                "&:before": {
+                  display: "none",
+                },
+                "&.Mui-expanded": {
+                  margin: "16px 0",
+                },
+              }}
             >
-              <button
-                type="button"   // 👈 add this
-                className="w-full text-left px-4 py-3 cursor-pointer flex justify-between items-center focus:outline-none"
-                onClick={() => toggle(index)}
+              <AccordionSummary
+                expandIcon={<ChevronDown className="h-6 w-6 text-[#EF6C00]" />}
+                aria-controls={`panel${index}a-content`}
+                id={`panel${index}a-header`}
               >
-                <span className="text-lg  primaryTextColor font-medium">
+                <span className="text-lg primaryTextColor font-medium">
                   {item.question}
                 </span>
-                <span className="text-2xl text-[#EF6C00]">
-                  {activeIndex === index ? (
-                    <ChevronUp className="h-6 w-6" />
-                  ) : (
-                    <ChevronDown className="h-6 w-6" />
-                  )}
-                </span>
-              </button>
-              <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden px-4 ${
-                  activeIndex === index ? "max-h-screen py-2" : "max-h-0"
-                }`}
-              >
+              </AccordionSummary>
+              <AccordionDetails>
                 <p className="secondaryTextColor whitespace-pre-line">
                   {item.answer}
                 </p>
-              </div>
-            </div>
+              </AccordionDetails>
+            </Accordion>
           ))}
         </div>
       </div>

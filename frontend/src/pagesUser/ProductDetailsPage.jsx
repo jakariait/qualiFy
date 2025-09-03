@@ -1,6 +1,7 @@
 import React from 'react';
 import Layout from "../component/componentGeneral/Layout.jsx";
 import ProductDetails from "../component/componentGeneral/ProductDetails.jsx";
+import TimedDialog from "../component/componentGeneral/TimedDialog.jsx";
 
 const ProductDetailsPage = () => {
   return (

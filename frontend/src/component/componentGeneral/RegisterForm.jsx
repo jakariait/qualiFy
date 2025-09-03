@@ -163,7 +163,7 @@ const RegisterForm = () => {
           <div className="flex items-center bg-white rounded-md shadow-sm px-4 py-4">
             <FaPhone className="primaryTextColor mr-5 text-2xl" />
             <input
-              type="tel"
+              type="number"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
@@ -233,7 +233,7 @@ const RegisterForm = () => {
           {/* Register Button */}
           <button
             type="submit"
-            className="w-full py-3 rounded-md mt-2 primaryBgColor accentTextColor"
+            className="w-full py-3 rounded-md cursor-pointer mt-2 primaryBgColor accentTextColor"
             disabled={registrationLoading || authLoading}
           >
             {registrationLoading || authLoading ? "Registering..." : "Register"}

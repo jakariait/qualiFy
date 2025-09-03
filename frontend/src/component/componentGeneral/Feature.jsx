@@ -20,7 +20,7 @@ const Feature = () => {
       {/* ✅ Headline */}
       <div className="text-center mb-6">
         <h2 className="text-xl heading md:text-2xl font-bold primaryTextColor">
-          Join Our Facebook Group
+          Join Our Facebook Groups
         </h2>
         <p className="mt-1">
           Stay connected, share ideas, and never miss an update!

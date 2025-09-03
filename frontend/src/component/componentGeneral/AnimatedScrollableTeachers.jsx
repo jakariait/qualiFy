@@ -64,7 +64,7 @@ const AnimatedScrollableTeachers = () => {
           <h2 className="text-3xl heading md:text-4xl  font-extrabold   mb-6 leading-tight">
             Meet Our{" "}
             <span className="relative  heading inline-block primaryTextColor">
-              Instructor
+              Instructors
               <svg
                 className="absolute -bottom-2 left-0 w-full h-3"
                 viewBox="0 0 200 12"

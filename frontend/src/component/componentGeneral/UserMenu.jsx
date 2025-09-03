@@ -18,6 +18,7 @@ import {
   FaKey,
 } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
+import { User as UserIcon } from "lucide-react";
 
 const menuItems = [
   {
@@ -76,14 +77,12 @@ const UserMenu = () => {
               {user?.userImage ? (
                 <ImageComponent
                   imageName={user?.userImage}
-                  className={
-                    "w-24 h-24 rounded-full object-cover border-white border-4"
-                  }
+                  className="w-24 h-24 rounded-full object-cover border-white border-4"
                 />
               ) : (
-                <span className="accentTextColor text-xl font-semibold w-24 h-24 rounded-full border-4 border-white flex items-center justify-center text-center">
-                  {user?.fullName || "User"}
-                </span>
+                <div className="w-24 h-24 rounded-full border-4 border-white flex items-center justify-center bg-gray-100">
+                  <UserIcon className="w-12 h-12 text-gray-500" />
+                </div>
               )}
               <h2 className="text-xl font-bold mt-2">
                 {user?.fullName || "User"}

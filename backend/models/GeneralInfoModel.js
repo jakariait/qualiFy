@@ -17,6 +17,7 @@ const DataSchema = mongoose.Schema(
     TINNumber: { type: Number },
     BINNumber: { type: Number },
     FooterCopyright: { type: String },
+    productPopUpIsOpen: { type: Boolean, default: true },
   },
   {
     timestamps: true,

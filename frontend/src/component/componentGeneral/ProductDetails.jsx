@@ -11,6 +11,7 @@ import InstructorSection from "./InstructorSection.jsx";
 import LessonSection from "./LessonSection.jsx";
 import YouTubeVideoSection from "./YouTubeVideoSection.jsx";
 import SelfHostedVideo from "./SelfHostedVideo.jsx";
+import TimedDialog from "./TimedDialog.jsx";
 
 const ProductDetails = () => {
   const hasPushedRef = useRef(false);
@@ -154,14 +155,12 @@ const ProductDetails = () => {
                   ? `${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${product.courseIntroVideo}`
                   : ""
               }
-              // autoplay
-              // loop
-              // muted
             />
           </div>
 
           <div className="flex flex-col-reverse md:flex-row md:items-start md:gap-8">
             {/* Left content - product details */}
+            <TimedDialog type={product?.type} id={product?.id} product={product} />
 
             <div className="flex-grow relative">
               <div className={"hidden md:block pt-4 pb-4"}>
@@ -171,9 +170,6 @@ const ProductDetails = () => {
                       ? `${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${product.courseIntroVideo}`
                       : ""
                   }
-                  // autoplay
-                  // loop
-                  // muted
                 />
               </div>
 
@@ -184,21 +180,22 @@ const ProductDetails = () => {
                   __html: cleanHtml(product.longDesc),
                 }}
               />
+              <div>
+                {/* Instructors (if course) */}
+                {product?.type === "course" &&
+                  product?.instructors?.length > 0 && (
+                    <InstructorSection
+                      instructors={product.instructors}
+                      loading={loading}
+                    />
+                  )}
+              </div>
 
               {/*Module Course Only*/}
               {product?.type === "course" &&
                 Array.isArray(product.modules) &&
                 product.modules.length > 0 && (
                   <LessonSection modules={product.modules} />
-                )}
-
-              {/* Instructors (if course) */}
-              {product?.type === "course" &&
-                product?.instructors?.length > 0 && (
-                  <InstructorSection
-                    instructors={product.instructors}
-                    loading={loading}
-                  />
                 )}
 
               {product?.type === "course" &&
@@ -212,7 +209,9 @@ const ProductDetails = () => {
                 ) && <YouTubeVideoSection videos={product.videoUrl} />}
 
               {/* FAQ Section */}
-              <ProductFAQ faq={product?.faqs} />
+              <div>
+                <ProductFAQ faq={product?.faqs} />
+              </div>
             </div>
 
             {/* Right sticky column - cart box */}

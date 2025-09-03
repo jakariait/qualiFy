@@ -2,7 +2,15 @@ import React, { useEffect, useState } from "react";
 import ImageComponent from "../componentGeneral/ImageComponent.jsx";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
 import useGeneralInfoStore from "../../store/GeneralInfoStore.js";
-import { TextField, Button, Snackbar, Alert, Input } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Snackbar,
+  Alert,
+  Input,
+  FormControlLabel,
+  Switch,
+} from "@mui/material";
 
 export default function GeneralInfoForm() {
   const { token } = useAuthAdminStore();
@@ -21,6 +29,7 @@ export default function GeneralInfoForm() {
     TINNumber: "",
     BINNumber: "",
     FooterCopyright: "",
+    productPopUpIsOpen: false,
   });
 
   const [files, setFiles] = useState({
@@ -53,6 +62,10 @@ export default function GeneralInfoForm() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleSwitchChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.checked });
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFiles({ ...files, [e.target.name]: file });
@@ -73,7 +86,6 @@ export default function GeneralInfoForm() {
     setFormData({ ...formData, [field]: newArray });
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = new FormData();
@@ -81,7 +93,7 @@ export default function GeneralInfoForm() {
     Object.keys(formData).forEach((key) => {
       if (Array.isArray(formData[key])) {
         form.append(key, formData[key].join(","));
-      } else if (formData[key]) {
+      } else if (formData[key] !== null && formData[key] !== "") {
         form.append(key, formData[key]);
       }
     });
@@ -347,6 +359,17 @@ export default function GeneralInfoForm() {
           onChange={handleChange}
           fullWidth
           margin="normal"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={formData.productPopUpIsOpen || false}
+              onChange={handleSwitchChange}
+              name="productPopUpIsOpen"
+            />
+          }
+          label="Product Popup Enabled"
         />
 
         {/* Submit Button */}

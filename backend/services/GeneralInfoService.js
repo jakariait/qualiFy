@@ -13,8 +13,10 @@ const updateGeneralInfo = async (data, files) => {
   try {
     let generalInfo = await GeneralInfoModel.findOne({});
 
-    const PrimaryLogo = files?.PrimaryLogo?.[0]?.filename || generalInfo?.PrimaryLogo;
-    const SecondaryLogo = files?.SecondaryLogo?.[0]?.filename || generalInfo?.SecondaryLogo;
+    const PrimaryLogo =
+      files?.PrimaryLogo?.[0]?.filename || generalInfo?.PrimaryLogo;
+    const SecondaryLogo =
+      files?.SecondaryLogo?.[0]?.filename || generalInfo?.SecondaryLogo;
     const Favicon = files?.Favicon?.[0]?.filename || generalInfo?.Favicon;
 
     if (!generalInfo) {
@@ -23,16 +25,24 @@ const updateGeneralInfo = async (data, files) => {
         SecondaryLogo,
         Favicon,
         ...data,
-        PhoneNumber: Array.isArray(data.PhoneNumber) ? data.PhoneNumber : data.PhoneNumber.split(","),
-        CompanyEmail: Array.isArray(data.CompanyEmail) ? data.CompanyEmail : data.CompanyEmail.split(","),
+        PhoneNumber: Array.isArray(data.PhoneNumber)
+          ? data.PhoneNumber
+          : data.PhoneNumber.split(","),
+        CompanyEmail: Array.isArray(data.CompanyEmail)
+          ? data.CompanyEmail
+          : data.CompanyEmail.split(","),
       });
     } else {
       generalInfo.PrimaryLogo = PrimaryLogo;
       generalInfo.SecondaryLogo = SecondaryLogo;
       generalInfo.Favicon = Favicon;
       generalInfo.CompanyName = data.CompanyName;
-      generalInfo.PhoneNumber = Array.isArray(data.PhoneNumber) ? data.PhoneNumber : data.PhoneNumber.split(",");
-      generalInfo.CompanyEmail = Array.isArray(data.CompanyEmail) ? data.CompanyEmail : data.CompanyEmail.split(",");
+      generalInfo.PhoneNumber = Array.isArray(data.PhoneNumber)
+        ? data.PhoneNumber
+        : data.PhoneNumber.split(",");
+      generalInfo.CompanyEmail = Array.isArray(data.CompanyEmail)
+        ? data.CompanyEmail
+        : data.CompanyEmail.split(",");
       generalInfo.ShortDescription = data.ShortDescription;
       generalInfo.CompanyAddress = data.CompanyAddress;
       generalInfo.GoogleMapLink = data.GoogleMapLink;
@@ -42,6 +52,7 @@ const updateGeneralInfo = async (data, files) => {
       generalInfo.TINNumber = data.TINNumber;
       generalInfo.BINNumber = data.BINNumber;
       generalInfo.FooterCopyright = data.FooterCopyright;
+      generalInfo.productPopUpIsOpen = data.productPopUpIsOpen;
     }
 
     await generalInfo.save();
