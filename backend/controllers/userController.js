@@ -12,24 +12,35 @@ const loginUser = asyncHandler(async (req, res) => {
       $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
     }).select("+password");
 
-    if (user && (await user.comparePassword(password))) {
-      res.status(200).json({
-        message: "Login successful",
-        user: {
-          _id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          phone: user.phone,
-          token: generateToken(user._id),
-        },
+    // If no user found
+    if (!user) {
+      return res.status(404).json({
+        message: "No registered email found, please register first",
       });
-    } else {
-      res.status(401).json({ message: "Invalid email/phone or password" });
     }
+
+    // If user found but password incorrect
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "The password is incorrect" });
+    }
+
+    // If login successful
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        token: generateToken(user._id),
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Login failed", error: error.message });
   }
 });
+
 
 // 👤 Create user
 const createUser = asyncHandler(async (req, res) => {

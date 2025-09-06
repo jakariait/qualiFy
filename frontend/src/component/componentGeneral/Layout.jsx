@@ -1,5 +1,4 @@
 import Headers from "./Headers.jsx";
-import MenuBar from "./MenuBar.jsx";
 import Footer from "./Footer.jsx";
 import MarqueeModern from "./MarqueeModern.jsx";
 

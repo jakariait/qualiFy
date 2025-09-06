@@ -25,7 +25,7 @@ const useAuthUserStore = create((set, get) => ({
       localStorage.setItem("user_token", user.token);
       set({ user, token: user.token, loading: false });
     } catch (error) {
-      console.error("Login error:", error.response || error);
+      // console.error("Login error:", error.response || error);
       set({
         error: error?.response?.data?.message || "Login failed",
         loading: false,

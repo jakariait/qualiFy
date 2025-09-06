@@ -43,6 +43,8 @@ const LoginForm = ({ message }) => {
     }
   };
 
+  // console.log("came from", location.state?.from?.pathname);
+
   return (
     <div className="flex items-center justify-center  px-4 mt-20 mb-20 md:m-20">
       <div className="secondaryBgColor rounded-2xl shadow-md p-8 w-full max-w-xl text-center relative">
@@ -56,8 +58,14 @@ const LoginForm = ({ message }) => {
         {/* Message from protected route */}
         {message && (
           <div className=" primaryTextColor px-4 py-2 mb-4 rounded">
-            {message}
-            <OrderTimeline currentStep={1} />
+            {location.state?.from?.pathname?.includes("resource-viewer") ? (
+              "Please sign in to view free resources"
+            ) : (
+              <>
+                {message}
+                <OrderTimeline currentStep={1} />
+              </>
+            )}
           </div>
         )}
 

@@ -21,7 +21,7 @@ const TimedDialog = ({ type, id, product }) => {
           setOpen(true);
           sessionStorage.setItem(key, "true");
         }
-      }, 10000);
+      }, 20000);
 
       return () => clearTimeout(timer);
     }
