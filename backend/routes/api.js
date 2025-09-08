@@ -36,6 +36,8 @@ const examController = require("../controllers/examController");
 const examAttemptController = require("../controllers/examAttemptController");
 const resultController = require("../controllers/resultController");
 const courseExamNoticeController = require("../controllers/courseExamNoticeController");
+const noticeController = require("../controllers/noticeController");
+
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
@@ -832,5 +834,15 @@ router.get(
   userProtect,
   courseExamNoticeController.getNoticeByProductId,
 );
+
+
+// Notice Routes
+router.post("/notices",adminProtect, noticeController.createNotice);
+router.get("/notices",adminProtect, noticeController.getAllNotices);
+router.get("/notices/active",userProtect, noticeController.getActiveNotices);
+router.get("/notices/:id",adminProtect, noticeController.getNoticeById);
+router.put("/notices/:id", adminProtect,noticeController.updateNotice);
+router.delete("/notices/:id",adminProtect, noticeController.deleteNotice);
+
 
 module.exports = router;
