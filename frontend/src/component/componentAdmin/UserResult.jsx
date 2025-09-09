@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import ExamResultsSkeleton from "../componentGeneral/ExamResultsSkeleton.jsx";
-import DOMPurify from "dompurify";
 import AuthAdminStore from "../../store/AuthAdminStore.js";
 import QuestionPreview from "../QuestionPreview.jsx";
 import QuestionEditorWithLatex from "../QuestionEditorWithLatex.jsx";
@@ -175,12 +174,12 @@ const UserResult = () => {
 
         return (
           <div key={index} className="bg-gray-50 shadow-inner rounded-2xl p-3 ">
-            <p className="flex items-center">
+            <p className="flex flex-col ">
               <strong className="mr-1">Question:</strong>
               <QuestionPreview content={qr.questionText} />
             </p>
 
-            <p className="flex items-center">
+            <p className="flex flex-col">
               <strong className="mr-1">Your Answer:</strong>
               {qr.questionType === "image" ? (
                 qr.userAnswer ? (
@@ -201,7 +200,7 @@ const UserResult = () => {
             </p>
 
             {qr.questionType === "mcq-single" && (
-              <p className="flex items-center">
+              <p className="flex flex-col">
                 <strong className="mr-1">Correct Answer:</strong>
                 <QuestionPreview content={correctAnswerText} />
               </p>
@@ -287,7 +286,7 @@ const UserResult = () => {
             )}
 
             {question?.solution && (
-              <p className="flex items-start">
+              <p className="flex flex-col">
                 <strong className="mr-1">Solution:</strong>
                 <QuestionPreview content={question.solution} />
               </p>

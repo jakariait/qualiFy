@@ -68,7 +68,7 @@ export default function ExamResultByUserIdExamId() {
   };
 
   return (
-    <div className="bg-gray-50 shadow-inner rounded-2xl p-4 space-y-4">
+    <div className="bg-gray-50 shadow-inner rounded-2xl p-4  space-y-4">
       {/* Summary */}
       <div className="flex flex-col items-center justify-center space-y-1">
         <h2 className="text-2xl primaryTextColor font-bold">Result Summary</h2>
