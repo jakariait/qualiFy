@@ -160,14 +160,23 @@ const ExamResults = () => {
                 </div>
               )}
             </p>
+
             <p>
               <strong>Status:</strong>{" "}
-              {qResult.isCorrect === true ? (
-                <span className="text-green-500">Correct</span>
-              ) : qResult.isCorrect === false ? (
-                <span className="text-red-500">Incorrect</span>
-              ) : (
+              {qResult.questionType === "mcq-single" ? (
+                qResult.isCorrect ? (
+                  <span className="text-green-500">Correct</span>
+                ) : (
+                  <span className="text-red-500">Incorrect</span>
+                )
+              ) : qResult.isCorrect === null ? (
                 <span className="text-yellow-500">Pending Review</span>
+              ) : qResult.reviewedAt ? (
+                <span className="text-blue-500">Marks Given</span>
+              ) : qResult.isCorrect === true ? (
+                <span className="text-green-500">Correct</span>
+              ) : (
+                <span className="text-red-500">Incorrect</span>
               )}
             </p>
             <p>
@@ -181,10 +190,8 @@ const ExamResults = () => {
                 return (
                   <p>
                     <strong>Solution:</strong>{" "}
-                    {DOMPurify.sanitize(question.solution).replace(
-                      /<[^>]*>?/gm,
-                      " ",
-                    )}
+
+                    <QuestionPreview content={question.solution} />
                   </p>
                 );
               }

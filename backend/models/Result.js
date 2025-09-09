@@ -150,12 +150,13 @@ ResultSchema.methods.calculateStatistics = function () {
 			} else if (question.isCorrect === false) {
 				this.mcqWrongCount++;
 			}
-		}
-
-		if (question.isCorrect === null) {
-			this.pendingReviewCount++;
 		} else {
-			this.reviewedCount++;
+			// It's a non-MCQ question
+			if (question.isCorrect === null) {
+				this.pendingReviewCount++;
+			} else {
+				this.reviewedCount++;
+			}
 		}
 	});
 

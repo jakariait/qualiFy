@@ -5,6 +5,7 @@ import ExamResultsSkeleton from "../componentGeneral/ExamResultsSkeleton.jsx";
 import DOMPurify from "dompurify";
 import AuthAdminStore from "../../store/AuthAdminStore.js";
 import QuestionPreview from "../QuestionPreview.jsx";
+import QuestionEditorWithLatex from "../QuestionEditorWithLatex.jsx";
 
 const UserResult = () => {
   const { id } = useParams(); // get result ID from URL
@@ -208,7 +209,13 @@ const UserResult = () => {
 
             <p>
               <strong>Status:</strong>{" "}
-              {qr.isCorrect === null ? (
+              {qr.questionType === "mcq-single" ? (
+                qr.isCorrect ? (
+                  <span className="text-green-500">Correct</span>
+                ) : (
+                  <span className="text-red-500">Incorrect</span>
+                )
+              ) : qr.isCorrect === null ? (
                 <span className="text-yellow-500">Pending Review</span>
               ) : qr.reviewedAt ? (
                 <span className="text-blue-500">Marks Given</span>
@@ -233,7 +240,7 @@ const UserResult = () => {
               </p>
             )}
 
-            {qr.questionType !== 'mcq-single' && (
+            {qr.questionType !== "mcq-single" && (
               <div className="mt-2 p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
                 <p className="font-semibold text-yellow-800">Action</p>
                 <div className="flex flex-col gap-2 mt-2">
@@ -263,17 +270,15 @@ const UserResult = () => {
                       Update Marks
                     </button>
                   </div>
-                  <textarea
-                    className="w-full px-2 py-1 border border-gray-300 rounded-md"
-                    placeholder="Provide feedback..."
+                  <QuestionEditorWithLatex
                     value={
                       feedback[`${qr.subjectIndex}-${qr.questionIndex}`] ?? ""
                     }
-                    onChange={(e) =>
+                    onTextChange={(e) =>
                       handleFeedbackChange(
                         qr.subjectIndex,
                         qr.questionIndex,
-                        e.target.value,
+                        e.htmlValue, // use the HTML output from QuestionEditorWithLatex
                       )
                     }
                   />

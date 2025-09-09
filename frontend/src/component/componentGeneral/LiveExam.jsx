@@ -68,6 +68,7 @@ const LiveExam = () => {
   const [confirmDialogTitle, setConfirmDialogTitle] = useState("");
   const [confirmDialogMessage, setConfirmDialogMessage] = useState("");
   const confirmCallbackRef = React.useRef(null);
+  const timeoutHandled = React.useRef(false);
 
   const showSnackbar = (message, severity = "error") => {
     setSnackbar({ open: true, message, severity });
@@ -111,6 +112,11 @@ const LiveExam = () => {
       fetchExamStatus();
     }
   }, [fetchExamStatus, token]);
+
+  // Reset timeout handled flag on subject change
+  useEffect(() => {
+    timeoutHandled.current = false;
+  }, [attempt?.currentSubject]);
 
   // Timer countdown
   useEffect(() => {
@@ -274,8 +280,10 @@ const LiveExam = () => {
       attempt &&
       attempt.status === "in_progress" &&
       attempt.timeRemaining <= 0 &&
-      !isSubmitting
+      !isSubmitting &&
+      !timeoutHandled.current
     ) {
+      timeoutHandled.current = true;
       handleTimeout();
     }
   }, [
@@ -504,7 +512,7 @@ const LiveExam = () => {
       <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center">
         <h2 className="text-xl primaryTextColor">{exam.title}</h2>
         <h2
-          className=""
+          className="p-5"
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(exam.description),
           }}
@@ -531,9 +539,9 @@ const LiveExam = () => {
             key={qIndex}
             className="mb-2 p-4 bg-white shadow-inner rounded-2xl"
           >
-            <h4 className="text-lg font-semibold mb-2 whitespace-nowrap overflow-ellipsis overflow-hidden">
+            <h4 className="text-lg font-semibold mb-2 ">
               {qIndex + 1}:
-              <span className="primaryTextColor ml-2 inline-block">
+              <span className="primaryTextColor ml-2 ">
                 <QuestionPreview content={question.text} />
               </span>
               {question.marks > 0 && (

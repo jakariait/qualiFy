@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import ExamResultsSkeleton from "./ExamResultsSkeleton.jsx";
-import DOMPurify from "dompurify";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import QuestionPreview from "../QuestionPreview.jsx";
 
@@ -116,12 +115,12 @@ export default function ExamResultByUserIdExamId() {
 
         return (
           <div key={index} className="bg-gray-50 shadow-inner rounded-2xl p-3 ">
-            <p className="flex items-center">
+            <p className="flex flex-col ">
               <strong className="mr-1">Question:</strong>
               <QuestionPreview content={qr.questionText} />
             </p>
 
-            <p className="flex items-center">
+            <p className="flex flex-col ">
               <strong className="mr-1">Your Answer:</strong>
               {qr.questionType === "image" ? (
                 qr.userAnswer ? (
@@ -142,7 +141,7 @@ export default function ExamResultByUserIdExamId() {
             </p>
 
             {qr.questionType === "mcq-single" && (
-              <p className="flex items-center">
+              <p className="flex flex-col ">
                 <strong className="mr-1">Correct Answer:</strong>
                 <QuestionPreview content={correctAnswerText} />
               </p>
@@ -150,7 +149,13 @@ export default function ExamResultByUserIdExamId() {
 
             <p>
               <strong>Status:</strong>{" "}
-              {qr.isCorrect === null ? (
+              {qr.questionType === "mcq-single" ? (
+                qr.isCorrect ? (
+                  <span className="text-green-500">Correct</span>
+                ) : (
+                  <span className="text-red-500">Incorrect</span>
+                )
+              ) : qr.isCorrect === null ? (
                 <span className="text-yellow-500">Pending Review</span>
               ) : qr.reviewedAt ? (
                 <span className="text-blue-500">Marks Given</span>
@@ -161,7 +166,7 @@ export default function ExamResultByUserIdExamId() {
               )}
             </p>
 
-            <p className="flex items-center">
+            <p className="flex  items-center">
               <strong className="mr-1">Marks Obtained:</strong>
               <span className="ml-1">
                 {qr.marksObtained}/{qr.maxMarks}
@@ -169,7 +174,7 @@ export default function ExamResultByUserIdExamId() {
             </p>
 
             {question?.solution && (
-              <p className="flex items-start">
+              <p className="flex flex-col items-start">
                 <strong className="mr-1">Solution:</strong>
 
                 <QuestionPreview content={question.solution} />
@@ -182,8 +187,6 @@ export default function ExamResultByUserIdExamId() {
                 <QuestionPreview content={qr.adminFeedback} />
               </p>
             )}
-
-
           </div>
         );
       })}

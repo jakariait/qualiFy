@@ -57,8 +57,10 @@ export default function ExamResults() {
         {results.map((result) => (
           <div key={result._id} className="p-4 shadow rounded space-y-1">
             <p>
-              <strong>User:</strong> {result.userId.fullName} (
-              {result.userId.email})
+              <strong>User:</strong>{" "}
+              {result.userId
+                ? `${result.userId.fullName} (${result.userId.email})`
+                : "User not found"}
             </p>
 
             <p>

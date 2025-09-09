@@ -210,7 +210,7 @@ class ResultController {
       result.percentage = (result.obtainedMarks / result.totalMarks) * 100;
 
       const pendingReviewCount = result.questionResults.filter(
-        (q) => q.isCorrect === null,
+        (q) => q.isCorrect === null && q.questionType !== "mcq-single",
       ).length;
       result.pendingReviewCount = pendingReviewCount;
 
@@ -254,7 +254,7 @@ class ResultController {
 
       // Check if all questions are reviewed
       const unreviewedQuestions = result.questionResults.filter(
-        (q) => q.isCorrect === null,
+        (q) => q.isCorrect === null && q.questionType !== "mcq-single",
       );
       if (unreviewedQuestions.length > 0) {
         return res.status(400).json({

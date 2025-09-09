@@ -7,9 +7,14 @@ const QuestionPreview = ({ content }) => {
   // Load MathJax once
   useEffect(() => {
     if (!window.MathJax) {
+      window.MathJax = {
+        svg: {
+          linebreaks: { automatic: true },
+        },
+      };
       const script = document.createElement("script");
       script.src =
-        "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js";
       script.async = true;
       document.head.appendChild(script);
     }
@@ -27,9 +32,12 @@ const QuestionPreview = ({ content }) => {
     USE_PROFILES: { html: true }, // allow HTML tags
   });
 
+
   return (
     <div
       ref={previewRef}
+      style={{ width: "100%", overflowX: "auto" }}
+      className={"custom-scrollbar"}
       dangerouslySetInnerHTML={{ __html: sanitizedContent }}
     />
   );
