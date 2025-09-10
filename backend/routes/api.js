@@ -759,6 +759,13 @@ router.post(
   examAttemptController.advanceSubject,
 );
 
+router.post(
+  "/exam-attempts/:attemptId/submit-and-advance",
+  upload,
+  userProtect,
+  examAttemptController.submitAndAdvance,
+);
+
 // Result Routes (Admin)
 router.get(
   "/results/exam/:examId",

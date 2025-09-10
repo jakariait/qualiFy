@@ -15,7 +15,7 @@ const AnswerSchema = new mongoose.Schema(
 const SubjectAttemptSchema = new mongoose.Schema(
 	{
 		subjectIndex: { type: Number, required: true },
-		startTime: { type: Date, required: true },
+		startTime: { type: Date },
 		endTime: { type: Date },
 		timeLimitMin: { type: Number, required: true },
 		timeRemaining: { type: Number }, // in seconds
@@ -117,57 +117,81 @@ ExamAttemptSchema.methods.calculateResults = async function () {
 
 // Method to check if exam is timed out
 ExamAttemptSchema.methods.isTimedOut = function () {
-	const now = new Date();
-	return this.subjectAttempts.some((subject) => {
-		if (!subject.isCompleted) {
-			const elapsed = (now - subject.startTime) / 1000 / 60; // in minutes
-			return elapsed >= subject.timeLimitMin;
-		}
+	const currentSubject = this.getCurrentSubjectAttempt();
+	if (!currentSubject) {
 		return false;
-	});
+	}
+	const now = new Date();
+	const elapsed = (now - currentSubject.startTime) / 1000 / 60; // in minutes
+	return elapsed >= currentSubject.timeLimitMin;
 };
 
 // Method to handle timeout
 ExamAttemptSchema.methods.handleTimeout = function () {
-	const now = new Date();
-	let hasTimeout = false;
-
-	this.subjectAttempts.forEach((subject) => {
-		if (!subject.isCompleted) {
-			const elapsed = (now - subject.startTime) / 1000 / 60; // in minutes
-			if (elapsed >= subject.timeLimitMin) {
-				subject.endTime = now;
-				subject.isCompleted = true;
-				subject.timeRemaining = 0;
-				hasTimeout = true;
-			}
-		}
-	});
-
-	if (hasTimeout) {
-		this.status = "timeout";
-		this.endTime = now;
-		this.totalDuration = (now - this.startTime) / 1000; // in seconds
+	const currentSubject = this.getCurrentSubjectAttempt();
+	if (!currentSubject) {
+		return false;
 	}
 
-	return hasTimeout;
+	const now = new Date();
+	const elapsed = (now - currentSubject.startTime) / 1000 / 60; // in minutes
+
+	if (elapsed >= currentSubject.timeLimitMin) {
+		currentSubject.endTime = now;
+		currentSubject.isCompleted = true;
+		currentSubject.timeRemaining = 0;
+
+		const allSubjectsCompleted = this.subjectAttempts.every(s => s.isCompleted);
+
+		if (allSubjectsCompleted) {
+			this.status = "completed";
+			this.endTime = now;
+			this.totalDuration = (now - this.startTime) / 1000; // in seconds
+		}
+		return true;
+	}
+
+	return false;
 };
 
 // Method to get current subject attempt
 ExamAttemptSchema.methods.getCurrentSubjectAttempt = function () {
-	return this.subjectAttempts.find((subject) => !subject.isCompleted);
+	// Find the first subject that is not marked as completed
+	const firstUncompleted = this.subjectAttempts.find(
+		(subject) => !subject.isCompleted
+	);
+
+	// If a subject is found, it's the current one
+	if (firstUncompleted) {
+		return firstUncompleted;
+	}
+
+	// If all subjects are completed, there is no current subject
+	return null;
 };
 
 // Method to get time remaining for current subject
 ExamAttemptSchema.methods.getTimeRemainingForCurrentSubject = function () {
 	const currentSubject = this.getCurrentSubjectAttempt();
-	if (!currentSubject) return 0;
+	if (!currentSubject || currentSubject.isCompleted) {
+		return 0;
+	}
 
+	// If timeRemaining is already stored, use it
+	if (currentSubject.timeRemaining) {
+		const now = new Date();
+		const lastUpdated = currentSubject.endTime || currentSubject.startTime;
+		const elapsedSinceUpdate = (now - lastUpdated) / 1000; // in seconds
+		const remaining = Math.max(0, currentSubject.timeRemaining - elapsedSinceUpdate);
+		return Math.floor(remaining);
+	}
+
+	// If timeRemaining is not stored, calculate it from the time limit
 	const now = new Date();
-	const elapsed = (now - currentSubject.startTime) / 1000 / 60; // in minutes
-	const remaining = Math.max(0, currentSubject.timeLimitMin - elapsed);
+	const elapsed = (now - currentSubject.startTime) / 1000; // in seconds
+	const remaining = Math.max(0, currentSubject.timeLimitMin * 60 - elapsed);
 
-	return Math.floor(remaining * 60); // return in seconds
+	return Math.floor(remaining);
 };
 
 module.exports = mongoose.model("ExamAttempt", ExamAttemptSchema);

@@ -22,7 +22,7 @@ const QuestionResultSchema = new mongoose.Schema(
 		subjectIndex: { type: Number, required: true },
 		questionType: {
 			type: String,
-			enum: ["mcq-single", "short", "image"],
+			enum: ["mcq-single", "mcq-multiple", "short", "image"],
 			required: true,
 		},
 		questionText: { type: String, required: true },
@@ -143,11 +143,11 @@ ResultSchema.methods.calculateStatistics = function () {
 	this.reviewedCount = 0;
 
 	this.questionResults.forEach((question) => {
-		if (question.questionType === "mcq-single") {
+		if (question.questionType === "mcq-single" || question.questionType === "mcq-multiple") {
 			this.mcqTotalCount++;
 			if (question.isCorrect === true) {
 				this.mcqCorrectCount++;
-			} else if (question.isCorrect === false) {
+			} else {
 				this.mcqWrongCount++;
 			}
 		} else {
@@ -212,8 +212,6 @@ ResultSchema.methods.autoGradeMCQs = function () {
 			}
 		}
 	});
-
-	this.save();
 };
 
 // Method to get subject breakdown

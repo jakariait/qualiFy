@@ -108,7 +108,7 @@ const ExamResults = () => {
               <QuestionPreview content={qResult.questionText} />
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col space-x-2">
               <strong>Your Answer:</strong>
               {qResult.questionType === "image" ? (
                 qResult.userAnswer ? (
@@ -127,7 +127,6 @@ const ExamResults = () => {
                 <QuestionPreview content={qResult.userAnswer || ""} />
               )}
             </div>
-
 
             <p>
               {qResult.questionType === "mcq-single" && (
@@ -190,7 +189,6 @@ const ExamResults = () => {
                 return (
                   <p>
                     <strong>Solution:</strong>{" "}
-
                     <QuestionPreview content={question.solution} />
                   </p>
                 );

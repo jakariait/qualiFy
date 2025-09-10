@@ -343,6 +343,45 @@ class ExamAttemptController {
 			res.status(400).json({ success: false, message: error.message });
 		}
 	}
+
+	async submitAndAdvance(req, res) {
+		try {
+			const { attemptId } = req.params;
+			const { subjectIndex, answers } = JSON.parse(req.body.answers);
+			const userId = req.user.id;
+
+			if (subjectIndex === undefined || !Array.isArray(answers)) {
+				return res.status(400).json({
+					success: false,
+					message: "Missing required fields: subjectIndex, and answers array",
+				});
+			}
+
+			// Attach uploaded image to the corresponding answer
+			if (req.files && req.files.answer && req.files.answer[0]) {
+				const savedFile = req.files.answer[0];
+				const imageAnswer = answers.find(ans => ans.type === 'image');
+				if (imageAnswer) {
+					imageAnswer.answer = savedFile.filename;
+				}
+			}
+
+			const result = await examAttemptService.submitAndAdvance(
+				attemptId,
+				userId,
+				subjectIndex,
+				answers
+			);
+
+			res.status(200).json({
+				success: true,
+				message: "Answers submitted and advanced to next subject successfully",
+				data: result,
+			});
+		} catch (error) {
+			res.status(400).json({ success: false, message: error.message });
+		}
+	}
 }
 
 module.exports = new ExamAttemptController();

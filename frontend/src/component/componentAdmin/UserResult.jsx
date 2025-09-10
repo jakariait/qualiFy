@@ -133,10 +133,10 @@ const UserResult = () => {
       <div className="flex flex-col items-center justify-center space-y-1">
         <h2 className="text-2xl primaryTextColor font-bold">Result Summary</h2>
         <p>
-          <strong>User:</strong> {userId.fullName} ({userId.email})
+          <strong>User:</strong> {userId ? `${userId.fullName} (${userId.email})` : "N/A"}
         </p>
         <p>
-          <strong>Exam:</strong> {examId.title}
+          <strong>Exam:</strong> {examId ? examId.title : "N/A"}
         </p>
         <p>
           <strong>Total Marks:</strong> {totalMarks}
@@ -165,7 +165,7 @@ const UserResult = () => {
         Question Results:
       </h3>
       {questionResults.map((qr, index) => {
-        const subject = examId.subjects[qr.subjectIndex];
+        const subject = examId?.subjects[qr.subjectIndex];
         const question = subject?.questions[qr.questionIndex];
         const correctAnswerText =
           Array.isArray(qr.correctAnswer) && question?.options

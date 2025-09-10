@@ -70,9 +70,9 @@ const LiveExam = () => {
   const confirmCallbackRef = React.useRef(null);
   const timeoutHandled = React.useRef(false);
 
-  const showSnackbar = (message, severity = "error") => {
+  const showSnackbar = useCallback((message, severity = "error") => {
     setSnackbar({ open: true, message, severity });
-  };
+  }, []);
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -120,21 +120,22 @@ const LiveExam = () => {
 
   // Timer countdown
   useEffect(() => {
-    if (
-      attempt &&
-      attempt.timeRemaining > 0 &&
-      attempt.status === "in_progress"
-    ) {
-      const timer = setInterval(() => {
-        setAttempt((prevAttempt) => ({
-          ...prevAttempt,
-          timeRemaining:
-            prevAttempt.timeRemaining > 0 ? prevAttempt.timeRemaining - 1 : 0,
-        }));
-      }, 1000);
-      return () => clearInterval(timer);
+    if (attempt?.status !== "in_progress") {
+      return;
     }
-  }, [attempt]);
+
+    const timer = setInterval(() => {
+      setAttempt((prevAttempt) => {
+        if (!prevAttempt || prevAttempt.timeRemaining <= 0) {
+          clearInterval(timer);
+          return prevAttempt;
+        }
+        return { ...prevAttempt, timeRemaining: prevAttempt.timeRemaining - 1 };
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [attempt?.currentSubject, attempt?.status]);
 
   const submitCurrentSubjectAnswers = useCallback(async () => {
     if (!attempt) return;
@@ -226,18 +227,22 @@ const LiveExam = () => {
     }
   }, [attempt, answers, attemptId, token, showSnackbar]);
 
+  
+
+
   // Auto-submit on timeout
   useEffect(() => {
     const handleTimeout = async () => {
       setIsSubmitting(true);
       try {
-        await submitCurrentSubjectAnswers();
-
         if (!attempt) return;
 
         const isLastSubject =
           attempt.currentSubject >= attempt.exam.subjects.length - 1;
+
         if (isLastSubject) {
+          // This is the last subject, so submit the entire exam.
+          await submitCurrentSubjectAnswers(); // Submit final answers
           await fetch(`${API_URL}/exam-attempts/${attemptId}/submit`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
@@ -245,14 +250,47 @@ const LiveExam = () => {
           showSnackbar("Time's up! Exam submitted automatically.", "info");
           navigate(`/user/exam/results/${attemptId}`);
         } else {
-          // Call backend to advance to the next subject on timeout
+          // Not the last subject, so submit and advance.
+          const { exam, currentSubject: currentSubjectIndex } = attempt;
+          const currentSubject = exam.subjects[currentSubjectIndex];
+          const answersToSubmit = currentSubject.questions.map((question, qIndex) => ({
+            questionIndex: qIndex,
+            answer: answers[qIndex] !== undefined ? answers[qIndex] : null,
+            type: question.type,
+          }));
+
+          const formData = new FormData();
+          const plainAnswersPayload = [];
+          const imageFiles = [];
+
+          answersToSubmit.forEach((ans) => {
+            if (ans.type === "image" && ans.answer instanceof File) {
+              imageFiles.push(ans);
+            } else {
+              plainAnswersPayload.push(ans);
+            }
+          });
+
+          if (imageFiles.length > 0) {
+            formData.append("answer", imageFiles[0].answer);
+            imageFiles.forEach((imgAns) => {
+              plainAnswersPayload.push({ ...imgAns, answer: imgAns.answer.name });
+            });
+          }
+
+          const bodyPayload = {
+            subjectIndex: currentSubjectIndex,
+            answers: plainAnswersPayload,
+          };
+
+          formData.append("answers", JSON.stringify(bodyPayload));
+
           const advanceResponse = await fetch(
-            `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
+            `${API_URL}/exam-attempts/${attemptId}/submit-and-advance`,
             {
               method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
+              body: formData,
             },
           );
 
@@ -270,7 +308,9 @@ const LiveExam = () => {
           await fetchExamStatus();
         }
       } catch (error) {
-        // Error is already shown by submitCurrentSubjectAnswers
+        showSnackbar(
+          error.message || "An error occurred during auto-submission.",
+        );
       } finally {
         setIsSubmitting(false);
       }
@@ -288,8 +328,8 @@ const LiveExam = () => {
     }
   }, [
     attempt,
+    answers,
     isSubmitting,
-    submitCurrentSubjectAnswers,
     fetchExamStatus,
     attemptId,
     navigate,
@@ -308,19 +348,29 @@ const LiveExam = () => {
             },
           );
           const data = await response.json();
-          if (data.success) {
-            setAttempt((prevAttempt) => ({
-              ...prevAttempt,
-              timeRemaining: data.data.timeRemaining,
-            }));
+          if (data.success && data.data) {
+            // If server reports a change in subject or status, trigger a full refresh
+            if (
+              data.data.currentSubject !== attempt.currentSubject ||
+              data.data.status !== attempt.status
+            ) {
+              await fetchExamStatus();
+            } else {
+              // Otherwise, just update the timer
+              setAttempt((prev) => ({
+                ...prev,
+                timeRemaining: data.data.timeRemaining,
+              }));
+            }
           }
         } catch (error) {
           console.error("Failed to sync time", error);
         }
       }
-    }, 30000);
+    }, 30000); // Sync with server every 30 seconds
+
     return () => clearInterval(syncTime);
-  }, [attemptId, token, attempt]);
+  }, [attempt, attemptId, token, fetchExamStatus]);
 
   const handleAnswerChange = (questionIndex, value, type) => {
     if (type === "mcq-multiple") {

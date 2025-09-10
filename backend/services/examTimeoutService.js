@@ -47,18 +47,15 @@ class ExamTimeoutService {
 
 			for (const attempt of inProgressAttempts) {
 				try {
-					// Check if any subject has timed out
-					const hasTimeout = attempt.subjectAttempts.some((subject) => {
-						if (subject.isCompleted) return false;
-
+					// Check if the current subject has timed out
+					const currentSubject = attempt.getCurrentSubjectAttempt();
+					if (currentSubject) {
 						const now = new Date();
-						const elapsed = (now - subject.startTime) / 1000 / 60; // in minutes
-						return elapsed >= subject.timeLimitMin;
-					});
-
-					if (hasTimeout) {
-						console.log(`Timeout detected for attempt ${attempt._id}`);
-						await this.handleTimeout(attempt);
+						const elapsed = (now - currentSubject.startTime) / 1000 / 60; // in minutes
+						if (elapsed >= currentSubject.timeLimitMin) {
+							console.log(`Timeout detected for attempt ${attempt._id}`);
+							await this.handleTimeout(attempt);
+						}
 					}
 				} catch (error) {
 					console.error(
@@ -75,48 +72,9 @@ class ExamTimeoutService {
 	// Handle timeout for a specific attempt
 	async handleTimeout(attempt) {
 		try {
-			const now = new Date();
-			let hasTimeout = false;
-
-			// Mark timed out subjects as completed
-			attempt.subjectAttempts.forEach((subject) => {
-				if (!subject.isCompleted) {
-					const elapsed = (now - subject.startTime) / 1000 / 60; // in minutes
-					if (elapsed >= subject.timeLimitMin) {
-						subject.endTime = now;
-						subject.isCompleted = true;
-						subject.timeRemaining = 0;
-						hasTimeout = true;
-						console.log(
-							`Subject ${subject.subjectIndex} timed out for attempt ${attempt._id}`
-						);
-					}
-				}
-			});
-
-			if (hasTimeout) {
-				// Check if all subjects are now completed
-				const allCompleted = attempt.subjectAttempts.every(
-					(s) => s.isCompleted
-				);
-
-				if (allCompleted) {
-					attempt.status = "timeout";
-					attempt.endTime = now;
-					attempt.totalDuration = (now - attempt.startTime) / 1000; // in seconds
-
-					await attempt.save();
-
-					// Complete the exam and generate results
-					await examAttemptService.completeExam(attempt);
-
-					console.log(
-						`Exam attempt ${attempt._id} automatically submitted due to timeout`
-					);
-				} else {
-					await attempt.save();
-				}
-			}
+			console.log(`Auto-advancing subject due to timeout for attempt ${attempt._id}`);
+			// Reuse the advanceSubject logic to ensure consistent state transitions.
+			await examAttemptService.advanceSubject(attempt._id, attempt.userId);
 		} catch (error) {
 			console.error(
 				`Error handling timeout for attempt ${attempt._id}:`,
