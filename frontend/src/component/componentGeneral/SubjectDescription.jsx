@@ -7,7 +7,7 @@ const SubjectDescription = ({ description }) => {
   return (
     <div
       className={
-        "bg-gray-100 shadow-inner rounded-2xl p-5 sticky top-17 h-[200px] overflow-y-auto custom-scrollbar"
+        "bg-orange-200 shadow-inner rounded-2xl p-5  sticky top-17 h-[250px] overflow-y-auto custom-scrollbar"
       }
     >
       <QuestionPreview content={description} />

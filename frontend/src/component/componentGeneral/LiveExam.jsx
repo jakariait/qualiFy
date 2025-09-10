@@ -227,9 +227,6 @@ const LiveExam = () => {
     }
   }, [attempt, answers, attemptId, token, showSnackbar]);
 
-  
-
-
   // Auto-submit on timeout
   useEffect(() => {
     const handleTimeout = async () => {
@@ -253,11 +250,13 @@ const LiveExam = () => {
           // Not the last subject, so submit and advance.
           const { exam, currentSubject: currentSubjectIndex } = attempt;
           const currentSubject = exam.subjects[currentSubjectIndex];
-          const answersToSubmit = currentSubject.questions.map((question, qIndex) => ({
-            questionIndex: qIndex,
-            answer: answers[qIndex] !== undefined ? answers[qIndex] : null,
-            type: question.type,
-          }));
+          const answersToSubmit = currentSubject.questions.map(
+            (question, qIndex) => ({
+              questionIndex: qIndex,
+              answer: answers[qIndex] !== undefined ? answers[qIndex] : null,
+              type: question.type,
+            }),
+          );
 
           const formData = new FormData();
           const plainAnswersPayload = [];
@@ -274,7 +273,10 @@ const LiveExam = () => {
           if (imageFiles.length > 0) {
             formData.append("answer", imageFiles[0].answer);
             imageFiles.forEach((imgAns) => {
-              plainAnswersPayload.push({ ...imgAns, answer: imgAns.answer.name });
+              plainAnswersPayload.push({
+                ...imgAns,
+                answer: imgAns.answer.name,
+              });
             });
           }
 
@@ -558,7 +560,7 @@ const LiveExam = () => {
   );
 
   return (
-    <div className="bg-orange-100 shadow-inner rounded-2xl p-3 grid grid-cols-1 gap-4">
+    <div className="bg-orange-100 shadow-inner rounded-2xl p-3 grid grid-cols-1 gap-4 ">
       <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center">
         <h2 className="text-xl primaryTextColor">{exam.title}</h2>
         <h2
@@ -581,7 +583,7 @@ const LiveExam = () => {
         />
       </div>
 
-      <SubjectDescription description={currentSubject.description} />
+        <SubjectDescription description={currentSubject.description} />
 
       <div>
         {currentSubject.questions.map((question, qIndex) => (

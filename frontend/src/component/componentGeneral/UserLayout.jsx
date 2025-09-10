@@ -56,7 +56,7 @@ const UserLayout = ({ children }) => {
           </div>
         </div>
         {/*Children Component Append Here*/}
-        <main className="w-full overflow-hidden">{children}</main>
+        <main className="w-full md:w-4/5 ">{children}</main>
       </div>
     </Layout>
   );

@@ -1,8 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { CircularProgress, Alert } from "@mui/material";
+import { Alert, Skeleton } from "@mui/material";
 import { Link } from "react-router-dom";
+
+const LoadingSkeleton = () => (
+  <div className="shadow rounded-lg p-3">
+    <h1 className="text-lg mb-4 font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
+      <Skeleton width="150px" />
+    </h1>
+    <div className="grid grid-cols-2 gap-2">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="p-4 shadow rounded space-y-2">
+          <Skeleton variant="text" width="80%" />
+          <Skeleton variant="text" width="60%" />
+          <Skeleton variant="text" width="40%" />
+          <div className="flex items-center justify-center pt-4">
+            <Skeleton variant="rectangular" width={100} height={36} />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 export default function ExamResults() {
   const { examId } = useParams();
@@ -39,7 +59,7 @@ export default function ExamResults() {
     fetchResults();
   }, [examId, API_URL]);
 
-  if (loading) return <CircularProgress />;
+  if (loading) return <LoadingSkeleton />;
 
   if (error)
     return (
