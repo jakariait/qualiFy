@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import useProductStore from "../../store/useProductStore.js";
 import ProductList from "./ProductList.jsx";
+import FreeLiveExamList from "./FreeLiveExam.jsx";
 
 const AllLiveExam = ({ limit, showViewAll }) => {
   const { exams, fetchExams, loadingExams } = useProductStore();
@@ -50,6 +51,11 @@ const AllLiveExam = ({ limit, showViewAll }) => {
           )}
         </div>
       </div>
+
+      <div className={"mb-5"}>
+        <FreeLiveExamList />
+      </div>
+
 
       {/* 📚 Exam List */}
       <ProductList products={displayedExams} loading={loadingExams} />

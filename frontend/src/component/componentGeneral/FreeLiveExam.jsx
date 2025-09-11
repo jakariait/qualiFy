@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
 import { Snackbar, Alert } from "@mui/material";
 import ExamStartDialog from "./ExamStartDialog.jsx";
-import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -39,7 +38,7 @@ const FreeLiveExamList = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 👈 token here
+            Authorization: token ? `Bearer ${token}` : undefined,
           },
         });
         if (!response.ok) {
@@ -113,6 +112,12 @@ const FreeLiveExamList = () => {
   };
 
   const handleStartExamClick = (exam) => {
+    if (!token) {
+      // redirect to login if user is not logged in
+      navigate("/login", { state: { from: `/exam/${exam._id}` } });
+      return;
+    }
+
     setSelectedExam(exam);
     setIsDialogOpen(true);
   };
@@ -131,9 +136,23 @@ const FreeLiveExamList = () => {
 
   return (
     <section className="bg-gray-50 shadow-inner rounded-2xl p-3">
-      <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
+      <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-3 pl-2 text-2xl font-semibold">
         Free Live Exams
       </h1>
+      {/* 👇 Show message if not logged in */}
+      {!token && (
+        <p className="primaryTextColor font-medium mb-4">
+          Please{" "}
+          <Link to="/register" className="underline ">
+            register
+          </Link>{" "}
+          or{" "}
+          <Link to="/login" className="underline ">
+            log in
+          </Link>{" "}
+          to start an exam.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {loading ? (

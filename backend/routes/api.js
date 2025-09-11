@@ -686,7 +686,7 @@ router.delete(
 // Exam Routes
 router.post("/exams", adminProtect, examController.createExam);
 router.get("/exams", adminProtect, examController.getAllExams);
-router.get("/exams/free", userProtect, examController.getFreeExams);
+router.get("/exams/free",  examController.getFreeExams);
 router.get("/exams/:id", adminProtect, examController.getExamById);
 router.get(
   "/exams/product/:productId",
