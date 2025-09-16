@@ -20,8 +20,8 @@ const userSchema = new mongoose.Schema(
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         "Please fill a valid email address",
       ],
+      required: true,
     },
-
 
     address: {
       type: String,
@@ -30,8 +30,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
-      match: [/^\d{10,15}$/, "Please enter a valid phone number"],
+      match: [/^\+?\d{10,15}$/, "Please enter a valid phone number"],
     },
+
     password: {
       type: String,
       required: true,

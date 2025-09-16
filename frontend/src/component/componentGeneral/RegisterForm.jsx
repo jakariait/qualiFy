@@ -14,17 +14,20 @@ import useAuthUserStore from "../../store/AuthUserStore.js";
 import useCartStore from "../../store/useCartStore.js";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import "./RegisterForm.css";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [phone, setPhone] = useState("");
 
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    phone: "",
     address: "",
     password: "",
     confirmPassword: "",
@@ -52,6 +55,17 @@ const RegisterForm = () => {
       return;
     }
 
+    // Phone validation
+    if (!phone) {
+      setRegistrationError("Phone number is required");
+      return;
+    }
+    const phoneRegex = /^\+?\d{10,15}$/;
+    if (!phoneRegex.test(phone)) {
+      setRegistrationError("Phone number must be 10 to 15 digits.");
+      return;
+    }
+
     // Password match validation
     if (formData.password !== formData.confirmPassword) {
       setRegistrationError("Passwords do not match");
@@ -63,7 +77,7 @@ const RegisterForm = () => {
     const payload = {
       fullName: formData.fullName,
       email: formData.email,
-      phone: formData.phone || undefined,
+      phone: phone,
       address: formData.address,
       password: formData.password,
     };
@@ -162,14 +176,15 @@ const RegisterForm = () => {
           {/* Phone  */}
           <div className="flex items-center bg-white rounded-md shadow-sm px-4 py-4">
             <FaPhone className="primaryTextColor mr-5 text-2xl" />
-            <input
-              type="number"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              required={true}
-              placeholder="Phone Number*"
+            <PhoneInput
+              placeholder="Enter phone number*"
+              value={phone}
+              onChange={setPhone}
+              defaultCountry="BD"
+              international
+              withCountryCallingCode
               className="w-full outline-none text-sm bg-transparent"
+              required
             />
           </div>
 
