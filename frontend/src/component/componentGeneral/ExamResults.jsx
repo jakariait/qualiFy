@@ -52,6 +52,7 @@ const ExamResults = () => {
 
   const { attempt, result, exam } = results;
 
+
   return (
     <div className="bg-gray-50 shadow-inner rounded-2xl p-3">
       <div className="flex flex-col items-center justify-center mb-4">
@@ -111,15 +112,20 @@ const ExamResults = () => {
             <div className="flex flex-col space-x-2">
               <strong>Your Answer:</strong>
               {qResult.questionType === "image" ? (
-                qResult.userAnswer ? (
-                  <a
-                    href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${qResult.userAnswer}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="primaryTextColor underline"
-                  >
-                    View Uploaded Image
-                  </a>
+                qResult.userAnswer && (Array.isArray(qResult.userAnswer) ? qResult.userAnswer.length > 0 : qResult.userAnswer) ? (
+                  <div>
+                    {(Array.isArray(qResult.userAnswer) ? qResult.userAnswer : [qResult.userAnswer]).map((imageName, index) => (
+                      <a
+                        key={index}
+                        href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${imageName}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="primaryTextColor underline mr-4"
+                      >
+                        View Image {index + 1}
+                      </a>
+                    ))}
+                  </div>
                 ) : (
                   <span>No image uploaded</span>
                 )

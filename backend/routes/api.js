@@ -38,7 +38,6 @@ const resultController = require("../controllers/resultController");
 const courseExamNoticeController = require("../controllers/courseExamNoticeController");
 const noticeController = require("../controllers/noticeController");
 
-
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
   createSteadfastOrder,
@@ -686,7 +685,7 @@ router.delete(
 // Exam Routes
 router.post("/exams", adminProtect, examController.createExam);
 router.get("/exams", adminProtect, examController.getAllExams);
-router.get("/exams/free",  examController.getFreeExams);
+router.get("/exams/free", examController.getFreeExams);
 router.get("/exams/:id", adminProtect, examController.getExamById);
 router.get(
   "/exams/product/:productId",
@@ -842,14 +841,12 @@ router.get(
   courseExamNoticeController.getNoticeByProductId,
 );
 
-
 // Notice Routes
-router.post("/notices",adminProtect, noticeController.createNotice);
-router.get("/notices",adminProtect, noticeController.getAllNotices);
-router.get("/notices/active",userProtect, noticeController.getActiveNotices);
-router.get("/notices/:id",adminProtect, noticeController.getNoticeById);
-router.put("/notices/:id", adminProtect,noticeController.updateNotice);
-router.delete("/notices/:id",adminProtect, noticeController.deleteNotice);
-
+router.post("/notices", adminProtect, noticeController.createNotice);
+router.get("/notices", adminProtect, noticeController.getAllNotices);
+router.get("/notices/active", userProtect, noticeController.getActiveNotices);
+router.get("/notices/:id", adminProtect, noticeController.getNoticeById);
+router.put("/notices/:id", adminProtect, noticeController.updateNotice);
+router.delete("/notices/:id", adminProtect, noticeController.deleteNotice);
 
 module.exports = router;

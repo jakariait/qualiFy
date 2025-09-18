@@ -143,12 +143,8 @@ const LiveExam = () => {
     const currentSubject = exam.subjects[currentSubjectIndex];
 
     const answersToSubmit = [];
-    let hasImage = false;
     currentSubject.questions.forEach((question, qIndex) => {
       const answer = answers[qIndex] !== undefined ? answers[qIndex] : null;
-      if (question.type === "image" && answer instanceof File) {
-        hasImage = true;
-      }
       answersToSubmit.push({
         questionIndex: qIndex,
         answer: answer,
@@ -158,29 +154,26 @@ const LiveExam = () => {
 
     const formData = new FormData();
     const plainAnswersPayload = [];
-    const imageFiles = [];
+    const imageFilesToUpload = [];
 
     answersToSubmit.forEach((ans) => {
-      if (ans.type === "image" && ans.answer instanceof File) {
-        imageFiles.push(ans);
+      if (ans.type === "image" && Array.isArray(ans.answer)) {
+        const fileNames = [];
+        ans.answer.forEach((file) => {
+          if (file instanceof File) {
+            imageFilesToUpload.push(file);
+            fileNames.push(file.name);
+          }
+        });
+        plainAnswersPayload.push({ ...ans, answer: fileNames });
       } else {
         plainAnswersPayload.push(ans);
       }
     });
 
-    if (imageFiles.length > 1) {
-      showSnackbar(
-        "Warning: This exam allows only one image upload per subject.",
-        "warning",
-      );
-    }
-
-    if (imageFiles.length > 0) {
-      // Add the first file under the key 'answer' for the router.
-      formData.append("answer", imageFiles[0].answer);
-      // Add placeholders for all images for the controller.
-      imageFiles.forEach((imgAns) => {
-        plainAnswersPayload.push({ ...imgAns, answer: imgAns.answer.name });
+    if (imageFilesToUpload.length > 0) {
+      imageFilesToUpload.forEach((file) => {
+        formData.append("answer", file);
       });
     }
 
@@ -260,23 +253,26 @@ const LiveExam = () => {
 
           const formData = new FormData();
           const plainAnswersPayload = [];
-          const imageFiles = [];
+          const imageFilesToUpload = [];
 
           answersToSubmit.forEach((ans) => {
-            if (ans.type === "image" && ans.answer instanceof File) {
-              imageFiles.push(ans);
+            if (ans.type === "image" && Array.isArray(ans.answer)) {
+              const fileNames = [];
+              ans.answer.forEach((file) => {
+                if (file instanceof File) {
+                  imageFilesToUpload.push(file);
+                  fileNames.push(file.name);
+                }
+              });
+              plainAnswersPayload.push({ ...ans, answer: fileNames });
             } else {
               plainAnswersPayload.push(ans);
             }
           });
 
-          if (imageFiles.length > 0) {
-            formData.append("answer", imageFiles[0].answer);
-            imageFiles.forEach((imgAns) => {
-              plainAnswersPayload.push({
-                ...imgAns,
-                answer: imgAns.answer.name,
-              });
+          if (imageFilesToUpload.length > 0) {
+            imageFilesToUpload.forEach((file) => {
+              formData.append("answer", file);
             });
           }
 
@@ -381,8 +377,6 @@ const LiveExam = () => {
         ? currentAnswers.filter((ans) => ans !== value)
         : [...currentAnswers, value];
       setAnswers({ ...answers, [questionIndex]: newAnswers });
-    } else if (type === "image") {
-      setAnswers({ ...answers, [questionIndex]: value[0] });
     } else {
       setAnswers({ ...answers, [questionIndex]: value });
     }
@@ -496,14 +490,45 @@ const LiveExam = () => {
           />
         );
       case "image":
+        const imageFiles = answer || [];
+
+        const handleImageUpload = (e) => {
+          if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            handleAnswerChange(qIndex, [...imageFiles, file], question.type);
+            e.target.value = null;
+          }
+        };
+
+        const handleImageRemove = (index) => {
+          const newFiles = imageFiles.filter((_, i) => i !== index);
+          handleAnswerChange(qIndex, newFiles, question.type);
+        };
+
         return (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) =>
-              handleAnswerChange(qIndex, e.target.files, question.type)
-            }
-          />
+          <div>
+            {imageFiles.map((file, index) => (
+              <div key={index} className="flex items-center space-x-2 my-1">
+                <span>{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => handleImageRemove(index)}
+                  className="text-red-500"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            {imageFiles.length < 2 && (
+              <div className="mt-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
+              </div>
+            )}
+          </div>
         );
       default:
         return <div>Unsupported question type</div>;

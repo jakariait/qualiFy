@@ -341,7 +341,7 @@ const ViewOrder = () => {
 
             {order.vat !== 0 && <p>VAT/TAX: {order.vat.toFixed(2)}</p>}
 
-            <p>Delivery Charge: {order.deliveryCharge.toFixed(2)}</p>
+            <p>Delivery Charge: {order?.deliveryCharge?.toFixed(2)}</p>
             {order.specialDiscount !== 0 && (
               <p>Special Discount Amount: {order.specialDiscount.toFixed(2)}</p>
             )}

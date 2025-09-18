@@ -23,8 +23,7 @@ export default function EditExamPage() {
         });
         // Handle nested data structure from API
         const examData = res.data?.exam || res.data?.data || res.data;
-        console.log("API Response:", res.data);
-        console.log("Extracted exam data:", examData);
+
         setExam(examData);
       } catch (err) {
         console.error(err);

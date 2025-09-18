@@ -65,6 +65,7 @@ export default function ExamList() {
     }
   };
 
+  console.log(exams);
   return (
     <div className="shadow rounded-lg p-3">
       <div className="flex justify-between items-center mb-6">

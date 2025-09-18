@@ -67,7 +67,6 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length) {
-      console.log("Loading exam data:", initialData);
       // Normalize the data to ensure proper structure
       const normalizedData = {
         ...initialData,
@@ -79,7 +78,6 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
             questions: subject.questions || [],
           })) || [],
       };
-      console.log("Normalized exam data:", normalizedData);
       setForm(normalizedData);
     }
   }, [initialData]);
@@ -267,7 +265,12 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
       onSuccess && onSuccess();
     } catch (err) {
       console.error(err);
-      showSnackbar(err.response?.data?.message || "Error saving exam", "error");
+      showSnackbar(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Error saving exam",
+        "error",
+      );
     } finally {
       setLoading(false);
     }

@@ -9,7 +9,6 @@ import ActiveNotices from "../component/componentGeneral/ActiveNotices.jsx";
 const UserHomePage = () => {
   const { user, token } = useAuthUserStore();
 
-  console.log(user);
 
   return (
     <UserLayout>

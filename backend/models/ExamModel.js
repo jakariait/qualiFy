@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
+const slugify = require("slugify");
 
 const ExamSchema = new mongoose.Schema(
   {
+    examId: { type: String, unique: true },
+    slug: { type: String, unique: true },
     title: { type: String, required: true },
     description: { type: String },
 
@@ -18,7 +22,7 @@ const ExamSchema = new mongoose.Schema(
     subjects: [
       {
         title: { type: String, required: true },
-        description: { type: String},
+        description: { type: String },
         timeLimitMin: { type: Number, default: null },
         questions: [
           {
@@ -45,6 +49,14 @@ const ExamSchema = new mongoose.Schema(
 
 // Auto-calculate total time and marks before save
 ExamSchema.pre("save", function (next) {
+  if (this.isNew) {
+    this.examId = uuidv4();
+  }
+
+  if (this.isModified("title") || this.isNew) {
+    this.slug = slugify(this.title, { lower: true, strict: true });
+  }
+
   let totalTime = 0;
   let totalMarks = 0;
 

@@ -130,15 +130,22 @@ class ExamAttemptController {
 				});
 			}
 
-			// Attach uploaded image to the corresponding answer
-			if (req.files && req.files.answer && req.files.answer[0]) {
-				const savedFile = req.files.answer[0];
-				// Find the first image-type question in the answers payload
-				const imageAnswer = answers.find(ans => ans.type === 'image');
-				if (imageAnswer) {
-					// Set the answer to the stored filename
-					imageAnswer.answer = savedFile.filename;
-				}
+			// Attach uploaded images to their corresponding answers
+			if (req.files && req.files.answer) {
+				const uploadedFiles = req.files.answer; // Array of files
+				const uploadedFileMap = uploadedFiles.reduce((map, file) => {
+					map[file.originalname] = file.filename;
+					return map;
+				}, {});
+
+				answers.forEach(ans => {
+					if (ans.type === 'image' && Array.isArray(ans.answer)) {
+						// Replace original filenames with saved filenames
+						ans.answer = ans.answer
+							.map(originalName => uploadedFileMap[originalName])
+							.filter(Boolean);
+					}
+				});
 			}
 
 			const result = await examAttemptService.submitAllAnswers(
@@ -357,13 +364,22 @@ class ExamAttemptController {
 				});
 			}
 
-			// Attach uploaded image to the corresponding answer
-			if (req.files && req.files.answer && req.files.answer[0]) {
-				const savedFile = req.files.answer[0];
-				const imageAnswer = answers.find(ans => ans.type === 'image');
-				if (imageAnswer) {
-					imageAnswer.answer = savedFile.filename;
-				}
+			// Attach uploaded images to their corresponding answers
+			if (req.files && req.files.answer) {
+				const uploadedFiles = req.files.answer; // Array of files
+				const uploadedFileMap = uploadedFiles.reduce((map, file) => {
+					map[file.originalname] = file.filename;
+					return map;
+				}, {});
+
+				answers.forEach(ans => {
+					if (ans.type === 'image' && Array.isArray(ans.answer)) {
+						// Replace original filenames with saved filenames
+						ans.answer = ans.answer
+							.map(originalName => uploadedFileMap[originalName])
+							.filter(Boolean);
+					}
+				});
 			}
 
 			const result = await examAttemptService.submitAndAdvance(

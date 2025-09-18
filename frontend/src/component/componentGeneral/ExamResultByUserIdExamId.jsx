@@ -123,15 +123,20 @@ export default function ExamResultByUserIdExamId() {
             <p className="flex flex-col ">
               <strong className="mr-1">Your Answer:</strong>
               {qr.questionType === "image" ? (
-                qr.userAnswer ? (
-                  <a
-                    href={`${API_URL.replace("/api", "")}/uploads/${qr.userAnswer}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="primaryTextColor underline ml-1"
-                  >
-                    View Uploaded Image
-                  </a>
+                qr.userAnswer && (Array.isArray(qr.userAnswer) ? qr.userAnswer.length > 0 : qr.userAnswer) ? (
+                  <div>
+                    {(Array.isArray(qr.userAnswer) ? qr.userAnswer : [qr.userAnswer]).map((imageName, index) => (
+                      <a
+                        key={index}
+                        href={`${API_URL.replace("/api", "")}/uploads/${imageName}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="primaryTextColor underline mr-4"
+                      >
+                        View Image {index + 1}
+                      </a>
+                    ))}
+                  </div>
                 ) : (
                   <span className="ml-1">No image uploaded</span>
                 )
