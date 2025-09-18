@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
+import RequirePermission from "./RequirePermission.jsx";
 
 export default function ExamList() {
   const { token } = useAuthAdminStore();
@@ -65,7 +66,6 @@ export default function ExamList() {
     }
   };
 
-  console.log(exams);
   return (
     <div className="shadow rounded-lg p-3">
       <div className="flex justify-between items-center mb-6">
@@ -101,14 +101,17 @@ export default function ExamList() {
               >
                 Edit
               </Button>
-              <Button
-                variant="contained"
-                color="error"
-                size="small"
-                onClick={() => setDeleteId(exam._id)}
-              >
-                Delete
-              </Button>
+              <RequirePermission permission="delete_exam" fallback={true}>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={() => setDeleteId(exam._id)}
+                >
+                  Delete
+                </Button>
+              </RequirePermission>
+
               <Button
                 variant="contained"
                 color="primary"

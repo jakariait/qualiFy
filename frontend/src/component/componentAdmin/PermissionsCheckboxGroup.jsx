@@ -18,7 +18,6 @@ const PermissionsCheckboxGroup = ({
     { value: "delivery_charges", label: "Delivery Charges" },
     { value: "manage_coupons", label: "Manage Coupons" },
 
-
     { value: "add_products", label: "Add Products" },
     { value: "delete_products", label: "Delete Products" },
     { value: "view_products", label: "View Products" },
@@ -27,7 +26,6 @@ const PermissionsCheckboxGroup = ({
     { value: "view_orders", label: "View Orders" },
     { value: "edit_orders", label: "Edit Orders" },
     { value: "delete_orders", label: "Delete Orders" },
-
 
     { value: "bkash_api", label: "bKash API" },
 
@@ -41,6 +39,16 @@ const PermissionsCheckboxGroup = ({
     { value: "faqs", label: "FAQs" },
     { value: "admin-users", label: "Admin Users" },
     { value: "blogs", label: "Blogs" },
+
+    { value: "student-review", label: "Student Review" },
+    { value: "instructor", label: "Instructor" },
+    { value: "exam", label: "Exam Management" },
+    { value: "delete_exam", label: "Delete Exam" },
+    { value: "platform", label: "Platform" },
+    { value: "notice", label: "Notice Management" },
+    { value: "product_service", label: "Manage Product & Service" },
+    { value: "free_resources", label: "Manage Free Resources" },
+    { value: "free_class", label: "Manage Free Class" },
   ];
 
   const handleChange = (value) => {

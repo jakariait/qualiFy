@@ -74,34 +74,51 @@ export default function SidebarMenu() {
       {/* Website Config */}
       <div>
         <ul className="space-y-1">
-          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-            <Link
-              to="/admin/student-review"
-              className={"flex items-center gap-2"}
-            >
-              <FaComments /> <span>Student Review</span>
-            </Link>
-          </li>
-          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-            <Link to="/admin/instructor" className={"flex items-center gap-2"}>
-              <FaChalkboardTeacher /> <span>Instructor</span>
-            </Link>
-          </li>
-          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-            <Link to="/admin/platform" className={"flex items-center gap-2"}>
-              <FaEnvelope /> <span>Platform Info</span>
-            </Link>
-          </li>
-          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-            <Link to="/admin/exams" className={"flex items-center gap-2"}>
-              <FaClipboardCheck /> <span>Exam Management</span>
-            </Link>
-          </li>
-          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-            <Link to="/admin/notice" className={"flex items-center gap-2"}>
-              <FaInfoCircle /> <span>Notice Management</span>
-            </Link>
-          </li>
+          <RequirePermission permission="student-review" fallback={true}>
+            <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+              <Link
+                to="/admin/student-review"
+                className={"flex items-center gap-2"}
+              >
+                <FaComments /> <span>Student Review</span>
+              </Link>
+            </li>
+          </RequirePermission>
+
+          <RequirePermission permission="instructor" fallback={true}>
+            <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+              <Link
+                to="/admin/instructor"
+                className={"flex items-center gap-2"}
+              >
+                <FaChalkboardTeacher /> <span>Instructor</span>
+              </Link>
+            </li>
+          </RequirePermission>
+          <RequirePermission permission="platform" fallback={true}>
+            <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+              <Link to="/admin/platform" className={"flex items-center gap-2"}>
+                <FaEnvelope /> <span>Platform Info</span>
+              </Link>
+            </li>
+          </RequirePermission>
+
+          <RequirePermission permission="exam" fallback={true}>
+            <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+              <Link to="/admin/exams" className={"flex items-center gap-2"}>
+                <FaClipboardCheck /> <span>Exam Management</span>
+              </Link>
+            </li>
+          </RequirePermission>
+
+          <RequirePermission permission="notice" fallback={true}>
+            <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+              <Link to="/admin/notice" className={"flex items-center gap-2"}>
+                <FaInfoCircle /> <span>Notice Management</span>
+              </Link>
+            </li>
+          </RequirePermission>
+
           <RequirePermission permission="website_theme_color" fallback={true}>
             <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
               <Link
@@ -135,24 +152,35 @@ export default function SidebarMenu() {
             </Link>
           </RequirePermission>
         </ul>
-        <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-          <Link
-            to="/admin/product-service"
-            className={"flex items-center gap-2"}
-          >
-            <FaTags /> <span>Manage Products & Service</span>
-          </Link>
-        </li>
-        <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-          <Link to="/admin/free-resource" className={"flex items-center gap-2"}>
-            <FaArchive /> <span>Manage Free Resources</span>
-          </Link>
-        </li>
-        <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
-          <Link to="/admin/free-class" className={"flex items-center gap-2"}>
-            <FaArchive /> <span>Manage Free Class</span>
-          </Link>
-        </li>
+        <RequirePermission permission="product_service" fallback={true}>
+          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+            <Link
+              to="/admin/product-service"
+              className={"flex items-center gap-2"}
+            >
+              <FaTags /> <span>Manage Products & Service</span>
+            </Link>
+          </li>
+        </RequirePermission>
+
+        <RequirePermission permission="product_service" fallback={true}>
+          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+            <Link
+              to="/admin/free-resource"
+              className={"flex items-center gap-2"}
+            >
+              <FaArchive /> <span>Manage Free Resources</span>
+            </Link>
+          </li>
+        </RequirePermission>
+
+        <RequirePermission permission="free_class" fallback={true}>
+          <li className="flex items-center space-x-2 p-2 rounded-md cursor-pointer">
+            <Link to="/admin/free-class" className={"flex items-center gap-2"}>
+              <FaArchive /> <span>Manage Free Class</span>
+            </Link>
+          </li>
+        </RequirePermission>
       </div>
 
       {/* E-Commerce Modules */}
