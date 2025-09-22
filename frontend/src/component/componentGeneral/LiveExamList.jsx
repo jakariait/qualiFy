@@ -33,10 +33,6 @@ const LiveExamList = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-
-
-
-
   useEffect(() => {
     const fetchExams = async () => {
       try {
@@ -46,12 +42,16 @@ const LiveExamList = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`, // 👈 pass token here
           },
-        });        if (!response.ok) {
+        });
+        if (!response.ok) {
           throw new Error("Failed to fetch exams");
         }
         const data = await response.json();
         if (Array.isArray(data.exams)) {
-          setExams(data.exams);
+          const sortedExams = data.exams.sort((a, b) =>
+            a.title.localeCompare(b.title),
+          );
+          setExams(sortedExams);
         } else {
           showSnackbar("Received invalid data from server");
         }
@@ -141,7 +141,7 @@ const LiveExamList = () => {
         Live Exams
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex flex-col gap-6">
         {loading
           ? Array.from({ length: 3 }).map((_, index) => (
               <ExamCardSkeleton key={index} />
@@ -159,10 +159,7 @@ const LiveExamList = () => {
                   key={exam._id}
                   className="bg-white border border-gray-200 p-3 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
-                  <h3 className="text-xl  text-gray-900">
-                    {exam.title}
-                  </h3>
-
+                  <h3 className="text-xl  text-gray-900">{exam.title}</h3>
 
                   <div className="flex justify-between text-sm text-gray-600 mt-4">
                     <span>Total Marks: {exam.totalMarks}</span>
@@ -171,7 +168,7 @@ const LiveExamList = () => {
                   {hasAttempted ? (
                     <Link
                       to={`/user/exam/result/${exam._id}`}
-                      className="block text-center w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
+                      className="block text-center w-full bg-blue-500 accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
                     >
                       View Results
                     </Link>
