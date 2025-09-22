@@ -586,7 +586,7 @@ const LiveExam = () => {
 
   return (
     <div className="bg-orange-100 shadow-inner rounded-2xl p-3 grid grid-cols-1 gap-4 ">
-      <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center">
+      <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center sticky top-0 z-10">
         <h2 className="text-xl primaryTextColor">{exam.title}</h2>
         <h2
           className="p-5"
