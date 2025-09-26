@@ -585,18 +585,20 @@ const LiveExam = () => {
   );
 
   return (
-    <div className="bg-orange-100 shadow-inner rounded-2xl p-3 grid grid-cols-1 gap-4 ">
-      <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center sticky top-0 z-10">
-        <h2 className="text-xl primaryTextColor">{exam.title}</h2>
+    <div className="bg-orange-100  shadow-inner rounded-2xl p-3 grid grid-cols-1 gap-4 ">
+      <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center ">
+        <h2 className="text-xl pt-5 primaryTextColor">{exam.title}</h2>
         <h2
           className="p-5"
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(exam.description),
           }}
         ></h2>
-        <div className="primaryTextColor">
-          Time Remaining: {Math.floor(timeRemaining / 60)}:
-          {(timeRemaining % 60).toString().padStart(2, "0")}
+        <div className="primaryTextColor rounded top-15 md:top-20 fixed bg-gray-50 ">
+          <div className={"px-3 py-3"}>
+            Time Remaining: {Math.floor(timeRemaining / 60)}:
+            {(timeRemaining % 60).toString().padStart(2, "0")}
+          </div>
         </div>
       </div>
 
@@ -608,7 +610,7 @@ const LiveExam = () => {
         />
       </div>
 
-        <SubjectDescription description={currentSubject.description} />
+      <SubjectDescription description={currentSubject.description} />
 
       <div>
         {currentSubject.questions.map((question, qIndex) => (
