@@ -37,7 +37,7 @@ const ProductAddToCart = ({ product }) => {
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const baseUrl = apiUrl.replace("/api", "");
-  const src = `${baseUrl}/uploads/${product.previewPdf}`;
+  const src = `https://docs.google.com/gview?url=${baseUrl}/uploads/${product.previewPdf}&embedded=true`;
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
@@ -285,7 +285,6 @@ const ProductAddToCart = ({ product }) => {
               title="eBook Preview"
               width="100%"
               height="100%"
-              className="rounded-lg border"
               style={{ border: "none" }}
             />
           </div>
