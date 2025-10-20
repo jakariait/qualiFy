@@ -30,6 +30,9 @@ const Checkout = () => {
 
   const isBook = cartContainsBooks(cart);
 
+  const isExamOnly =
+    cart.length > 0 && cart.every((item) => item.productType === "exam");
+
   const { user } = useAuthUserStore();
 
   // Coupon
@@ -130,7 +133,7 @@ const Checkout = () => {
     fetchVatAmount();
   }, []);
 
-  // console.log(cart);
+  console.log(cart);
 
 
   // Data Layer for Initiate Checkout
@@ -250,7 +253,7 @@ const Checkout = () => {
           <div className="space-y-8">
             <AddressForm user={user} onAddressChange={handleAddressChange} />
 
-            <ShippingOptions onShippingChange={setSelectedShipping} />
+            {!isExamOnly && <ShippingOptions onShippingChange={setSelectedShipping} />}
             <DeliveryMethod
               freeDelivery={freeDelivery}
               formattedTotalAmount={formattedTotalAmount}

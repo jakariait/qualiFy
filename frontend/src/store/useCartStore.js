@@ -28,8 +28,7 @@ const useCartStore = create((set, get) => ({
         discountPrice: item.discountPrice,
         quantity: item.quantity,
         thumbnail: item.thumbnail,
-        slug: item.slug,
-        productType: item.type, // <-- add here
+        productType: item.productType, // <-- add here
       }));
 
       saveCart(serverCartItems);
@@ -192,7 +191,7 @@ const useCartStore = create((set, get) => ({
             quantity: item.quantity,
             thumbnail: item.thumbnail,
             slug: item.slug,
-            productType: item.type, // <-- add here
+            productType: item.productType, // <-- add here
           },
           {
             headers: {
@@ -217,7 +216,7 @@ const useCartStore = create((set, get) => ({
         quantity: item.quantity,
         thumbnail: item.thumbnail,
         slug: item.product?.slug,
-        productType: item.type, // <-- add here
+        productType: item.productType, // <-- add here
       }));
 
       saveCart(serverCartItems);

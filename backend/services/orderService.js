@@ -32,15 +32,18 @@ const createOrder = async (orderData, userId) => {
     const vatEntry = await VatPercentage.findOne().sort({ createdAt: -1 });
     const vatPercent = vatEntry ? vatEntry.value : 0;
 
-    // Calculate subtotal and update stock only if product type is "book"
+    // Calculate subtotal and update stock
     let subtotal = 0;
     const updatedItems = [];
+    const productTypes = [];
 
     for (const item of orderData.items) {
       const { productId, quantity } = item;
 
       const product = await Product.findById(productId);
       if (!product) throw new Error("Product not found");
+
+      productTypes.push(product.type);
 
       const price =
         product.finalDiscount > 0 ? product.finalDiscount : product.finalPrice;
@@ -63,10 +66,13 @@ const createOrder = async (orderData, userId) => {
       updatedItems.push({ productId, quantity, price });
     }
 
+    const isExamOnlyOrder =
+      productTypes.length > 0 && productTypes.every((type) => type === "exam");
+
     // Handle shipping (optional)
     let deliveryCharge = 0;
 
-    if (orderData.shippingId) {
+    if (orderData.shippingId && !isExamOnlyOrder) {
       const shippingMethod = await Shipping.findById(orderData.shippingId);
       if (!shippingMethod) throw new Error("Invalid shipping method");
 
