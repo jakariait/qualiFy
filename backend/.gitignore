@@ -136,4 +136,4 @@ dist
 .pnp.*
 
 
-backend/mongo_backup.sh
+mongo_backup.sh
