@@ -5,6 +5,7 @@ const slugify = require("slugify");
 const productSchema = new mongoose.Schema(
   {
     productId: { type: Number, unique: true, index: true },
+    isPreBooked: { type: Boolean, default: false },
     name: { type: String, trim: true, required: true },
     slug: { type: String, trim: true, unique: true },
     type: {

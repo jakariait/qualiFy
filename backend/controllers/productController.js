@@ -85,6 +85,12 @@ const createProduct = async (req, res) => {
       else if (val === "false") productData.isActive = false;
       else delete productData.isActive;
     }
+    if (typeof productData.isPreBooked === "string") {
+      const val = productData.isPreBooked.toLowerCase();
+      if (val === "true") productData.isPreBooked = true;
+      else if (val === "false") productData.isPreBooked = false;
+      else delete productData.isPreBooked;
+    }
 
     // --- UNIFIED FILE HANDLING ---
     const fileMap = {};
@@ -160,6 +166,20 @@ const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const productData = { ...req.body };
+
+    // Normalize boolean fields
+    if (typeof productData.isActive === "string") {
+      const val = productData.isActive.toLowerCase();
+      if (val === "true") productData.isActive = true;
+      else if (val === "false") productData.isActive = false;
+      else delete productData.isActive;
+    }
+    if (typeof productData.isPreBooked === "string") {
+      const val = productData.isPreBooked.toLowerCase();
+      if (val === "true") productData.isPreBooked = true;
+      else if (val === "false") productData.isPreBooked = false;
+      else delete productData.isPreBooked;
+    }
 
     // --- UNIFIED FILE HANDLING ---
     const fileMap = {};
@@ -246,9 +266,9 @@ const updateProduct = async (req, res) => {
 // ✅ Get all products (with optional filtering: type, isActive)
 const getAllProducts = async (req, res) => {
   try {
-    const { type, isActive } = req.query;
+    const { type, isActive, isPreBooked } = req.query;
 
-    const products = await productService.getFilteredProducts({ type, isActive });
+    const products = await productService.getFilteredProducts({ type, isActive, isPreBooked });
 
     res.status(200).json({
       success: true,

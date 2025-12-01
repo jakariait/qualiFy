@@ -141,7 +141,7 @@ const LiveExamList = () => {
         Live Exams
       </h1>
 
-      <div className="flex flex-col gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         {loading
           ? Array.from({ length: 3 }).map((_, index) => (
               <ExamCardSkeleton key={index} />

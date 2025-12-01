@@ -63,6 +63,7 @@ const ProductCRUD = () => {
 		videoUrl: [""], // start with one empty string
 		faqs: [{ question: "", answer: "" }], // one empty faq
 		isActive: true,
+		isPreBooked: false, // New field
 	});
 
 	const [modules, setModules] = useState([]);
@@ -197,6 +198,10 @@ const ProductCRUD = () => {
 			previewPdfFile: null,
 			courseIntroVideo: "",
 			courseIntroVideoFile: null,
+			videoUrl: [""], // Ensure videoUrl is initialized as array
+			faqs: [{ question: "", answer: "" }], // Ensure faqs is initialized
+			isActive: true, // Ensure isActive is initialized
+			isPreBooked: false, // Initialize isPreBooked
 		});
 		setModules([]);
 		setRemovedPreviewPdf(false);
@@ -317,6 +322,7 @@ const ProductCRUD = () => {
 					? product.faqs
 					: [{ question: "", answer: "" }],
 			isActive: product.isActive !== undefined ? product.isActive : true,
+			isPreBooked: product.isPreBooked !== undefined ? product.isPreBooked : false,
 		});
 		setModules(
 			product.modules?.map((mod) => ({
@@ -389,6 +395,7 @@ const ProductCRUD = () => {
 			formData.append("videoUrl", JSON.stringify(form.videoUrl));
 			formData.append("faqs", JSON.stringify(form.faqs));
 			formData.append("isActive", form.isActive);
+			formData.append("isPreBooked", form.isPreBooked);
 
 			// Create a version of modules with unique keys for file uploads
 			const modulesWithKeys = modules.map((mod, mIdx) => ({
@@ -774,6 +781,17 @@ const ProductCRUD = () => {
 								onChange={handleIsActiveChange}
 							/>
 							<span>Active</span>
+						</label>
+					</FormControl>
+					{/* IsPreBooked Toggle */}
+					<FormControl margin="normal" fullWidth>
+						<label className="inline-flex items-center gap-2">
+							<input
+								type="checkbox"
+								checked={form.isPreBooked}
+								onChange={(e) => setForm((f) => ({ ...f, isPreBooked: e.target.checked }))}
+							/>
+							<span>Pre-booked</span>
 						</label>
 					</FormControl>
 					{form.type === "course" && (

@@ -37,7 +37,7 @@ const updateProduct = async (productId, productData) => {
 };
 
 // ✅ Get all products by filter (type, isActive)
-const getFilteredProducts = async ({ type, isActive }) => {
+const getFilteredProducts = async ({ type, isActive, isPreBooked }) => {
   try {
     const filter = {};
 
@@ -47,6 +47,10 @@ const getFilteredProducts = async ({ type, isActive }) => {
 
     if (isActive !== undefined) {
       filter.isActive = isActive === "true"; // convert string to boolean
+    }
+
+    if (isPreBooked !== undefined) {
+      filter.isPreBooked = isPreBooked === "true"; // convert string to boolean
     }
 
     const products = await ProductModel.find(filter)
