@@ -15,6 +15,7 @@ import {
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import OrderCountBadge from "./OrderCountBadge.jsx";
+import PrebookButton from "./PrebookButton.jsx";
 
 const ProductAddToCart = ({ product }) => {
   const [openPdf, setOpenPdf] = useState(false);
@@ -117,86 +118,94 @@ const ProductAddToCart = ({ product }) => {
           )}
         </div>
 
-        {/* Stock Display (only for book) */}
-        {product.type === "book" && product.finalStock === 0 && (
-          <div>
-            <span className="text-red-600 font-semibold">Stock Out</span>
-          </div>
-        )}
+        {/*Conditionally Render Buy Now and PreBook Button*/}
 
-        {/* Quantity & Action Buttons */}
-        <div className="flex flex-col gap-2 mt-2">
-          {product.type === "book" ? (
-            <>
-              {/* Quantity + Add To Cart in same line */}
-              <div className="flex gap-2 items-center">
-                {/* Quantity Selector */}
-                <div className="rounded flex items-center justify-between">
-                  <button
-                    className="primaryBgColor accentTextColor px-2 py-2 md:py-3 rounded-l cursor-pointer"
-                    onClick={() => handleQuantityChange("decrease")}
-                  >
-                    <FiMinus />
-                  </button>
-                  <span className="px-3 py-1 md:py-2 primaryTextColor">
-                    {quantity}
-                  </span>
-                  <button
-                    className="primaryBgColor accentTextColor px-2 py-2 md:py-3 rounded-r cursor-pointer"
-                    onClick={() => handleQuantityChange("increase")}
-                    disabled={quantity >= MAX_QUANTITY}
-                  >
-                    <FaPlus />
-                  </button>
-                </div>
+        {product.isPreBooked ? (
+          <PrebookButton product={product} quantity={quantity} />
+        ) : (
+          <>
+            {/* Stock Display (only for book) */}
+            {product.type === "book" && product.finalStock === 0 && (
+              <div>
+                <span className="text-red-600 font-semibold">Stock Out</span>
+              </div>
+            )}
 
-                {/* Add To Cart */}
-                {product.finalStock === 0 ? (
-                  <button className="text-red-600 font-semibold" disabled>
-                    Stock Out
-                  </button>
-                ) : (
+            {/* Quantity & Action Buttons */}
+            <div className="flex flex-col gap-2 mt-2">
+              {product.type === "book" ? (
+                <>
+                  {/* Quantity + Add To Cart in same line */}
+                  <div className="flex gap-2 items-center">
+                    {/* Quantity Selector */}
+                    <div className="rounded flex items-center justify-between">
+                      <button
+                        className="primaryBgColor accentTextColor px-2 py-2 md:py-3 rounded-l cursor-pointer"
+                        onClick={() => handleQuantityChange("decrease")}
+                      >
+                        <FiMinus />
+                      </button>
+                      <span className="px-3 py-1 md:py-2 primaryTextColor">
+                        {quantity}
+                      </span>
+                      <button
+                        className="primaryBgColor accentTextColor px-2 py-2 md:py-3 rounded-r cursor-pointer"
+                        onClick={() => handleQuantityChange("increase")}
+                        disabled={quantity >= MAX_QUANTITY}
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
+
+                    {/* Add To Cart */}
+                    {product.finalStock === 0 ? (
+                      <button className="text-red-600 font-semibold" disabled>
+                        Stock Out
+                      </button>
+                    ) : (
+                      <button
+                        className="primaryBgColor accentTextColor px-4 py-2 rounded flex-grow cursor-pointer"
+                        onClick={handleAddToCart}
+                      >
+                        Add To Cart
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Cash on Delivery Button */}
                   <button
-                    className="primaryBgColor accentTextColor px-4 py-2 rounded flex-grow cursor-pointer"
+                    className="primaryBgColor cursor-pointer accentTextColor px-4 py-2 rounded w-full"
+                    onClick={() => {
+                      addToCart(product, quantity);
+                      navigate("/checkout");
+                    }}
+                  >
+                    Buy Now
+                  </button>
+                </>
+              ) : (
+                // Non-book buttons side-by-side
+                <div className="flex gap-2">
+                  <button
+                    className="primaryBgColor accentTextColor cursor-pointer px-3 py-2 rounded w-full"
                     onClick={handleAddToCart}
                   >
                     Add To Cart
                   </button>
-                )}
-              </div>
-
-              {/* Cash on Delivery Button */}
-              <button
-                className="primaryBgColor cursor-pointer accentTextColor px-4 py-2 rounded w-full"
-                onClick={() => {
-                  addToCart(product, quantity);
-                  navigate("/checkout");
-                }}
-              >
-                Buy Now
-              </button>
-            </>
-          ) : (
-            // Non-book buttons side-by-side
-            <div className="flex gap-2">
-              <button
-                className="primaryBgColor accentTextColor cursor-pointer px-3 py-2 rounded w-full"
-                onClick={handleAddToCart}
-              >
-                Add To Cart
-              </button>
-              <button
-                className="primaryBgColor accentTextColor cursor-pointer px-3 py-2 rounded w-full"
-                onClick={() => {
-                  addToCart(product, 1);
-                  navigate("/checkout");
-                }}
-              >
-                Buy Now
-              </button>
+                  <button
+                    className="primaryBgColor accentTextColor cursor-pointer px-3 py-2 rounded w-full"
+                    onClick={() => {
+                      addToCart(product, 1);
+                      navigate("/checkout");
+                    }}
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/*Only for Book*/}

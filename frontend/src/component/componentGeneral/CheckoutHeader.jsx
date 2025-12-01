@@ -3,19 +3,23 @@ import { Breadcrumbs } from "@mui/material";
 import { Link } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 
-const CheckoutHeader = ({ user }) => {
+const CheckoutHeader = ({ user, page = "checkout" }) => {
   return (
     <div>
       {/* Page Header */}
       <div className="flex flex-col justify-between items-center gap-2 mb-6">
-        <h1 className="text-2xl">Checkout</h1>
+        <h1 className="text-2xl">
+          {page === "prebook" ? "Prebook" : "Checkout"}
+        </h1>
 
         {/* Breadcrumbs for navigation */}
         <Breadcrumbs separator="/" aria-label="breadcrumb">
           <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
             Home
           </Link>
-          <Typography color="text.primary">Checkout</Typography>
+          <Typography color="text.primary">
+            {page === "prebook" ? "Prebook" : "Checkout"}
+          </Typography>
         </Breadcrumbs>
 
         {/* Login/Register prompt */}

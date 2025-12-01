@@ -92,6 +92,7 @@ import ResultByUserIdExamIdPage from "./pagesUser/ResultByUserIdExamIdPage.jsx";
 import CourseExamNoticePage from "./pagesUser/CourseExamNoticePage.jsx";
 import NoticeForCourseExamPage from "./pagesAdmin/NoticeForCourseExamPage.jsx";
 import PageViewTracker from "./component/componentGeneral/PageViewTracker.jsx";
+import PrebookPage from "./pagesUser/PrebookPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -181,6 +182,7 @@ function App() {
         <Route element={<UserProtectedRoute />}>
           <Route path="/resource-viewer/:id" element={<ResourceViewerPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/pre-book" element={<PrebookPage/>} />
           <Route path="/user/home" element={<UserHomePage />} />
           <Route path="/user/orders" element={<UserAllOrdersPage />} />
           <Route

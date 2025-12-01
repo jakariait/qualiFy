@@ -111,7 +111,7 @@ const AnimatedScrollableTeachers = () => {
               <div
                 key={`${teacher._id}-${index}`}
                 className="rounded-md shadow transition-all duration-300 overflow-hidden group flex-shrink-0"
-                style={{ width: '40vw', maxWidth: '288px' }} // 288px is 72 * 4 (Tailwind w-72)
+                style={{ width: '55vw', maxWidth: '288px' }} // 288px is 72 * 4 (Tailwind w-72)
               >
                 <div className="relative">
                   <ImageComponent

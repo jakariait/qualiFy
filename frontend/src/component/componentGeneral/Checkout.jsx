@@ -135,7 +135,6 @@ const Checkout = () => {
 
   console.log(cart);
 
-
   // Data Layer for Initiate Checkout
 
   useEffect(() => {
@@ -246,14 +245,15 @@ const Checkout = () => {
         <OrderTimeline currentStep={2} />
       </div>
 
-
       <form onSubmit={handleOrderSubmit}>
         <div className="grid gap-12 md:grid-cols-2">
           {/* Left Column - Address & Shipping */}
           <div className="space-y-8">
             <AddressForm user={user} onAddressChange={handleAddressChange} />
 
-            {!isExamOnly && <ShippingOptions onShippingChange={setSelectedShipping} />}
+            {!isExamOnly && (
+              <ShippingOptions onShippingChange={setSelectedShipping} />
+            )}
             <DeliveryMethod
               freeDelivery={freeDelivery}
               formattedTotalAmount={formattedTotalAmount}
@@ -291,9 +291,13 @@ const Checkout = () => {
               vatPercentage={vatPercentage}
             />
             <button
-              className={
-                "primaryBgColor accentTextColor px-4 py-2 w-full rounded-lg cursor-pointer"
-              }
+              type="submit"
+              disabled={cart.length === 0}
+              className={`primaryBgColor accentTextColor px-4 py-2 w-full rounded-lg ${
+                cart.length === 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
+              }`}
             >
               {paymentMethod === "cash_on_delivery"
                 ? "Place Order (Cash on Delivery)"

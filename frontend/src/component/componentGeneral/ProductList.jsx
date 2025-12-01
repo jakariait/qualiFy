@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Typography, Skeleton } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ImageComponent from "./ImageComponent.jsx";
-import { GraduationCap, BookOpen, User, Book, Calendar } from "lucide-react";
+import { BookOpen, Calendar } from "lucide-react";
 import useCartStore from "../../store/useCartStore.js";
 import OrderCountBadge from "./OrderCountBadge.jsx";
+import PrebookButton from "./PrebookButton.jsx";
 
 const formatPrice = (price) => {
   if (isNaN(price)) return price;
@@ -30,8 +31,6 @@ const ProductList = ({ products, loading }) => {
   };
 
   const activeProducts = products.filter((product) => product.isActive);
-
-
 
   if (loading) {
     return (
@@ -101,9 +100,10 @@ const ProductList = ({ products, loading }) => {
                   <div className="mt-2 p-2 primaryTextColor flex flex-col items-center gap-1">
                     {product.enrolledStudents && (
                       <div className="flex items-center gap-1">
-
-                        <OrderCountBadge productId={product._id} enrolledStudents={product.enrolledStudents} />
-
+                        <OrderCountBadge
+                          productId={product._id}
+                          enrolledStudents={product.enrolledStudents}
+                        />
                       </div>
                     )}
                     {product.lessons && (
@@ -132,15 +132,21 @@ const ProductList = ({ products, loading }) => {
                       View Details
                     </button>
 
-                    <button
-                      className="primaryBgColor accentTextColor cursor-pointer px-3 py-2 rounded w-full"
-                      onClick={() => {
-                        addToCart(product, quantity);
-                        navigate("/checkout");
-                      }}
-                    >
-                      Buy Now
-                    </button>
+                    {/*Conditionally Render Buy Now and PreBook Button*/}
+
+                    {product.isPreBooked ? (
+                      <PrebookButton product={product} quantity={quantity} />
+                    ) : (
+                      <button
+                        className="primaryBgColor accentTextColor cursor-pointer px-3 py-2 rounded w-full"
+                        onClick={() => {
+                          addToCart(product, quantity);
+                          navigate("/checkout");
+                        }}
+                      >
+                        Buy Now
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

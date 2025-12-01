@@ -85,6 +85,7 @@ const ProductDetails = () => {
     hasPushedRef.current = true;
   }, [product]);
 
+
   if (loading || product?.slug !== slug) {
     return (
       <div className="xl:container xl:mx-auto p-3">
