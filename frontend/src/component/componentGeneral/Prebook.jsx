@@ -47,10 +47,14 @@ const Prebook = () => {
     }
   };
 
+  const formatPrice = (price) => {
+    if (isNaN(price)) return price;
+    return price.toLocaleString();
+  };
 
   return (
     <div className="xl:container xl:mx-auto p-4">
-      <CheckoutHeader page={"prebook"}/>
+      <CheckoutHeader page={"prebook"} />
 
       <div className="md:mt-10 max-w-4xl mx-auto bg-white p-6 rounded-xl shadow ">
         {isPrebooked ? (
@@ -98,13 +102,35 @@ const Prebook = () => {
 
               {/* Price Section */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <p className="text-gray-600 ">Pre-Book Price</p>
-                <p className="text-3xl font-semibold primaryTextColor mt-1">
-                  Tk.
-                  {product.finalDiscount > 0
-                    ? product.finalDiscount
-                    : product.finalPrice}
-                </p>
+                <div className="flex flex-col gap-2 ">
+                  {product.finalDiscount > 0 ? (
+                    <>
+                      <div>
+                        <p className="text-gray-600 ">Pre-Book Price</p>
+                        <div className="text-3xl font-semibold primaryTextColor mt-1">
+                          Tk. {formatPrice(Number(product.finalDiscount))}
+                        </div>
+                      </div>
+
+                      <div className="text-gray-600 ">
+                        <p>Regular Price</p>
+                        Tk. {formatPrice(Number(product.finalPrice))}
+                      </div>
+
+                      <div className="text-gray-700">
+                        You Are Saving Tk{" "}
+                        {formatPrice(
+                          Number(product.finalPrice - product.finalDiscount),
+                        )}{" "}
+                        by Pre-Booking
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-black font-medium">
+                      Tk. {formatPrice(Number(product.finalPrice))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Product Details (optional placeholder) */}
