@@ -11,6 +11,8 @@ const AllLiveExam = ({ limit, showViewAll }) => {
     fetchExams();
   }, [fetchExams]);
 
+
+
   const displayedExams = limit ? exams.slice(0, limit) : exams;
 
   // If limit is active and there are no exams to show, render nothing
