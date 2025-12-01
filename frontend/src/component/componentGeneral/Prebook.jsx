@@ -12,9 +12,11 @@ const Prebook = () => {
   const { product, quantity } = location.state || {};
   const [isLoading, setIsLoading] = useState(false);
   const [isPrebooked, setIsPrebooked] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleClick = async () => {
     setIsLoading(true);
+    setErrorMessage("");
     try {
       const response = await fetch(`${apiUrl}/pre-book`, {
         method: "POST",
@@ -37,11 +39,11 @@ const Prebook = () => {
       if (response.ok) {
         setIsPrebooked(true);
       } else {
-        toast.error(data.message || "Pre-booking failed.");
+        setErrorMessage(data.message || "Pre-booking failed.");
       }
     } catch (error) {
       console.error("Error during pre-booking:", error);
-      toast.error("An error occurred during pre-booking.");
+      setErrorMessage("An error occurred during pre-booking.");
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +59,20 @@ const Prebook = () => {
       <CheckoutHeader page={"prebook"} />
 
       <div className="md:mt-10 max-w-4xl mx-auto bg-white p-6 rounded-xl shadow ">
-        {isPrebooked ? (
+        {errorMessage ? (
+          <div className="text-center py-10">
+            <h2 className="text-2xl font-semibold text-red-600 mb-4">
+              Pre-Booking Failed!
+            </h2>
+            <p className="text-gray-600 text-lg mb-4">{errorMessage}</p>
+            <Link
+              to="/"
+              className="primaryBgColor accentTextColor px-5 py-2 rounded-md mt-6 inline-block"
+            >
+              Go to Home
+            </Link>
+          </div>
+        ) : isPrebooked ? (
           <div className="text-center py-10">
             <h2 className="text-2xl font-semibold primaryTextColor mb-4">
               Pre-Booking Successful!

@@ -1,6 +1,11 @@
 const Prebook = require("../models/PrebookModel");
 
 exports.createPrebook = async (data) => {
+  const { userId, productId } = data;
+  const existingPrebook = await Prebook.findOne({ userId, productId });
+  if (existingPrebook) {
+    throw new Error("Only one pre-book allowed per user per product.");
+  }
   return Prebook.create(data);
 };
 

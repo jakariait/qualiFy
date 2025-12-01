@@ -61,7 +61,7 @@ const LoginForm = ({ message }) => {
             {location.state?.from?.pathname?.includes("resource-viewer") ? (
               "Please sign in to view free resources"
             ) : location.state?.from?.pathname?.includes("pre-book") ? (
-              "Please sign in to preorder"
+              "Please sign in to Pre-Book"
             ) : (
               <>
                 {message}
