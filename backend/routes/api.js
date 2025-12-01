@@ -851,7 +851,7 @@ router.put("/notices/:id", adminProtect, noticeController.updateNotice);
 router.delete("/notices/:id", adminProtect, noticeController.deleteNotice);
 
 // Routes for Pre-Book
-router.post("/pre-book", prebookController.createPrebook);
+router.post("/pre-book", userProtect, prebookController.createPrebook);
 router.get("/pre-book", prebookController.getAllPrebooks);
 router.get("/pre-book/:id", prebookController.getPrebookById);
 // get all prebooks for a specific user

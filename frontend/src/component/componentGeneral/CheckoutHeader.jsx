@@ -2,8 +2,15 @@ import React from "react";
 import { Breadcrumbs } from "@mui/material";
 import { Link } from "react-router-dom";
 import Typography from "@mui/material/Typography";
+import useAuthUserStore from "../../store/AuthUserStore.js";
 
-const CheckoutHeader = ({ user, page = "checkout" }) => {
+
+
+const CheckoutHeader = ({ page = "checkout" }) => {
+
+  const { user, loading } = useAuthUserStore();
+
+
   return (
     <div>
       {/* Page Header */}
@@ -23,7 +30,7 @@ const CheckoutHeader = ({ user, page = "checkout" }) => {
         </Breadcrumbs>
 
         {/* Login/Register prompt */}
-        {!user && (
+        {!loading && !user && (
           <div className="flex flex-col md:flex-row justify-between items-center w-full gap-2 bg-yellow-100 p-3 rounded-lg">
             <div>Have an account? Please Login or Register</div>
             <div className="flex gap-6">

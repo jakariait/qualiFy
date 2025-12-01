@@ -240,7 +240,7 @@ const Checkout = () => {
 
   return (
     <div className="xl:container xl:mx-auto p-4">
-      <CheckoutHeader user={user} />
+      <CheckoutHeader />
       <div className="max-w-xl mx-auto pb-10">
         <OrderTimeline currentStep={2} />
       </div>
