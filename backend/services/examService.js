@@ -36,7 +36,9 @@ const getExamsByProductId = async (productId) => {
   return Exam.find({
     productIds: productId,
     status: "published",
-  }).sort({ createdAt: -1 });
+  })
+    .select("-subjects")
+    .sort({ createdAt: -1 });
 };
 
 const getFreeExams = async () => {

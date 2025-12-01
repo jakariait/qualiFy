@@ -134,7 +134,6 @@ const FreeLiveExamList = () => {
     handleDialogClose();
   };
 
-  console.log(exams);
 
   return (
     <section className="bg-gray-50 shadow-inner rounded-2xl p-3">

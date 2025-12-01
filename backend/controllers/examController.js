@@ -75,7 +75,14 @@ const deleteExam = asyncHandler(async (req, res) => {
 const getExamsByProductId = asyncHandler(async (req, res) => {
   try {
     const exams = await examService.getExamsByProductId(req.params.productId);
-    res.status(200).json({ message: "Exams retrieved successfully", exams });
+    const examsWithoutSubjects = exams.map((exam) => {
+      const { subjects, ...examData } = exam.toObject ? exam.toObject() : exam;
+      return examData;
+    });
+    res.status(200).json({
+      message: "Exams retrieved successfully",
+      exams: examsWithoutSubjects,
+    });
   } catch (error) {
     res
       .status(500)
