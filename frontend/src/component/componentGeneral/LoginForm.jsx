@@ -60,6 +60,8 @@ const LoginForm = ({ message }) => {
           <div className=" primaryTextColor px-4 py-2 mb-4 rounded">
             {location.state?.from?.pathname?.includes("resource-viewer") ? (
               "Please sign in to view free resources"
+            ) : location.state?.from?.pathname?.includes("pre-book") ? (
+              "Please sign in to preorder"
             ) : (
               <>
                 {message}

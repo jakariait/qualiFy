@@ -9,7 +9,7 @@ const CheckoutHeader = ({ user, page = "checkout" }) => {
       {/* Page Header */}
       <div className="flex flex-col justify-between items-center gap-2 mb-6">
         <h1 className="text-2xl">
-          {page === "prebook" ? "Prebook" : "Checkout"}
+          {page === "prebook" ? "Pre-Book" : "Checkout"}
         </h1>
 
         {/* Breadcrumbs for navigation */}
@@ -18,7 +18,7 @@ const CheckoutHeader = ({ user, page = "checkout" }) => {
             Home
           </Link>
           <Typography color="text.primary">
-            {page === "prebook" ? "Prebook" : "Checkout"}
+            {page === "prebook" ? "Pre-Book" : "Checkout"}
           </Typography>
         </Breadcrumbs>
 

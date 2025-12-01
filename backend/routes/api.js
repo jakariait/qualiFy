@@ -37,6 +37,7 @@ const examAttemptController = require("../controllers/examAttemptController");
 const resultController = require("../controllers/resultController");
 const courseExamNoticeController = require("../controllers/courseExamNoticeController");
 const noticeController = require("../controllers/noticeController");
+const prebookController = require("../controllers/prebookController");
 
 const { handleCourierCheck } = require("../controllers/courierController");
 const {
@@ -848,5 +849,14 @@ router.get("/notices/active", userProtect, noticeController.getActiveNotices);
 router.get("/notices/:id", adminProtect, noticeController.getNoticeById);
 router.put("/notices/:id", adminProtect, noticeController.updateNotice);
 router.delete("/notices/:id", adminProtect, noticeController.deleteNotice);
+
+// Routes for Pre-Book
+router.post("/pre-book", prebookController.createPrebook);
+router.get("/pre-book", prebookController.getAllPrebooks);
+router.get("/pre-book/:id", prebookController.getPrebookById);
+// get all prebooks for a specific user
+router.get("/pre-book/user/:userId", prebookController.getPrebooksByUser);
+router.put("/pre-book/:id", prebookController.updatePrebook);
+router.delete("/pre-book/:id", prebookController.deletePrebook);
 
 module.exports = router;
