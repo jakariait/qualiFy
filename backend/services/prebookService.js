@@ -47,6 +47,10 @@ exports.getPrebooksByProductId = async (productId) => {
   return { prebooks, count };
 };
 
+exports.countPrebooksByProductId = async (productId) => {
+  return Prebook.countDocuments({ productId });
+};
+
 exports.updatePrebook = async (id, data) => {
   return Prebook.findByIdAndUpdate(id, data, { new: true });
 };

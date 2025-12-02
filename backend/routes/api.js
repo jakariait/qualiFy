@@ -861,6 +861,10 @@ router.get(
   adminProtect,
   prebookController.getPrebooksByProductId,
 );
+router.get(
+  "/pre-book/product/:productId/count",
+  prebookController.getPrebookCountByProductId,
+);
 router.put("/pre-book/:id", prebookController.updatePrebook);
 router.delete("/pre-book/:id",adminProtect, prebookController.deletePrebook);
 

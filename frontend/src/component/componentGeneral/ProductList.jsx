@@ -2,7 +2,14 @@ import React, { useState } from "react";
 import { Typography, Skeleton } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ImageComponent from "./ImageComponent.jsx";
-import { BookOpen, Calendar } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  ClipboardCheck,
+  FileText,
+  MessageSquare,
+  ThumbsUp,
+} from "lucide-react";
 import useCartStore from "../../store/useCartStore.js";
 import OrderCountBadge from "./OrderCountBadge.jsx";
 import PrebookButton from "./PrebookButton.jsx";
@@ -99,16 +106,21 @@ const ProductList = ({ products, loading }) => {
                 {/* Course info */}
                 {product.type === "course" && (
                   <div className="mt-2 p-2 primaryTextColor flex flex-col items-center gap-1">
-                    {product.isPreBooked
-                      ? product.bookingNumber && (
+                    {product.isPreBooked && (
+                      <div>
+                        {product.enrolledStudents && (
                           <div className="flex items-center gap-1">
                             <PrebookCountBadge
                               productId={product._id}
                               prebook={product.bookingNumber}
                             />
                           </div>
-                        )
-                      : product.enrolledStudents && (
+                        )}
+                      </div>
+                    )}
+                    {!product.isPreBooked && (
+                      <div>
+                        {product.enrolledStudents && (
                           <div className="flex items-center gap-1">
                             <OrderCountBadge
                               productId={product._id}
@@ -116,7 +128,25 @@ const ProductList = ({ products, loading }) => {
                             />
                           </div>
                         )}
+                      </div>
+                    )}
 
+                    {product.modelTest > 0 && (
+                      <div className="flex items-center gap-1">
+                        <ClipboardCheck className="w-4 h-4 text-purple-600" />
+                        <span>Model Test: {product.modelTest}</span>
+                      </div>
+                    )}
+
+                    {product.liveDoubtSolutionsSession > 0 && (
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="w-4 h-4 text-purple-600" />
+                        <span>
+                          Live Doubt solving Session:{" "}
+                          {product.liveDoubtSolutionsSession}
+                        </span>
+                      </div>
+                    )}
                     {product.lessons && (
                       <div className="flex items-center gap-1">
                         <BookOpen className="w-4 h-4 text-green-600" />
@@ -127,6 +157,63 @@ const ProductList = ({ products, loading }) => {
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4 text-yellow-600" />
                         <span>Start Date: {product.classStartDate}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/*Book Specific Info*/}
+                {product.type === "book" && (
+                  <div className="primaryTextColor flex flex-col items-center gap-1 mt-3">
+                    {product.isPreBooked && (
+                      <div>
+                        {product.enrolledStudents && (
+                          <div className="flex items-center gap-1">
+                            <PrebookCountBadge
+                              productId={product._id}
+                              prebook={product.bookingNumber}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {product.numberOfPages > 0 && (
+                      <div className="flex items-center gap-1">
+                        <FileText className="w-4 h-4 text-purple-600" />
+                        <span>Number of Pages: {product.numberOfPages}</span>
+                      </div>
+                    )}
+
+                    {product.numberOfChapters > 0 && (
+                      <div className="flex items-center gap-1">
+                        <BookOpen className="w-4 h-4 text-purple-600" />
+                        <span>
+                          Number of Chapters: {product.numberOfChapters}
+                        </span>
+                      </div>
+                    )}
+
+                    {product.recommendedFor && (
+                      <div className="flex items-center gap-1">
+                        <ThumbsUp className="w-4 h-4 text-purple-600" />
+                        <span>Recommend For: {product.recommendedFor}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {product.type === "exam" && (
+                  <div
+                    className={
+                      "primaryTextColor flex flex-col items-center gap-1 mt-3"
+                    }
+                  >
+                    {product.isPreBooked && (
+                      <div>
+                        <PrebookCountBadge
+                          productId={product._id}
+                          prebook={product.bookingNumber}
+                        />
                       </div>
                     )}
                   </div>

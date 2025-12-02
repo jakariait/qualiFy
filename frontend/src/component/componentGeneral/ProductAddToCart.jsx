@@ -102,22 +102,37 @@ const ProductAddToCart = ({ product }) => {
         <h2 className="text-2xl heading primaryTextColor">{product.name}</h2>
 
         {/* Price Display */}
-        <div className="flex  gap-2 items-center">
+        <div className="flex   gap-2 items-center">
           {product.finalDiscount > 0 ? (
-            <>
-              <div className="line-through">
-                Tk. {formatPrice(Number(product.finalPrice))}
-              </div>
-              <div className="text-red-800">
-                Tk. {formatPrice(Number(product.finalDiscount))}
-              </div>
-              <div>
-                You Save: Tk{" "}
-                {formatPrice(
-                  Number(product.finalPrice - product.finalDiscount),
+            <div>
+              <div className="flex gap-2 items-center ">
+                <div className="line-through">
+                  Tk. {formatPrice(Number(product.finalPrice))}
+                </div>
+                <div className="text-red-800">
+                  Tk. {formatPrice(Number(product.finalDiscount))}
+                </div>
+
+                {!product.isPreBooked && (
+                  <div>
+                    You Save: Tk{" "}
+                    {formatPrice(
+                      Number(product.finalPrice - product.finalDiscount),
+                    )}
+                  </div>
                 )}
               </div>
-            </>
+
+              {product.isPreBooked && (
+                <div className={"primaryTextColor mt-2"}>
+                  You Are Saving Tk{" "}
+                  {formatPrice(
+                    Number(product.finalPrice - product.finalDiscount),
+                  )}{" "}
+                  by Pre-Booking
+                </div>
+              )}
+            </div>
           ) : (
             <div className="text-black font-medium">
               Tk. {formatPrice(Number(product.finalPrice))}
@@ -218,7 +233,10 @@ const ProductAddToCart = ({ product }) => {
       {/*Pre-Booked Counter*/}
       {product.isPreBooked && (
         <div className={"p-2 mt-2 -mb-7"}>
-          <PrebookCountBadge prebook={product.bookingNumber} productId={product.id} />
+          <PrebookCountBadge
+            prebook={product.bookingNumber}
+            productId={product.id}
+          />
         </div>
       )}
 

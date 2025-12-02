@@ -132,7 +132,7 @@ const Prebook = () => {
                         Tk. {formatPrice(Number(product.finalPrice))}
                       </div>
 
-                      <div className="text-gray-700">
+                      <div className="primaryTextColor">
                         You Are Saving Tk{" "}
                         {formatPrice(
                           Number(product.finalPrice - product.finalDiscount),

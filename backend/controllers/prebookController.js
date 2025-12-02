@@ -70,6 +70,20 @@ exports.getPrebooksByProductId = async (req, res) => {
   }
 };
 
+exports.getPrebookCountByProductId = async (req, res) => {
+  try {
+    const count = await prebookService.countPrebooksByProductId(
+      req.params.productId
+    );
+    res.status(200).json({
+      success: true,
+      count: count,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.updatePrebook = async (req, res) => {
   try {
     const updated = await prebookService.updatePrebook(
