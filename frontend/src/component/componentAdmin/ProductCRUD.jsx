@@ -64,6 +64,12 @@ const ProductCRUD = () => {
 		faqs: [{ question: "", answer: "" }], // one empty faq
 		isActive: true,
 		isPreBooked: false, // New field
+		bookingNumber: "", // New field
+		numberOfPages: "", // New field
+		numberOfChapters: "", // New field
+		recommendedFor: "", // New field
+		modelTest: "", // New field
+		liveDoubtSolutionsSession: "", // New field
 	});
 
 	const [modules, setModules] = useState([]);
@@ -202,6 +208,12 @@ const ProductCRUD = () => {
 			faqs: [{ question: "", answer: "" }], // Ensure faqs is initialized
 			isActive: true, // Ensure isActive is initialized
 			isPreBooked: false, // Initialize isPreBooked
+			bookingNumber: "", // Initialize bookingNumber
+			numberOfPages: "", // Initialize numberOfPages
+			numberOfChapters: "", // Initialize numberOfChapters
+			recommendedFor: "", // Initialize recommendedFor
+			modelTest: "", // Initialize modelTest
+			liveDoubtSolutionsSession: "", // Initialize liveDoubtSolutionsSession
 		});
 		setModules([]);
 		setRemovedPreviewPdf(false);
@@ -323,6 +335,12 @@ const ProductCRUD = () => {
 					: [{ question: "", answer: "" }],
 			isActive: product.isActive !== undefined ? product.isActive : true,
 			isPreBooked: product.isPreBooked !== undefined ? product.isPreBooked : false,
+			bookingNumber: product.bookingNumber || "",
+			numberOfPages: product.numberOfPages || "",
+			numberOfChapters: product.numberOfChapters || "",
+			recommendedFor: product.recommendedFor || "",
+			modelTest: product.modelTest || "",
+			liveDoubtSolutionsSession: product.liveDoubtSolutionsSession || "",
 		});
 		setModules(
 			product.modules?.map((mod) => ({
@@ -396,6 +414,12 @@ const ProductCRUD = () => {
 			formData.append("faqs", JSON.stringify(form.faqs));
 			formData.append("isActive", form.isActive);
 			formData.append("isPreBooked", form.isPreBooked);
+			formData.append("bookingNumber", form.bookingNumber);
+			formData.append("numberOfPages", form.numberOfPages);
+			formData.append("numberOfChapters", form.numberOfChapters);
+			formData.append("recommendedFor", form.recommendedFor);
+			formData.append("modelTest", form.modelTest);
+			formData.append("liveDoubtSolutionsSession", form.liveDoubtSolutionsSession);
 
 			// Create a version of modules with unique keys for file uploads
 			const modulesWithKeys = modules.map((mod, mIdx) => ({
@@ -699,6 +723,32 @@ const ProductCRUD = () => {
 								fullWidth
 								margin="normal"
 							/>
+							<TextField
+								label="Number of Pages"
+								name="numberOfPages"
+								value={form.numberOfPages}
+								onChange={handleChange}
+								type="number"
+								fullWidth
+								margin="normal"
+							/>
+							<TextField
+								label="Number of Chapters"
+								name="numberOfChapters"
+								value={form.numberOfChapters}
+								onChange={handleChange}
+								type="number"
+								fullWidth
+								margin="normal"
+							/>
+							<TextField
+								label="Recommended For"
+								name="recommendedFor"
+								value={form.recommendedFor}
+								onChange={handleChange}
+								fullWidth
+								margin="normal"
+							/>
 							<div className="mb-4">
 								<label className="block mb-1 font-semibold">Preview PDF</label>
 								{form.previewPdf && !form.previewPdfFile && (
@@ -794,6 +844,16 @@ const ProductCRUD = () => {
 							<span>Pre-booked</span>
 						</label>
 					</FormControl>
+					{/* Booking Number */}
+					<TextField
+						label="Booking Number"
+						name="bookingNumber"
+						value={form.bookingNumber}
+						onChange={handleChange}
+						type="number"
+						fullWidth
+						margin="normal"
+					/>
 					{form.type === "course" && (
 						<>
 							{/* Instructors Selection */}
@@ -864,6 +924,22 @@ const ProductCRUD = () => {
 								label="Class Start Date"
 								name="classStartDate"
 								value={form.classStartDate}
+								onChange={handleChange}
+								fullWidth
+								margin="normal"
+							/>
+							<TextField
+								label="Model Test"
+								name="modelTest"
+								value={form.modelTest}
+								onChange={handleChange}
+								fullWidth
+								margin="normal"
+							/>
+							<TextField
+								label="Live Doubt Solutions Session"
+								name="liveDoubtSolutionsSession"
+								value={form.liveDoubtSolutionsSession}
 								onChange={handleChange}
 								fullWidth
 								margin="normal"

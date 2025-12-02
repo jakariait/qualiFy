@@ -92,6 +92,23 @@ const createProduct = async (req, res) => {
       else delete productData.isPreBooked;
     }
 
+    // Normalize number fields
+    if (typeof productData.bookingNumber === "string") {
+      const val = Number(productData.bookingNumber);
+      if (!isNaN(val)) productData.bookingNumber = val;
+      else delete productData.bookingNumber;
+    }
+    if (typeof productData.numberOfPages === "string") {
+      const val = Number(productData.numberOfPages);
+      if (!isNaN(val)) productData.numberOfPages = val;
+      else delete productData.numberOfPages;
+    }
+    if (typeof productData.numberOfChapters === "string") {
+      const val = Number(productData.numberOfChapters);
+      if (!isNaN(val)) productData.numberOfChapters = val;
+      else delete productData.numberOfChapters;
+    }
+
     // --- UNIFIED FILE HANDLING ---
     const fileMap = {};
     if (req.files && req.files.length > 0) {
@@ -179,6 +196,23 @@ const updateProduct = async (req, res) => {
       if (val === "true") productData.isPreBooked = true;
       else if (val === "false") productData.isPreBooked = false;
       else delete productData.isPreBooked;
+    }
+
+    // Normalize number fields
+    if (typeof productData.bookingNumber === "string") {
+      const val = Number(productData.bookingNumber);
+      if (!isNaN(val)) productData.bookingNumber = val;
+      else delete productData.bookingNumber;
+    }
+    if (typeof productData.numberOfPages === "string") {
+      const val = Number(productData.numberOfPages);
+      if (!isNaN(val)) productData.numberOfPages = val;
+      else delete productData.numberOfPages;
+    }
+    if (typeof productData.numberOfChapters === "string") {
+      const val = Number(productData.numberOfChapters);
+      if (!isNaN(val)) productData.numberOfChapters = val;
+      else delete productData.numberOfChapters;
     }
 
     // --- UNIFIED FILE HANDLING ---

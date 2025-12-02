@@ -6,6 +6,7 @@ const productSchema = new mongoose.Schema(
   {
     productId: { type: Number, unique: true, index: true },
     isPreBooked: { type: Boolean, default: false },
+    bookingNumber: { type: Number, min: 0 },
     name: { type: String, trim: true, required: true },
     slug: { type: String, trim: true, unique: true },
     type: {
@@ -58,6 +59,9 @@ const productSchema = new mongoose.Schema(
     author: { type: String, trim: true },
     publisher: { type: String, trim: true },
     previewPdf: { type: String, trim: true },
+    numberOfPages:{type:Number, trim:true, min: 0},
+    numberOfChapters:{type:Number, trim:true, min: 0},
+    recommendedFor: {type:String, trim:true},
 
     // Course-specific
     instructors: [
@@ -85,6 +89,8 @@ const productSchema = new mongoose.Schema(
         ],
       },
     ],
+    modelTest:{type:String, trim: true},
+    liveDoubtSolutionsSession: {type: String, trim: true},
   },
   {
     timestamps: true,
