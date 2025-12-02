@@ -6,6 +6,7 @@ import { BookOpen, Calendar } from "lucide-react";
 import useCartStore from "../../store/useCartStore.js";
 import OrderCountBadge from "./OrderCountBadge.jsx";
 import PrebookButton from "./PrebookButton.jsx";
+import PrebookCountBadge from "./PrebookCountBadge.jsx";
 
 const formatPrice = (price) => {
   if (isNaN(price)) return price;
@@ -98,14 +99,24 @@ const ProductList = ({ products, loading }) => {
                 {/* Course info */}
                 {product.type === "course" && (
                   <div className="mt-2 p-2 primaryTextColor flex flex-col items-center gap-1">
-                    {product.enrolledStudents && (
-                      <div className="flex items-center gap-1">
-                        <OrderCountBadge
-                          productId={product._id}
-                          enrolledStudents={product.enrolledStudents}
-                        />
-                      </div>
-                    )}
+                    {product.isPreBooked
+                      ? product.bookingNumber && (
+                          <div className="flex items-center gap-1">
+                            <PrebookCountBadge
+                              productId={product._id}
+                              prebook={product.bookingNumber}
+                            />
+                          </div>
+                        )
+                      : product.enrolledStudents && (
+                          <div className="flex items-center gap-1">
+                            <OrderCountBadge
+                              productId={product._id}
+                              enrolledStudents={product.enrolledStudents}
+                            />
+                          </div>
+                        )}
+
                     {product.lessons && (
                       <div className="flex items-center gap-1">
                         <BookOpen className="w-4 h-4 text-green-600" />
