@@ -856,7 +856,12 @@ router.get("/pre-book", prebookController.getAllPrebooks);
 router.get("/pre-book/:id", prebookController.getPrebookById);
 // get all prebooks for a specific user
 router.get("/pre-book/user/:userId", prebookController.getPrebooksByUser);
+router.get(
+  "/pre-book/product/:productId",
+  adminProtect,
+  prebookController.getPrebooksByProductId,
+);
 router.put("/pre-book/:id", prebookController.updatePrebook);
-router.delete("/pre-book/:id", prebookController.deletePrebook);
+router.delete("/pre-book/:id",adminProtect, prebookController.deletePrebook);
 
 module.exports = router;

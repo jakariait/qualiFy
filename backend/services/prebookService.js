@@ -36,6 +36,17 @@ exports.getPrebooksByUser = async (userId) => {
   return { prebooks, count };
 };
 
+exports.getPrebooksByProductId = async (productId) => {
+  const [prebooks, count] = await Promise.all([
+    Prebook.find({ productId })
+      .populate("productId", "name type thumbnailImage slug")
+      .populate("userId")
+      .sort({ createdAt: -1 }),
+    Prebook.countDocuments({ productId }),
+  ]);
+  return { prebooks, count };
+};
+
 exports.updatePrebook = async (id, data) => {
   return Prebook.findByIdAndUpdate(id, data, { new: true });
 };
