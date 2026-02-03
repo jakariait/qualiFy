@@ -127,7 +127,7 @@ const DownloadAllOrder = () => {
       <button
         onClick={handleExport}
         disabled={loading}
-        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-lg transition-all duration-200 ease-in-out"
+        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-lg transition-all duration-200 ease-in-out cursor-pointer"
       >
         {loading ? "Exporting..." : "Export All Orders to Excel"}
       </button>
