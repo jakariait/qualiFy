@@ -229,6 +229,18 @@ const getProductSalesHistoryController = async (req, res) => {
   }
 };
 
+const exportAllOrders = async (req, res) => {
+  try {
+    const { orders } = await orderService.getAllOrders({}, null, null, "");
+    res.status(200).json({
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // Exporting the controller functions
 module.exports = {
   createOrder,
@@ -241,4 +253,5 @@ module.exports = {
   trackOrderByOrderNoAndPhone,
   getDeliveredProductsForUser,
   getProductSalesHistoryController,
+  exportAllOrders,
 };

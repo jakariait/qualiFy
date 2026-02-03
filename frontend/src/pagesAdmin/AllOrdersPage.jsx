@@ -5,6 +5,7 @@ import AllOrders from "../component/componentAdmin/AllOrders.jsx";
 import useOrderStore from "../store/useOrderStore.js";
 import OrderStats from "../component/componentAdmin/OrderStats.jsx";
 import RequirePermission from "../component/componentAdmin/RequirePermission.jsx";
+import DownloadAllOrder from "../component/componentAdmin/DownloadAllOrder.jsx";
 
 const AllOrdersPage = () => {
   const {
@@ -26,6 +27,7 @@ const AllOrdersPage = () => {
       {/* Order status totals */}
       <RequirePermission permission="view_orders">
         <OrderStats orders={allOrders} />
+        <DownloadAllOrder/>
         <AllOrders
           allOrders={allOrders}
           orderListLoading={orderListLoading}

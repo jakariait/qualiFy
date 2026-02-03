@@ -169,7 +169,7 @@ const getAllOrders = async (filter = {}, page, limit, search = "") => {
     }
 
     let query = Order.find(queryFilter)
-      .populate("userId")
+      .populate("userId", "fullName email phone")
       .populate({
         path: "items.productId",
         select:

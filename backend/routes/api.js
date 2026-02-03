@@ -443,6 +443,12 @@ router.get(
   orderController.getAllOrders,
 );
 router.get(
+  "/orders/export",
+  adminProtect,
+  checkPermission("view_orders"),
+  orderController.exportAllOrders,
+);
+router.get(
   "/orders/:orderId",
   adminProtect,
   checkPermission("view_orders"),
