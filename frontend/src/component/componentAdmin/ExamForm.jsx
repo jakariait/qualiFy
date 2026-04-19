@@ -78,53 +78,53 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
   const [subjectsQuestionsCount, setSubjectsQuestionsCount] = useState({});
   const API_URL = import.meta.env.VITE_API_URL;
 
-useEffect(() => {
-    const fetchExamData = async () => {
-      if (initialData?._id) {
-        setInitialLoading(true);
-        try {
-          const res = await axios.get(
-            `${API_URL}/exams/${initialData._id}?subjectsPage=1&subjectsLimit=3&questionsPage=1&questionsLimit=10`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          const data = res.data.exam;
-          setForm({
-            title: data.title || "",
-            description: data.description || "",
-            status: data.status || "draft",
-            productIds: data.productIds || [],
-            subjects: data.subjects || [],
-            isFree: data.isFree || false,
+const fetchExamBasicInfo = async () => {
+    if (initialData?._id) {
+      setInitialLoading(true);
+      try {
+        const res = await axios.get(
+          `${API_URL}/exams/${initialData._id}?subjectsPage=1&subjectsLimit=50&questionsPage=0`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = res.data.exam;
+        setForm({
+          title: data.title || "",
+          description: data.description || "",
+          status: data.status || "draft",
+          productIds: data.productIds || [],
+          subjects: data.subjects || [],
+          isFree: data.isFree || false,
+        });
+
+        if (data.pagination?.subjects) {
+          setSubjectsPagination(prev => ({
+            page: data.pagination.subjects.page,
+            limit: data.pagination.subjects.limit,
+            total: data.pagination.subjects.total,
+            totalQuestions: data.pagination.subjects.totalQuestions || 0,
+            totalMarks: data.pagination.subjects.totalMarks || 0,
+            totalTime: data.pagination.subjects.totalTime || 0,
+            hasMore: false,
+            loadingMore: false,
+          }));
+
+          const counts = {};
+          data.subjects?.forEach((sub, idx) => {
+            counts[idx] = sub.questionsPagination?.total || 0;
           });
-
-          if (data.pagination?.subjects) {
-            setSubjectsPagination(prev => ({
-              page: data.pagination.subjects.page,
-              limit: data.pagination.subjects.limit,
-              total: data.pagination.subjects.total,
-              totalQuestions: data.pagination.subjects.totalQuestions || 0,
-              totalMarks: data.pagination.subjects.totalMarks || 0,
-              totalTime: data.pagination.subjects.totalTime || 0,
-              hasMore: data.pagination.subjects.hasMore,
-              loadingMore: false,
-            }));
-
-            const counts = {};
-            data.subjects?.forEach((sub, idx) => {
-              counts[idx] = sub.questionsPagination?.total || sub.questions?.length || 0;
-            });
-            setSubjectsQuestionsCount(counts);
-          }
-        } catch (err) {
-          console.error("Error fetching exam:", err);
-          showSnackbar("Failed to load exam data", "error");
-        } finally {
-          setInitialLoading(false);
+          setSubjectsQuestionsCount(counts);
         }
+      } catch (err) {
+        console.error("Error fetching exam:", err);
+        showSnackbar("Failed to load exam data", "error");
+      } finally {
+        setInitialLoading(false);
       }
-    };
+    }
+  };
 
-    fetchExamData();
+  useEffect(() => {
+    fetchExamBasicInfo();
   }, [initialData?._id]);
 
   useEffect(() => {
@@ -161,6 +161,40 @@ useEffect(() => {
     });
     return { totalMarks: marks, totalTime: time };
   }, [form.subjects]);
+
+  const loadSubjectQuestions = async (sIndex) => {
+    if (!initialData?._id || questionsLoadMore[sIndex]?.loaded) return;
+
+    setQuestionsLoadMore(prev => ({ ...prev, [sIndex]: { loading: true, loaded: true } }));
+    try {
+      const res = await axios.get(
+        `${API_URL}/exams/${initialData?._id}/questions?subjectIndex=${sIndex}&questionsPage=1&questionsLimit=10`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setForm(prev => {
+        const updated = [...(prev.subjects || [])];
+        updated[sIndex] = {
+          ...updated[sIndex],
+          questions: res.data.questions,
+        };
+        return { ...prev, subjects: updated };
+      });
+
+      setQuestionsLoadMore(prev => ({
+        ...prev,
+        [sIndex]: {
+          page: 1,
+          hasMore: res.data.pagination?.hasMore,
+          loading: false,
+          loaded: true,
+        },
+      }));
+    } catch (err) {
+      console.error("Error loading questions:", err);
+      setQuestionsLoadMore(prev => ({ ...prev, [sIndex]: { loading: false, loaded: false } }));
+    }
+  };
 
   const loadMoreSubjects = async () => {
     if (subjectsPagination.loadingMore || !subjectsPagination.hasMore) return;
@@ -581,38 +615,42 @@ useEffect(() => {
               Subjects & Questions
             </Typography>
 
-            {(form.subjects || []).map((subject, sIndex) => (
-              <Accordion key={sIndex} sx={{ mb: 2 }}>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 2,
-                      width: "100%",
-                    }}
-                  >
-                    <Typography variant="h6">
-                      Subject {sIndex + 1}:{" "}
-                      {subject.title || "Untitled Subject"}
-                    </Typography>
-                    <Chip
-                      label={`${subjectsQuestionsCount[sIndex] || subject.questions?.length || 0} questions`}
-                      size="small"
-                      color="secondary"
-                    />
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeSubject(sIndex);
-                      }}
-                      color="error"
-                      size="small"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </AccordionSummary>
+            {(form.subjects || []).map((subject, sIndex) => {
+                    const hasQuestionsLoaded = questionsLoadMore[sIndex]?.loaded || (subject.questions?.length > 0);
+                    const isLoadingQuestions = questionsLoadMore[sIndex]?.loading;
+                    return (
+                      <Accordion key={sIndex} sx={{ mb: 2 }}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />} onClick={() => !hasQuestionsLoaded && loadSubjectQuestions(sIndex)}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                              width: "100%",
+                            }}
+                          >
+                            <Typography variant="h6">
+                              Subject {sIndex + 1}:{" "}
+                              {subject.title || "Untitled Subject"}
+                            </Typography>
+                            <Chip
+                              label={`${subjectsQuestionsCount[sIndex] || 0} questions`}
+                              size="small"
+                              color="secondary"
+                            />
+                            {isLoadingQuestions && <CircularProgress size={16} />}
+                            <IconButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeSubject(sIndex);
+                              }}
+                              color="error"
+                              size="small"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Box>
+                        </AccordionSummary>
                 <AccordionDetails>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={8}>
@@ -911,8 +949,9 @@ useEffect(() => {
                     </Button>
                   </Box>
                 </AccordionDetails>
-              </Accordion>
-            ))}
+</Accordion>
+                    );
+                  })}
 
             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               {initialData?._id && subjectsPagination.hasMore && (
