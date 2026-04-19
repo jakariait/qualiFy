@@ -13,6 +13,15 @@ const requestPasswordReset = async (req, res) => {
     );
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // Block new OTP if a valid one already exists
+    if (user.resetOTP && user.resetOTPExpiry && Date.now() < user.resetOTPExpiry) {
+      const remainingSeconds = Math.ceil((user.resetOTPExpiry - Date.now()) / 1000);
+      return res.status(429).json({
+        message: "An OTP was already sent. Please wait before requesting a new one.",
+        remainingSeconds,
+      });
+    }
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
 
@@ -31,7 +40,7 @@ const requestPasswordReset = async (req, res) => {
       "qualiFy <otp@qualifybd.com>"
     );
 
-    res.status(200).json({ message: "OTP sent to email" });
+    res.status(200).json({ message: "OTP sent to email", otpExpiry: user.resetOTPExpiry });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

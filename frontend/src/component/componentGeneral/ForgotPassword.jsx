@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -30,16 +30,27 @@ export default function ForgotPassword() {
         severity: "success",
       });
 
-      // Redirect after short delay
+      const expiry = res.data.otpExpiry;
       setTimeout(() => {
-        navigate(`/reset-password?email=${encodeURIComponent(email)}`);
+        navigate(`/reset-password?email=${encodeURIComponent(email)}&expiry=${expiry}`);
       }, 1500);
     } catch (err) {
+      const status = err.response?.status;
+      const data = err.response?.data;
+
       setSnackbar({
         open: true,
-        message: err.response?.data?.message || "Something went wrong.",
-        severity: "error",
+        message: data?.message || "Something went wrong.",
+        severity: status === 429 ? "warning" : "error",
       });
+
+      // OTP still valid — navigate to reset page with remaining time
+      if (status === 429 && data?.remainingSeconds) {
+        const expiry = Date.now() + data.remainingSeconds * 1000;
+        setTimeout(() => {
+          navigate(`/reset-password?email=${encodeURIComponent(email)}&expiry=${expiry}`);
+        }, 1500);
+      }
     } finally {
       setLoading(false);
     }
@@ -47,7 +58,10 @@ export default function ForgotPassword() {
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 bg-white shadow rounded">
-      <h2 className="text-xl font-bold mb-4">Forgot Password</h2>
+      <h2 className="text-xl font-bold mb-2">Forgot Password</h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Enter your email address and we'll send you an OTP to reset your password.
+      </p>
       <form onSubmit={handleSendOTP} className="space-y-4">
         <input
           type="email"
@@ -59,14 +73,19 @@ export default function ForgotPassword() {
         />
         <button
           type="submit"
-          className="w-full primaryBgColor accentTextColor py-2 rounded flex items-center justify-center cursor-pointer"
+          className="w-full primaryBgColor accentTextColor py-2 rounded flex items-center justify-center cursor-pointer disabled:opacity-60"
           disabled={loading}
         >
           {loading ? <CircularProgress size={20} color="inherit" /> : "Send OTP"}
         </button>
       </form>
+      <p className="text-sm text-center mt-4 text-gray-500">
+        Remember your password?{" "}
+        <Link to="/login" className="primaryTextColor font-medium hover:underline">
+          Back to Login
+        </Link>
+      </p>
 
-      {/* MUI Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
