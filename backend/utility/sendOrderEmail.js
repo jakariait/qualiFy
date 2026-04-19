@@ -1,29 +1,15 @@
-const nodemailer = require("nodemailer");
+const sendEmailMessage = require("./sendEmail");
 const ProductModel = require("../models/ProductModel");
 
-
-const transporter = nodemailer.createTransport({
-  host: "mail.qualifybd.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: "order@qualifybd.com",
-    pass: "fm#!#6bStkW}",
-  },
-});
-
- const sendOrderEmail = async (order) => {
-  // Extract product ObjectIds from order items
+const sendOrderEmail = async (order) => {
   const productObjectIds = order.items.map(
     (item) => item.productId.$oid || item.productId,
   );
 
-  // Fetch products by _id (MongoDB ObjectId)
   const products = await ProductModel.find({
     _id: { $in: productObjectIds },
   }).lean();
 
-  // Map products by _id string for lookup
   const productMap = {};
   products.forEach((p) => {
     productMap[p._id.toString()] = p.name || "Unnamed Product";
@@ -101,19 +87,12 @@ const transporter = nodemailer.createTransport({
     </div>
   `;
 
-  try {
-    await transporter.sendMail({
-      from: `"qualiFy" <order@qualifybd.com>`,
-      to: email,
-      subject: `Order Confirmation - #${orderNo}`,
-      html: htmlTemplate,
-    });
-    console.log("Order confirmation email sent to:", email);
-  } catch (error) {
-    console.error("Error sending order email:", error);
-    throw error;
-  }
+  await sendEmailMessage(
+    email,
+    htmlTemplate,
+    `Order Confirmation - #${orderNo}`,
+    true
+  );
 };
-
 
 module.exports = { sendOrderEmail };

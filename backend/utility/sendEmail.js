@@ -24,21 +24,31 @@ const getTransporter = () => {
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const sendEmailMessage = async (
+  recipients,
   content,
   subject = "New Notification",
   isHTML = false,
-  maxRetries = 3, // ✅ How many times to retry
-  retryDelay = 3000, // ✅ Wait time (ms)
+  from = null,
+  maxRetries = 3,
+  retryDelay = 3000,
 ) => {
   try {
-    const { EMAIL_FROM, ALERT_EMAILS } = process.env;
+    const { EMAIL_FROM } = process.env;
+    const sender = from || EMAIL_FROM;
 
-    if (!ALERT_EMAILS) {
-      console.error("Email recipients missing.");
+    if (!sender) {
+      console.error("EMAIL_FROM not configured.");
       return;
     }
 
-    const emailList = ALERT_EMAILS.split(",");
+    const emailList = Array.isArray(recipients)
+      ? recipients
+      : recipients.split(",");
+
+    if (emailList.length === 0) {
+      console.error("Email recipients missing.");
+      return;
+    }
 
     const transporter = getTransporter();
 
@@ -48,7 +58,7 @@ const sendEmailMessage = async (
 
         const requests = emailList.map((email) =>
           transporter.sendMail({
-            from: EMAIL_FROM,
+            from: sender,
             to: email.trim(),
             subject,
 
@@ -59,11 +69,10 @@ const sendEmailMessage = async (
         await Promise.all(requests);
 
         console.log("✅ Email sent successfully");
-        return; // Stop after success
+        return;
       } catch (err) {
         console.error(`❌ Attempt ${attempt} failed:`, err.message);
 
-        // Last try failed
         if (attempt === maxRetries) {
           throw err;
         }
@@ -74,8 +83,6 @@ const sendEmailMessage = async (
     }
   } catch (error) {
     console.error("🚨 Email permanently failed:", error.message);
-
-    // Optional: save to DB / log file here
   }
 };
 

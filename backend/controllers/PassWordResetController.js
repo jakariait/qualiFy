@@ -23,11 +23,13 @@ const requestPasswordReset = async (req, res) => {
 
     // Send OTP email
     const message = `Your password reset OTP is: ${otp}. It will expire in 10 minutes.`;
-    await sendEmail({
-      to: user.email,
-      subject: "Password Reset OTP",
-      text: message,
-    });
+    await sendEmail(
+      user.email,
+      message,
+      "Password Reset OTP",
+      false,
+      "qualiFy <otp@qualifybd.com>"
+    );
 
     res.status(200).json({ message: "OTP sent to email" });
   } catch (error) {
