@@ -91,7 +91,6 @@ const getToken = async () => {
 
     tokenCache.token = id_token;
     tokenCache.expiry = new Date(now.getTime() + expires_in * 1000);
-   console.log(id_token);
     return id_token;
   } catch (error) {
     console.error(

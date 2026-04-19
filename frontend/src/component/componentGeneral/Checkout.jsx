@@ -133,7 +133,6 @@ const Checkout = () => {
     fetchVatAmount();
   }, []);
 
-  console.log(cart);
 
   // Data Layer for Initiate Checkout
 
