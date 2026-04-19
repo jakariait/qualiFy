@@ -706,6 +706,8 @@ router.post("/exams", adminProtect, examController.createExam);
 router.get("/exams", adminProtect, examController.getAllExams);
 router.get("/exams/free", examController.getFreeExams);
 router.get("/exams/:id", adminProtect, examController.getExamById);
+router.get("/exams/:id/subjects", adminProtect, examController.getMoreSubjects);
+router.get("/exams/:id/questions", adminProtect, examController.getSubjectQuestions);
 router.get(
   "/exams/product/:productId",
   userProtect,

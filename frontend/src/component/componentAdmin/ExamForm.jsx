@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import {
   Button,
@@ -55,30 +55,46 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
     isFree: false,
   });
   const [products, setProducts] = useState([]);
-  const [totalMarks, setTotalMarks] = useState(0);
-  const [totalTime, setTotalTime] = useState(0);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
+  const [subjectsPagination, setSubjectsPagination] = useState({
+    page: 1,
+    limit: 3,
+    total: 0,
+    totalQuestions: 0,
+    totalMarks: 0,
+    totalTime: 0,
+    hasMore: true,
+    loadingMore: false,
+  });
+  const [questionsLoadMore, setQuestionsLoadMore] = useState({});
+  const [expandedQuestions, setExpandedQuestions] = useState({});
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length) {
-      // Normalize the data to ensure proper structure
       const normalizedData = {
         ...initialData,
         productIds: initialData.productIds || [],
-        subjects:
-          initialData.subjects?.map((subject) => ({
-            ...subject,
-            description: subject.description || "",
-            questions: subject.questions || [],
-          })) || [],
+        subjects: initialData.subjects || [],
       };
       setForm(normalizedData);
+
+      if (initialData.pagination?.subjects) {
+        setSubjectsPagination((prev) => ({
+          ...prev,
+          total: initialData.pagination.subjects.total,
+          totalQuestions: initialData.pagination.subjects.totalQuestions || 0,
+          totalMarks: initialData.pagination.subjects.totalMarks || 0,
+          totalTime: initialData.pagination.subjects.totalTime || 0,
+          hasMore: initialData.pagination.subjects.hasMore,
+          page: initialData.pagination.subjects.page,
+        }));
+      }
     }
   }, [initialData]);
 
@@ -107,18 +123,80 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
     }
   };
 
-  // Live calculation of marks & time
-  useEffect(() => {
+  const { totalMarks, totalTime } = useMemo(() => {
     let marks = 0;
     let time = 0;
     (form.subjects || []).forEach((sub) => {
       time += sub.timeLimitMin || 0;
-      marks +=
-        (sub.questions || [])?.reduce((sum, q) => sum + (q.marks || 0), 0) || 0;
+      marks += sub.questions?.reduce((sum, q) => sum + (q.marks || 0), 0) || 0;
     });
-    setTotalMarks(marks);
-    setTotalTime(time);
+    return { totalMarks: marks, totalTime: time };
   }, [form.subjects]);
+
+  const loadMoreSubjects = async () => {
+    if (subjectsPagination.loadingMore || !subjectsPagination.hasMore) return;
+
+    setSubjectsPagination((prev) => ({ ...prev, loadingMore: true }));
+    try {
+      const nextPage = subjectsPagination.page + 1;
+      const res = await axios.get(
+        `${API_URL}/exams/${initialData?._id}/subjects?subjectsPage=${nextPage}&subjectsLimit=${subjectsPagination.limit}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setForm((prev) => ({
+        ...prev,
+        subjects: [...prev.subjects, ...res.data.subjects],
+      }));
+      setSubjectsPagination((prev) => ({
+        ...prev,
+        page: nextPage,
+        hasMore: res.data.subjects.length === prev.limit,
+        loadingMore: false,
+      }));
+    } catch (err) {
+      console.error("Error loading more subjects:", err);
+      setSubjectsPagination((prev) => ({ ...prev, loadingMore: false }));
+    }
+  };
+
+  const loadMoreQuestions = async (sIndex) => {
+    const subject = form.subjects?.[sIndex];
+    if (!subject || questionsLoadMore[sIndex]?.loading) return;
+
+    setQuestionsLoadMore((prev) => ({ ...prev, [sIndex]: { loading: true } }));
+    try {
+      const nextPage = (questionsLoadMore[sIndex]?.page || 1) + 1;
+      const res = await axios.get(
+        `${API_URL}/exams/${initialData?._id}/questions?subjectIndex=${sIndex}&questionsPage=${nextPage}&questionsLimit=10`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setForm((prev) => {
+        const updated = [...(prev.subjects || [])];
+        updated[sIndex] = {
+          ...updated[sIndex],
+          questions: [...updated[sIndex].questions, ...res.data.questions],
+        };
+        return { ...prev, subjects: updated };
+      });
+
+      setQuestionsLoadMore((prev) => ({
+        ...prev,
+        [sIndex]: {
+          page: nextPage,
+          hasMore: res.data.pagination?.hasMore,
+          loading: false,
+        },
+      }));
+    } catch (err) {
+      console.error("Error loading more questions:", err);
+      setQuestionsLoadMore((prev) => ({
+        ...prev,
+        [sIndex]: { loading: false },
+      }));
+    }
+  };
 
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -246,7 +324,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
     setLoading(true);
     try {
       if (initialData?._id) {
-        await axios.put(`${API_URL}/exams/${initialData._id}`, form, {
+        await axios.put(`${API_URL}/exams/${initialData?._id}`, form, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json", // optional if sending JSON
@@ -290,29 +368,63 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
           </Typography>
 
           {/* Live Calculation Display */}
-          <Paper
-            elevation={1}
-            sx={{ p: 2, mb: 3, bgcolor: "primary.light", color: "white" }}
-          >
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <GradeIcon />
-                  <Typography variant="h6">
-                    Total Marks: {totalMarks}
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <TimerIcon />
-                  <Typography variant="h6">
-                    Total Time: {totalTime} minutes
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Paper>
+          <div className="p-4 mb-6 bg-blue-500 text-white rounded-lg shadow">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center">
+              {initialData?._id ? (
+                <>
+                  {/* Subjects */}
+                  <div className="flex items-center gap-2">
+                    <span>📚</span>
+                    <h6 className="text-lg font-semibold">
+                      {subjectsPagination.total} Subjects
+                    </h6>
+                  </div>
+
+                  {/* Questions */}
+                  <div className="flex items-center gap-2">
+                    <span>❓</span>
+                    <h6 className="text-lg font-semibold">
+                      {subjectsPagination.totalQuestions} Questions
+                    </h6>
+                  </div>
+
+                  {/* Marks */}
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <h6 className="text-lg font-semibold">
+                      {subjectsPagination.totalMarks} Marks
+                    </h6>
+                  </div>
+
+                  {/* Time */}
+                  <div className="flex items-center gap-2">
+                    <span>⏱️</span>
+                    <h6 className="text-lg font-semibold">
+                      {subjectsPagination.totalTime} min
+                    </h6>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Total Marks */}
+                  <div className="flex items-center gap-2">
+                    <span>🎯</span>
+                    <h6 className="text-lg font-semibold">
+                      Total Marks: {totalMarks}
+                    </h6>
+                  </div>
+
+                  {/* Total Time */}
+                  <div className="flex items-center gap-2">
+                    <span>⏱️</span>
+                    <h6 className="text-lg font-semibold">
+                      Total Time: {totalTime} minutes
+                    </h6>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
@@ -423,7 +535,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
             </Typography>
 
             {(form.subjects || []).map((subject, sIndex) => (
-              <Accordion key={sIndex} defaultExpanded sx={{ mb: 2 }}>
+              <Accordion key={sIndex} sx={{ mb: 2 }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <Box
                     sx={{
@@ -519,210 +631,262 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                     Questions ({subject.questions?.length || 0})
                   </Typography>
 
-                  {(subject.questions || []).map((question, qIndex) => (
-                    <Card key={qIndex} variant="outlined" sx={{ mb: 2, p: 2 }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          mb: 2,
-                        }}
-                      >
-                        <Typography variant="subtitle2">
-                          Question {qIndex + 1}
-                        </Typography>
-                        <IconButton
-                          onClick={() => removeQuestion(sIndex, qIndex)}
-                          color="error"
-                          size="small"
+                  {(subject.questions || []).map((question, qIndex) => {
+                    const qKey = `${sIndex}-${qIndex}`;
+                    const isExpanded = expandedQuestions[qKey];
+                    return (
+                      <Accordion key={qIndex} sx={{ mb: 1 }}>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          onClick={() => toggleQuestionExpand(qKey)}
                         >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                          <FormControl fullWidth>
-                            <InputLabel>Question Type</InputLabel>
-                            <Select
-                              value={question.type}
-                              onChange={(e) =>
-                                handleQuestionChange(
-                                  sIndex,
-                                  qIndex,
-                                  "type",
-                                  e.target.value,
-                                )
-                              }
-                              label="Question Type"
-                            >
-                              <MenuItem value="mcq-single">
-                                MCQ (Single Answer)
-                              </MenuItem>
-                              <MenuItem value="short">Short Answer</MenuItem>
-                              <MenuItem value="image">Image Question</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            label="Marks"
-                            type="number"
-                            value={question.marks}
-                            onChange={(e) =>
-                              handleQuestionChange(
-                                sIndex,
-                                qIndex,
-                                "marks",
-                                parseInt(e.target.value) || 1,
-                              )
-                            }
-                            fullWidth
-                            variant="outlined"
-                            InputProps={{
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  marks
-                                </InputAdornment>
-                              ),
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              width: "100%",
+                              pr: 1,
                             }}
-                          />
-                        </Grid>
-                      </Grid>
-
-                      <p className="p-d-block pt-2 pb-2 text-gray-500">
-                        Question Text:
-                      </p>
-                      <QuestionEditorWithLatex
-                        value={question.text}
-                        onTextChange={(e) =>
-                          handleQuestionChange(
-                            sIndex,
-                            qIndex,
-                            "text",
-                            e.htmlValue,
-                          )
-                        }
-                      />
-
-                      {/* MCQ Options */}
-                      {question.type === "mcq-single" && (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Options
-                          </Typography>
-                          {question.options.map((option, optIndex) => (
-                            <Box
-                              key={optIndex}
-                              sx={{
-                                display: "flex",
-                                gap: 1,
-                                mb: 1,
-                                alignItems: "center",
-                              }}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ flexGrow: 1 }}
                             >
-                              <div key={optIndex} className="mb-2">
-                                <label className="block font-medium mb-1">{`Option ${optIndex + 1}`}</label>
-                                <QuestionEditorWithLatex
-                                  value={option}
-                                  onTextChange={(e) => {
-                                    const newOpts = [...question.options];
-                                    newOpts[optIndex] = e.htmlValue; // get HTML value from editor
+                              Q{qIndex + 1}:{" "}
+                              {question.text
+                                ?.replace(/<[^>]*>/g, "")
+                                .slice(0, 50) || "Untitled"}
+                              ...
+                            </Typography>
+                            <Chip
+                              label={question.type}
+                              size="small"
+                              sx={{ mr: 1 }}
+                            />
+                            <Chip
+                              label={`${question.marks} marks`}
+                              size="small"
+                              color="primary"
+                              sx={{ mr: 1 }}
+                            />
+                            <IconButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeQuestion(sIndex, qIndex);
+                              }}
+                              color="error"
+                              size="small"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                              <FormControl fullWidth>
+                                <InputLabel>Question Type</InputLabel>
+                                <Select
+                                  value={question.type}
+                                  onChange={(e) =>
                                     handleQuestionChange(
                                       sIndex,
                                       qIndex,
-                                      "options",
-                                      newOpts,
-                                    );
-                                  }}
-                                />
-                              </div>
-                              <Checkbox
-                                checked={question.correctAnswers.includes(
-                                  optIndex,
-                                )}
-                                onChange={(e) => {
-                                  let newCorrect = [...question.correctAnswers];
-                                  if (e.target.checked) {
-                                    newCorrect = [optIndex]; // single correct
-                                  } else {
-                                    newCorrect = [];
+                                      "type",
+                                      e.target.value,
+                                    )
                                   }
+                                  label="Question Type"
+                                >
+                                  <MenuItem value="mcq-single">
+                                    MCQ (Single Answer)
+                                  </MenuItem>
+                                  <MenuItem value="short">
+                                    Short Answer
+                                  </MenuItem>
+                                  <MenuItem value="image">
+                                    Image Question
+                                  </MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                label="Marks"
+                                type="number"
+                                value={question.marks}
+                                onChange={(e) =>
                                   handleQuestionChange(
                                     sIndex,
                                     qIndex,
-                                    "correctAnswers",
-                                    newCorrect,
-                                  );
+                                    "marks",
+                                    parseInt(e.target.value) || 1,
+                                  )
+                                }
+                                fullWidth
+                                variant="outlined"
+                                InputProps={{
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      marks
+                                    </InputAdornment>
+                                  ),
                                 }}
-                                color="primary"
                               />
-                              {question.options.length > 2 && (
-                                <IconButton
-                                  onClick={() =>
-                                    removeOption(sIndex, qIndex, optIndex)
-                                  }
-                                  color="error"
-                                  size="small"
+                            </Grid>
+                          </Grid>
+
+                          <p className="p-d-block pt-2 pb-2 text-gray-500">
+                            Question Text:
+                          </p>
+                          <QuestionEditorWithLatex
+                            value={question.text}
+                            onTextChange={(e) =>
+                              handleQuestionChange(
+                                sIndex,
+                                qIndex,
+                                "text",
+                                e.htmlValue,
+                              )
+                            }
+                          />
+
+                          {question.type === "mcq-single" && (
+                            <Box sx={{ mt: 2 }}>
+                              <Typography variant="subtitle2" gutterBottom>
+                                Options
+                              </Typography>
+                              {question.options.map((option, optIndex) => (
+                                <Box
+                                  key={optIndex}
+                                  sx={{
+                                    display: "flex",
+                                    gap: 1,
+                                    mb: 1,
+                                    alignItems: "center",
+                                  }}
                                 >
-                                  <DeleteIcon />
-                                </IconButton>
-                              )}
+                                  <div className="mb-2" sx={{ flex: 1 }}>
+                                    <label className="block font-medium mb-1">{`Option ${optIndex + 1}`}</label>
+                                    <QuestionEditorWithLatex
+                                      value={option}
+                                      onTextChange={(e) => {
+                                        const newOpts = [...question.options];
+                                        newOpts[optIndex] = e.htmlValue;
+                                        handleQuestionChange(
+                                          sIndex,
+                                          qIndex,
+                                          "options",
+                                          newOpts,
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                  <Checkbox
+                                    checked={question.correctAnswers.includes(
+                                      optIndex,
+                                    )}
+                                    onChange={(e) => {
+                                      handleQuestionChange(
+                                        sIndex,
+                                        qIndex,
+                                        "correctAnswers",
+                                        e.target.checked ? [optIndex] : [],
+                                      );
+                                    }}
+                                  />
+                                  {question.options.length > 2 && (
+                                    <IconButton
+                                      onClick={() =>
+                                        removeOption(sIndex, qIndex, optIndex)
+                                      }
+                                      color="error"
+                                      size="small"
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  )}
+                                </Box>
+                              ))}
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<AddIcon />}
+                                onClick={() => addOption(sIndex, qIndex)}
+                                sx={{ mt: 1 }}
+                              >
+                                Add Option
+                              </Button>
                             </Box>
-                          ))}
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<AddIcon />}
-                            onClick={() => addOption(sIndex, qIndex)}
-                            sx={{ mt: 1 }}
-                          >
-                            Add Option
-                          </Button>
-                        </Box>
+                          )}
+
+                          <p className="p-d-block pt-2 pb-2 text-gray-500">
+                            Solution:
+                          </p>
+                          <QuestionEditorWithLatex
+                            value={question.solution || ""}
+                            onTextChange={(e) =>
+                              handleQuestionChange(
+                                sIndex,
+                                qIndex,
+                                "solution",
+                                e.htmlValue,
+                              )
+                            }
+                          />
+                        </AccordionDetails>
+                      </Accordion>
+                    );
+                  })}
+
+                  <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                    {initialData?._id &&
+                      subject.questionsPagination?.hasMore && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => loadMoreQuestions(sIndex)}
+                          disabled={questionsLoadMore[sIndex]?.loading}
+                        >
+                          {questionsLoadMore[sIndex]?.loading
+                            ? "Loading..."
+                            : "Load More Questions"}
+                        </Button>
                       )}
-
-                      {/* Solution */}
-                      <p className="p-d-block pt-2 pb-2 text-gray-500">
-                        Provide the correct answer or explanation for this
-                        question:
-                      </p>
-
-                      <QuestionEditorWithLatex
-                        value={question.solution || ""}
-                        onTextChange={(e) =>
-                          handleQuestionChange(
-                            sIndex,
-                            qIndex,
-                            "solution",
-                            e.htmlValue,
-                          )
-                        }
-                      />
-                    </Card>
-                  ))}
-
-                  <Button
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                    onClick={() => addQuestion(sIndex)}
-                    sx={{ mt: 2 }}
-                  >
-                    Add Question
-                  </Button>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<AddIcon />}
+                      onClick={() => addQuestion(sIndex)}
+                    >
+                      Add Question
+                    </Button>
+                  </Box>
                 </AccordionDetails>
               </Accordion>
             ))}
 
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={addSubject}
-              sx={{ mb: 3 }}
-            >
-              Add Subject
-            </Button>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
+              {initialData?._id && subjectsPagination.hasMore && (
+                <Button
+                  variant="outlined"
+                  onClick={loadMoreSubjects}
+                  disabled={subjectsPagination.loadingMore}
+                >
+                  {subjectsPagination.loadingMore
+                    ? "Loading..."
+                    : `Load More Subjects (${subjectsPagination.total - subjectsPagination.page * subjectsPagination.limit} remaining)`}
+                </Button>
+              )}
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={addSubject}
+              >
+                Add Subject
+              </Button>
+            </Box>
 
             <Divider sx={{ my: 3 }} />
 

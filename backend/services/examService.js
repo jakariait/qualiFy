@@ -15,8 +15,39 @@ const getAllExams = async (page = 1, limit = 10) => {
   return { exams, total, page, limit, totalPages: Math.ceil(total / limit) };
 };
 
-const getExamById = async (id) => {
-  return Exam.findById(id);
+const getExamById = async (id, options = {}) => {
+  const { subjectsPage = 1, subjectsLimit = 3, questionsPage = 1, questionsLimit = 10 } = options;
+  const exam = await Exam.findById(id);
+  
+  if (!exam) return null;
+  
+  const subjects = await getSubjectsByExamId(id, subjectsPage, subjectsLimit, questionsPage, questionsLimit);
+  const totalSubjects = exam.subjects?.length || 0;
+  
+  let totalQuestions = 0, totalMarks = 0, totalTime = 0;
+  exam.subjects?.forEach(sub => {
+    totalTime += sub.timeLimitMin || 0;
+    totalQuestions += sub.questions?.length || 0;
+    sub.questions?.forEach(q => {
+      totalMarks += q.marks || 0;
+    });
+  });
+  
+  return {
+    ...exam.toObject(),
+    subjects,
+    pagination: {
+      subjects: {
+        page: subjectsPage,
+        limit: subjectsLimit,
+        total: totalSubjects,
+        totalQuestions,
+        totalMarks,
+        totalTime,
+        hasMore: (subjectsPage * subjectsLimit) < totalSubjects
+      }
+    }
+  };
 };
 
 const updateExam = async (id, data) => {
@@ -59,10 +90,55 @@ const getFreeExams = async () => {
     });
 };
 
+const getSubjectsByExamId = async (examId, subjectsPage = 1, subjectsLimit = 5, questionsPage = 1, questionsLimit = 10) => {
+  const exam = await Exam.findById(examId);
+  if (!exam || !exam.subjects) return [];
+  
+  const subjectsSkip = (subjectsPage - 1) * subjectsLimit;
+  const paginatedSubjects = exam.subjects.slice(subjectsSkip, subjectsSkip + subjectsLimit);
+  
+  return paginatedSubjects.map(subject => {
+    const questionsSkip = (questionsPage - 1) * questionsLimit;
+    const paginatedQuestions = subject.questions?.slice(questionsSkip, questionsSkip + questionsLimit) || [];
+    
+    return {
+      ...subject,
+      questions: paginatedQuestions,
+      questionsPagination: {
+        page: questionsPage,
+        limit: questionsLimit,
+        total: subject.questions?.length || 0,
+        hasMore: (questionsPage * questionsLimit) < (subject.questions?.length || 0)
+      }
+    };
+  });
+};
+
+const getSubjectQuestions = async (examId, subjectIndex, questionsPage = 1, questionsLimit = 10) => {
+  const exam = await Exam.findById(examId);
+  if (!exam || !exam.subjects || !exam.subjects[subjectIndex]) return null;
+  
+  const subject = exam.subjects[subjectIndex];
+  const questionsSkip = (questionsPage - 1) * questionsLimit;
+  const paginatedQuestions = subject.questions?.slice(questionsSkip, questionsSkip + questionsLimit) || [];
+  
+  return {
+    questions: paginatedQuestions,
+    pagination: {
+      page: questionsPage,
+      limit: questionsLimit,
+      total: subject.questions?.length || 0,
+      hasMore: (questionsPage * questionsLimit) < (subject.questions?.length || 0)
+    }
+  };
+};
+
 module.exports = {
   createExam,
   getAllExams,
   getExamById,
+  getSubjectsByExamId,
+  getSubjectQuestions,
   updateExam,
   deleteExam,
   getExamsByProductId,
