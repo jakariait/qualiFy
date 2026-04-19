@@ -80,14 +80,20 @@ const deleteExam = asyncHandler(async (req, res) => {
 // Get exams by product ID
 const getExamsByProductId = asyncHandler(async (req, res) => {
   try {
-    const exams = await examService.getExamsByProductId(req.params.productId);
-    const examsWithoutSubjects = exams.map((exam) => {
-      const { subjects, ...examData } = exam.toObject ? exam.toObject() : exam;
-      return examData;
-    });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { exams, total, totalPages } = await examService.getExamsByProductId(
+      req.params.productId,
+      page,
+      limit,
+    );
     res.status(200).json({
       message: "Exams retrieved successfully",
-      exams: examsWithoutSubjects,
+      exams,
+      total,
+      page,
+      limit,
+      totalPages,
     });
   } catch (error) {
     res

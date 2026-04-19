@@ -37,13 +37,18 @@ const deleteExam = async (id) => {
   return Exam.findByIdAndDelete(id);
 };
 
-const getExamsByProductId = async (productId) => {
-  return Exam.find({
-    productIds: productId,
-    status: "published",
-  })
-    .select("-subjects")
-    .sort({ createdAt: -1 });
+const getExamsByProductId = async (productId, page = 1, limit = 10) => {
+  const filter = { productIds: productId, status: "published" };
+  const skip = (page - 1) * limit;
+  const [exams, total] = await Promise.all([
+    Exam.find(filter)
+      .select("title totalMarks durationMin")
+      .sort({ title: 1 })
+      .skip(skip)
+      .limit(limit),
+    Exam.countDocuments(filter),
+  ]);
+  return { exams, total, page, limit, totalPages: Math.ceil(total / limit) };
 };
 
 const getFreeExams = async () => {

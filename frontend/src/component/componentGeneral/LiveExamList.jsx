@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
-import { Snackbar, Alert } from "@mui/material";
+import { Snackbar, Alert, Pagination } from "@mui/material";
 import ExamStartDialog from "./ExamStartDialog.jsx";
 import { Link } from "react-router-dom";
 
@@ -14,6 +14,10 @@ const LiveExamList = () => {
   const [userAttempts, setUserAttempts] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 10;
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -35,23 +39,27 @@ const LiveExamList = () => {
 
   useEffect(() => {
     const fetchExams = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`${API_URL}/exams/product/${id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 👈 pass token here
+        const params = new URLSearchParams({ page, limit });
+        const response = await fetch(
+          `${API_URL}/exams/product/${id}?${params}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch exams");
         }
         const data = await response.json();
         if (Array.isArray(data.exams)) {
-          const sortedExams = data.exams.sort((a, b) =>
-            a.title.localeCompare(b.title),
-          );
-          setExams(sortedExams);
+          setExams(data.exams);
+          if (data.totalPages) setTotalPages(data.totalPages);
+          if (data.total !== undefined) setTotal(data.total);
         } else {
           showSnackbar("Received invalid data from server");
         }
@@ -62,6 +70,12 @@ const LiveExamList = () => {
       }
     };
 
+    if (id) {
+      fetchExams();
+    }
+  }, [id, token, page]);
+
+  useEffect(() => {
     const fetchUserAttempts = async () => {
       if (!token) return;
       try {
@@ -86,11 +100,8 @@ const LiveExamList = () => {
       }
     };
 
-    if (id) {
-      fetchExams();
-    }
     fetchUserAttempts();
-  }, [id, token]);
+  }, [token]);
 
   const handleStartExam = async (examId) => {
     try {
@@ -143,7 +154,7 @@ const LiveExamList = () => {
 
       <div className="grid md:grid-cols-2 gap-6">
         {loading
-          ? Array.from({ length: 3 }).map((_, index) => (
+          ? Array.from({ length: 4 }).map((_, index) => (
               <ExamCardSkeleton key={index} />
             ))
           : exams.map((exam) => {
@@ -152,7 +163,6 @@ const LiveExamList = () => {
                   attempt.exam && String(attempt.exam._id) === String(exam._id),
               );
               const hasAttempted = !!userAttempt;
-              const attemptId = userAttempt ? userAttempt.id : null;
 
               return (
                 <div
@@ -185,6 +195,19 @@ const LiveExamList = () => {
             })}
       </div>
 
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-6">
+          <span className="text-sm text-gray-500">Total: {total} exams</span>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            shape="rounded"
+          />
+        </div>
+      )}
+
       <ExamStartDialog
         open={isDialogOpen}
         onClose={handleDialogClose}
@@ -192,7 +215,6 @@ const LiveExamList = () => {
         exam={selectedExam}
       />
 
-      {/* ✅ MUI Snackbar for alerts */}
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={snackbar.open}
