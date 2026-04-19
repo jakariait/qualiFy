@@ -13,6 +13,7 @@ const ExamListPage = () => {
           <ExamList />
         </div>
       </RequirePermission>
+
     </LayoutAdmin>
   );
 };

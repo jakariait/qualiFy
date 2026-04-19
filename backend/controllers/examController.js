@@ -16,7 +16,9 @@ const createExam = asyncHandler(async (req, res) => {
 // Get all exams
 const getAllExams = asyncHandler(async (req, res) => {
   try {
-    const exams = await examService.getAllExams();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { exams, total, totalPages } = await examService.getAllExams(page, limit);
     const examsWithoutSubjects = exams.map((exam) => {
       const { subjects, ...examData } = exam.toObject ? exam.toObject() : exam;
       return examData;
@@ -24,6 +26,10 @@ const getAllExams = asyncHandler(async (req, res) => {
     res.status(200).json({
       message: "Exams retrieved successfully",
       exams: examsWithoutSubjects,
+      total,
+      page,
+      limit,
+      totalPages,
     });
   } catch (error) {
     res

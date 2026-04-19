@@ -48,6 +48,7 @@ const ExamSchema = new mongoose.Schema(
 );
 
 ExamSchema.index({ isFree: 1, status: 1 });
+ExamSchema.index({ createdAt: -1 });
 
 // Auto-calculate total time and marks before save
 ExamSchema.pre("save", function (next) {
