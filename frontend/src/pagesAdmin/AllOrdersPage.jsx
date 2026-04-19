@@ -29,7 +29,9 @@ const AllOrdersPage = () => {
       <RequirePermission permission="view_orders">
         <OrderStats orders={allOrders} />
         <div className={"flex  items-center justify-between py-4"}>
-          <AdminNewOrderCreate />
+          <RequirePermission permission={"create_orders"} fallback={true}>
+            <AdminNewOrderCreate />
+          </RequirePermission>
           <DownloadAllOrder />
         </div>
 
