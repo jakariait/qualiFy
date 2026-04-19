@@ -91,7 +91,8 @@ const sendOrderEmail = async (order) => {
     email,
     htmlTemplate,
     `Order Confirmation - #${orderNo}`,
-    true
+    true,
+    "qualiFy <order@qualifybd.com>"
   );
 };
 

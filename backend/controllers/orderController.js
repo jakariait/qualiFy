@@ -20,8 +20,10 @@ const createOrder = async (req, res) => {
     // Proceed with creating the order (pass userId only if available)
     const order = await orderService.createOrder(orderData, userId || null);
 
-    // Send order confirmation email (async, but we await to handle errors)
-    await sendOrderEmail(order);
+    // Send order confirmation email (don't await - won't block order creation)
+    sendOrderEmail(order).catch((err) => {
+      console.error("Failed to send order email:", err.message);
+    });
 
     res.status(201).json({
       success: true,
