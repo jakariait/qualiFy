@@ -123,7 +123,7 @@ const DownloadAllOrder = () => {
   };
 
   return (
-    <div className="flex items-center justify-center my-4">
+    <div>
       <button
         onClick={handleExport}
         disabled={loading}

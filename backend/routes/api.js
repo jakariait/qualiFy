@@ -320,6 +320,12 @@ router.delete(
 
 // Routes for Products
 router.get("/products", productController.getAllProducts); // All Products Without Sorting
+router.get(
+  "/getAllProductsAdmin",
+  adminProtect,
+  checkPermission("view_products"),
+  productController.getAllProducts,
+);
 router.get("/products/:id", productController.getProductById);
 router.get("/products/:id/order-count", productController.getProductOrderCount);
 router.get("/products/slug/:slug", productController.getProductBySlug);
@@ -435,6 +441,12 @@ router.patch(
 
 // Order routes
 router.post("/orders", orderController.createOrder);
+router.post(
+  "/orders/admin/create",
+  adminProtect,
+  checkPermission("create_orders"),
+  orderController.createOrder,
+);
 
 router.get(
   "/orders",

@@ -136,8 +136,8 @@ const createOrder = async (orderData, userId) => {
       totalAmount,
       promoCode: appliedCouponCode,
       promoDiscount,
-      specialDiscount: 0,
-      adminNote: "",
+      specialDiscount: orderData.specialDiscount || 0,
+      adminNote: orderData.adminNote || "",
     });
 
     const savedOrder = await newOrder.save({ session });

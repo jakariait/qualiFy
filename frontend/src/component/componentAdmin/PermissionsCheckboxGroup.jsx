@@ -26,6 +26,7 @@ const PermissionsCheckboxGroup = ({
     { value: "view_orders", label: "View Orders" },
     { value: "edit_orders", label: "Edit Orders" },
     { value: "delete_orders", label: "Delete Orders" },
+    {value: "create_orders", label: "Create Orders" },
 
     { value: "bkash_api", label: "bKash API" },
 
