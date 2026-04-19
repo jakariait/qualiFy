@@ -27,6 +27,7 @@ import {
   FormHelperText,
   InputAdornment,
   FormControlLabel,
+  CircularProgress,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -56,6 +57,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
   });
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -73,30 +75,57 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
   });
   const [questionsLoadMore, setQuestionsLoadMore] = useState({});
   const [expandedQuestions, setExpandedQuestions] = useState({});
+  const [subjectsQuestionsCount, setSubjectsQuestionsCount] = useState({});
   const API_URL = import.meta.env.VITE_API_URL;
 
-  useEffect(() => {
-    if (initialData && Object.keys(initialData).length) {
-      const normalizedData = {
-        ...initialData,
-        productIds: initialData.productIds || [],
-        subjects: initialData.subjects || [],
-      };
-      setForm(normalizedData);
+useEffect(() => {
+    const fetchExamData = async () => {
+      if (initialData?._id) {
+        setInitialLoading(true);
+        try {
+          const res = await axios.get(
+            `${API_URL}/exams/${initialData._id}?subjectsPage=1&subjectsLimit=3&questionsPage=1&questionsLimit=10`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const data = res.data.exam;
+          setForm({
+            title: data.title || "",
+            description: data.description || "",
+            status: data.status || "draft",
+            productIds: data.productIds || [],
+            subjects: data.subjects || [],
+            isFree: data.isFree || false,
+          });
 
-      if (initialData.pagination?.subjects) {
-        setSubjectsPagination((prev) => ({
-          ...prev,
-          total: initialData.pagination.subjects.total,
-          totalQuestions: initialData.pagination.subjects.totalQuestions || 0,
-          totalMarks: initialData.pagination.subjects.totalMarks || 0,
-          totalTime: initialData.pagination.subjects.totalTime || 0,
-          hasMore: initialData.pagination.subjects.hasMore,
-          page: initialData.pagination.subjects.page,
-        }));
+          if (data.pagination?.subjects) {
+            setSubjectsPagination(prev => ({
+              page: data.pagination.subjects.page,
+              limit: data.pagination.subjects.limit,
+              total: data.pagination.subjects.total,
+              totalQuestions: data.pagination.subjects.totalQuestions || 0,
+              totalMarks: data.pagination.subjects.totalMarks || 0,
+              totalTime: data.pagination.subjects.totalTime || 0,
+              hasMore: data.pagination.subjects.hasMore,
+              loadingMore: false,
+            }));
+
+            const counts = {};
+            data.subjects?.forEach((sub, idx) => {
+              counts[idx] = sub.questionsPagination?.total || sub.questions?.length || 0;
+            });
+            setSubjectsQuestionsCount(counts);
+          }
+        } catch (err) {
+          console.error("Error fetching exam:", err);
+          showSnackbar("Failed to load exam data", "error");
+        } finally {
+          setInitialLoading(false);
+        }
       }
-    }
-  }, [initialData]);
+    };
+
+    fetchExamData();
+  }, [initialData?._id]);
 
   useEffect(() => {
     fetchProducts();
@@ -188,6 +217,11 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
           hasMore: res.data.pagination?.hasMore,
           loading: false,
         },
+      }));
+
+      setSubjectsQuestionsCount((prev) => ({
+        ...prev,
+        [sIndex]: res.data.pagination?.total || prev[sIndex],
       }));
     } catch (err) {
       console.error("Error loading more questions:", err);
@@ -354,6 +388,15 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
     }
   };
 
+  if (initialLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400, gap: 2 }}>
+        <CircularProgress size={24} />
+        <Typography>Loading exam data...</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box>
       <Card elevation={3} sx={{ mb: 3 }}>
@@ -369,9 +412,11 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
 
           {/* Live Calculation Display */}
           <div className="p-4 mb-6 bg-blue-500 text-white rounded-lg shadow">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center">
+            <div className=" gap-4 items-center">
               {initialData?._id ? (
-                <>
+                <div
+                  className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4"}
+                >
                   {/* Subjects */}
                   <div className="flex items-center gap-2">
                     <span>📚</span>
@@ -403,9 +448,11 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                       {subjectsPagination.totalTime} min
                     </h6>
                   </div>
-                </>
+                </div>
               ) : (
-                <>
+                <div
+                  className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4"}
+                >
                   {/* Total Marks */}
                   <div className="flex items-center gap-2">
                     <span>🎯</span>
@@ -415,13 +462,13 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                   </div>
 
                   {/* Total Time */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex  items-center gap-2">
                     <span>⏱️</span>
                     <h6 className="text-lg font-semibold">
                       Total Time: {totalTime} minutes
                     </h6>
                   </div>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -550,7 +597,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                       {subject.title || "Untitled Subject"}
                     </Typography>
                     <Chip
-                      label={`${subject.questions?.length || 0} questions`}
+                      label={`${subjectsQuestionsCount[sIndex] || subject.questions?.length || 0} questions`}
                       size="small"
                       color="secondary"
                     />
