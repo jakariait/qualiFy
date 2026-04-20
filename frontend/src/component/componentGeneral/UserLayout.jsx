@@ -56,7 +56,7 @@ const UserLayout = ({ children }) => {
           </div>
         </div>
         {/*Children Component Append Here*/}
-        <main className="w-full md:w-4/5 ">{children}</main>
+        <main className="flex-1 min-w-0">{children}</main>
       </div>
     </Layout>
   );
