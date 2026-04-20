@@ -154,11 +154,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
         showSnackbar("Failed to load exam data", "error");
       } finally {
         setInitialLoading(false);
-    } catch (err) {
-      console.error("Error fetching exam:", err);
-      showSnackbar("Failed to load exam data", "error");
-    } finally {
-      setInitialLoading(false);
+      }
     }
   };
 
