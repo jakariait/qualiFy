@@ -1,4 +1,5 @@
 const Exam = require("../models/ExamModel");
+const mongoose = require("mongoose");
 
 const createExam = async (data) => {
   const exam = new Exam(data);
@@ -17,42 +18,80 @@ const getAllExams = async (page = 1, limit = 10) => {
 
 const getExamById = async (id, options = {}) => {
   const { subjectsPage = 1, subjectsLimit = 10, questionsPage = 1, questionsLimit = 10 } = options;
-  const exam = await Exam.findById(id);
-  
-  if (!exam) return null;
-  
-  let subjects;
   const loadQuestions = questionsPage > 0;
-  
+
+  let exam, subjects;
+
   if (!loadQuestions) {
-    subjects = (exam.subjects || []).slice(0, subjectsLimit).map(sub => ({
-      _id: sub._id,
-      title: sub.title,
-      description: sub.description,
-      timeLimitMin: sub.timeLimitMin,
+    // Use aggregation to get subject metadata + per-subject question counts via $size,
+    // without loading any question content — stays tiny regardless of exam size
+    const subjectsSkip = (subjectsPage - 1) * subjectsLimit;
+    const [result] = await Exam.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      { $project: {
+        title: 1, description: 1, status: 1, productIds: 1, isFree: 1,
+        durationMin: 1, totalMarks: 1, totalQuestions: 1, examId: 1, slug: 1,
+        createdAt: 1, updatedAt: 1,
+        subjectsTotal: { $size: '$subjects' },
+        subjects: {
+          $map: {
+            input: { $slice: ['$subjects', subjectsSkip, subjectsLimit] },
+            as: 'sub',
+            in: {
+              _id: '$$sub._id',
+              title: '$$sub.title',
+              description: '$$sub.description',
+              timeLimitMin: '$$sub.timeLimitMin',
+              questionsCount: { $size: '$$sub.questions' },
+            }
+          }
+        }
+      }}
+    ]);
+
+    if (!result) return null;
+
+    subjects = (result.subjects || []).map(sub => ({
+      ...sub,
       questions: [],
       questionsPagination: {
         page: 0,
         limit: 0,
-        total: sub.questions?.length || 0,
-        hasMore: (sub.questions?.length || 0) > 0
+        total: sub.questionsCount,
+        hasMore: sub.questionsCount > 0
       }
     }));
-  } else {
-    subjects = await getSubjectsByExamId(id, subjectsPage, subjectsLimit, questionsPage, questionsLimit);
+
+    return {
+      ...result,
+      subjects,
+      pagination: {
+        subjects: {
+          page: subjectsPage,
+          limit: subjectsLimit,
+          total: result.subjectsTotal,
+          totalQuestions: result.totalQuestions || 0,
+          totalMarks: result.totalMarks || 0,
+          totalTime: result.durationMin || 0,
+          hasMore: (subjectsPage * subjectsLimit) < result.subjectsTotal
+        }
+      }
+    };
   }
-  
+
+  exam = await Exam.findById(id);
+  if (!exam) return null;
+
+  // Pass already-loaded exam document to avoid a second Exam.findById call
+  subjects = await getSubjectsByExamId(id, subjectsPage, subjectsLimit, questionsPage, questionsLimit, exam);
+
   const totalSubjects = exam.subjects?.length || 0;
-  
-  let totalQuestions = 0, totalMarks = 0, totalTime = 0;
-  exam.subjects?.forEach(sub => {
-    totalTime += sub.timeLimitMin || 0;
-    totalQuestions += sub.questions?.length || 0;
-    sub.questions?.forEach(q => {
-      totalMarks += q.marks || 0;
-    });
-  });
-  
+
+  // Use pre-computed fields stored by the pre('save') hook instead of re-iterating all questions
+  const totalQuestions = exam.totalQuestions || 0;
+  const totalMarks = exam.totalMarks || 0;
+  const totalTime = exam.durationMin || 0;
+
   return {
     ...exam.toObject(),
     subjects,
@@ -88,6 +127,35 @@ const deleteExam = async (id) => {
   return Exam.findByIdAndDelete(id);
 };
 
+const patchExamMeta = async (id, data) => {
+  const allowed = ['title', 'description', 'status', 'productIds', 'isFree'];
+  const exam = await Exam.findById(id);
+  if (!exam) return null;
+  allowed.forEach(field => { if (data[field] !== undefined) exam[field] = data[field]; });
+  await exam.save();
+  return exam;
+};
+
+const reorderSubjects = async (id, orderedIds) => {
+  const exam = await Exam.findById(id);
+  if (!exam) return null;
+  const map = new Map(exam.subjects.map(s => [s._id.toString(), s]));
+  exam.subjects = orderedIds.map(sid => map.get(sid)).filter(Boolean);
+  await exam.save();
+  return exam;
+};
+
+const reorderQuestions = async (examId, subjectId, orderedIds) => {
+  const exam = await Exam.findById(examId);
+  if (!exam) return null;
+  const subject = exam.subjects.id(subjectId);
+  if (!subject) return null;
+  const map = new Map(subject.questions.map(q => [q._id.toString(), q]));
+  subject.questions = orderedIds.map(qid => map.get(qid)).filter(Boolean);
+  await exam.save();
+  return exam;
+};
+
 const getExamsByProductId = async (productId, page = 1, limit = 10) => {
   const filter = { productIds: productId, status: "published" };
   const skip = (page - 1) * limit;
@@ -110,8 +178,8 @@ const getFreeExams = async () => {
     });
 };
 
-const getSubjectsByExamId = async (examId, subjectsPage = 1, subjectsLimit = 5, questionsPage = 1, questionsLimit = 10) => {
-  const exam = await Exam.findById(examId);
+const getSubjectsByExamId = async (examId, subjectsPage = 1, subjectsLimit = 5, questionsPage = 1, questionsLimit = 10, examDoc = null) => {
+  const exam = examDoc || await Exam.findById(examId);
   if (!exam || !exam.subjects) return [];
   
   const subjectsSkip = (subjectsPage - 1) * subjectsLimit;
@@ -180,6 +248,9 @@ module.exports = {
   getSubjectQuestions,
   updateExam,
   deleteExam,
+  patchExamMeta,
+  reorderSubjects,
+  reorderQuestions,
   getExamsByProductId,
   getFreeExams,
 };

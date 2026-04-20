@@ -43,6 +43,7 @@ const ExamSchema = new mongoose.Schema(
 
     durationMin: { type: Number, default: 0 }, // auto-calculated from subjects
     totalMarks: { type: Number, default: 0 }, // auto-calculated from questions
+    totalQuestions: { type: Number, default: 0 }, // auto-calculated from questions
   },
   { timestamps: true, versionKey: false },
 );
@@ -62,11 +63,13 @@ ExamSchema.pre("save", function (next) {
 
   let totalTime = 0;
   let totalMarks = 0;
+  let totalQuestions = 0;
 
   if (this.subjects && this.subjects.length > 0) {
     this.subjects.forEach((subject) => {
       totalTime += subject.timeLimitMin || 0;
       if (subject.questions && subject.questions.length > 0) {
+        totalQuestions += subject.questions.length;
         totalMarks += subject.questions.reduce(
           (sum, q) => sum + (q.marks || 0),
           0,
@@ -77,6 +80,7 @@ ExamSchema.pre("save", function (next) {
 
   this.durationMin = totalTime;
   this.totalMarks = totalMarks;
+  this.totalQuestions = totalQuestions;
   next();
 });
 

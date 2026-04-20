@@ -715,6 +715,9 @@ router.get(
 );
 router.put("/exams/:id", adminProtect, examController.updateExam);
 router.delete("/exams/:id", adminProtect, examController.deleteExam);
+router.patch("/exams/:id/meta", adminProtect, examController.patchExamMeta);
+router.patch("/exams/:id/subjects/reorder", adminProtect, examController.reorderSubjects);
+router.patch("/exams/:id/subjects/:subjectId/questions/reorder", adminProtect, examController.reorderQuestions);
 
 // Exam Attempt Routes (User)
 router.post(

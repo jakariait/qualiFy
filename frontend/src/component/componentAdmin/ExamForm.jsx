@@ -78,13 +78,14 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
   const [subjectsQuestionsCount, setSubjectsQuestionsCount] = useState({});
   const API_URL = import.meta.env.VITE_API_URL;
 
-const fetchExamBasicInfo = async () => {
+const fetchExamBasicInfo = async (signal) => {
     if (initialData?._id) {
       setInitialLoading(true);
       try {
+        const limit = subjectsPagination.limit;
         const res = await axios.get(
-          `${API_URL}/exams/${initialData._id}?subjectsPage=1&subjectsLimit=50&questionsPage=0`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `${API_URL}/exams/${initialData._id}?subjectsPage=1&subjectsLimit=${limit}&questionsPage=0`,
+          { headers: { Authorization: `Bearer ${token}` }, signal }
         );
         const data = res.data.exam;
         setForm({
@@ -97,16 +98,17 @@ const fetchExamBasicInfo = async () => {
         });
 
         if (data.pagination?.subjects) {
-          setSubjectsPagination(prev => ({
-            page: data.pagination.subjects.page,
-            limit: data.pagination.subjects.limit,
-            total: data.pagination.subjects.total,
+          const { page, limit: resLimit, total } = data.pagination.subjects;
+          setSubjectsPagination({
+            page,
+            limit: resLimit,
+            total,
             totalQuestions: data.pagination.subjects.totalQuestions || 0,
             totalMarks: data.pagination.subjects.totalMarks || 0,
             totalTime: data.pagination.subjects.totalTime || 0,
-            hasMore: false,
+            hasMore: page * resLimit < total,
             loadingMore: false,
-          }));
+          });
 
           const counts = {};
           data.subjects?.forEach((sub, idx) => {
@@ -115,6 +117,7 @@ const fetchExamBasicInfo = async () => {
           setSubjectsQuestionsCount(counts);
         }
       } catch (err) {
+        if (axios.isCancel(err)) return;
         console.error("Error fetching exam:", err);
         showSnackbar("Failed to load exam data", "error");
       } finally {
@@ -124,7 +127,9 @@ const fetchExamBasicInfo = async () => {
   };
 
   useEffect(() => {
-    fetchExamBasicInfo();
+    const controller = new AbortController();
+    fetchExamBasicInfo(controller.signal);
+    return () => controller.abort();
   }, [initialData?._id]);
 
   useEffect(() => {
@@ -207,14 +212,19 @@ const fetchExamBasicInfo = async () => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      setForm((prev) => ({
-        ...prev,
-        subjects: [...prev.subjects, ...res.data.subjects],
-      }));
+      setForm((prev) => {
+        const newCounts = {};
+        res.data.subjects.forEach((sub, idx) => {
+          const actualIdx = prev.subjects.length + idx;
+          newCounts[actualIdx] = sub.questionsPagination?.total || 0;
+        });
+        setSubjectsQuestionsCount((c) => ({ ...c, ...newCounts }));
+        return { ...prev, subjects: [...prev.subjects, ...res.data.subjects] };
+      });
       setSubjectsPagination((prev) => ({
         ...prev,
         page: nextPage,
-        hasMore: res.data.subjects.length === prev.limit,
+        hasMore: nextPage * prev.limit < prev.total,
         loadingMore: false,
       }));
     } catch (err) {

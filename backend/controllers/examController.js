@@ -44,7 +44,7 @@ const getExamById = asyncHandler(async (req, res) => {
     const options = {
       subjectsPage: parseInt(req.query.subjectsPage) || 1,
       subjectsLimit: parseInt(req.query.subjectsLimit) || 3,
-      questionsPage: parseInt(req.query.questionsPage) || 1,
+      questionsPage: req.query.questionsPage !== undefined ? parseInt(req.query.questionsPage) : 1,
       questionsLimit: parseInt(req.query.questionsLimit) || 10,
     };
     const exam = await examService.getExamById(req.params.id, options);
@@ -60,12 +60,15 @@ const getExamById = asyncHandler(async (req, res) => {
 // Get more subjects for exam
 const getMoreSubjects = asyncHandler(async (req, res) => {
   try {
-    const options = {
-      subjectsPage: parseInt(req.query.subjectsPage) || 1,
-      subjectsLimit: parseInt(req.query.subjectsLimit) || 3,
-      questionsPage: parseInt(req.query.questionsPage) || 1,
-      questionsLimit: parseInt(req.query.questionsLimit) || 10,
-    };
+    const all = req.query.all === "true";
+    const options = all
+      ? { subjectsPage: 1, subjectsLimit: 9999, questionsPage: 0, questionsLimit: 0 }
+      : {
+          subjectsPage: parseInt(req.query.subjectsPage) || 1,
+          subjectsLimit: parseInt(req.query.subjectsLimit) || 3,
+          questionsPage: parseInt(req.query.questionsPage) || 1,
+          questionsLimit: parseInt(req.query.questionsLimit) || 10,
+        };
     const subjects = await examService.getSubjectsByExamId(
       req.params.id,
       options.subjectsPage,
@@ -163,6 +166,36 @@ const getFreeExams = asyncHandler(async (req, res) => {
   }
 });
 
+const patchExamMeta = asyncHandler(async (req, res) => {
+  try {
+    const exam = await examService.patchExamMeta(req.params.id, req.body);
+    if (!exam) return res.status(404).json({ message: "Exam not found" });
+    res.status(200).json({ message: "Exam meta updated", exam });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update exam meta", error: error.message });
+  }
+});
+
+const reorderSubjects = asyncHandler(async (req, res) => {
+  try {
+    const exam = await examService.reorderSubjects(req.params.id, req.body.orderedIds);
+    if (!exam) return res.status(404).json({ message: "Exam not found" });
+    res.status(200).json({ message: "Subjects reordered" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to reorder subjects", error: error.message });
+  }
+});
+
+const reorderQuestions = asyncHandler(async (req, res) => {
+  try {
+    const exam = await examService.reorderQuestions(req.params.id, req.params.subjectId, req.body.orderedIds);
+    if (!exam) return res.status(404).json({ message: "Exam or subject not found" });
+    res.status(200).json({ message: "Questions reordered" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to reorder questions", error: error.message });
+  }
+});
+
 module.exports = {
   createExam,
   getAllExams,
@@ -171,6 +204,9 @@ module.exports = {
   getSubjectQuestions,
   updateExam,
   deleteExam,
+  patchExamMeta,
+  reorderSubjects,
+  reorderQuestions,
   getExamsByProductId,
   getFreeExams,
 };
