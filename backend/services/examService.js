@@ -1,5 +1,6 @@
 const Exam = require("../models/ExamModel");
 const mongoose = require("mongoose");
+const { invalidateExam } = require("../utils/redisClient");
 
 const createExam = async (data) => {
   const exam = new Exam(data);
@@ -111,15 +112,10 @@ const getExamById = async (id, options = {}) => {
 
 const updateExam = async (id, data) => {
   const exam = await Exam.findById(id);
-  if (!exam) {
-    return null;
-  }
-
-  // Update exam properties based on data
-  // This will trigger the pre('save') hook when exam.save() is called
+  if (!exam) return null;
   Object.assign(exam, data);
-
   await exam.save();
+  await invalidateExam(id.toString());
   return exam;
 };
 

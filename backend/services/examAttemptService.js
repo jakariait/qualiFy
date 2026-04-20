@@ -2,6 +2,16 @@ const ExamAttempt = require("../models/ExamAttemptModel");
 const Exam = require("../models/ExamModel");
 const Result = require("../models/Result");
 const User = require("../models/UserModel");
+const { getExam, setExam } = require("../utils/redisClient");
+
+// Fetch exam from Redis cache, falling back to MongoDB
+async function fetchExam(examId) {
+  const cached = await getExam(examId.toString());
+  if (cached) return cached;
+  const exam = await Exam.findById(examId).lean();
+  if (exam) await setExam(examId.toString(), exam);
+  return exam;
+}
 
 class ExamAttemptService {
   // Start a new exam attempt
@@ -85,40 +95,16 @@ class ExamAttemptService {
   // Get current exam attempt status
   async getAttemptStatus(attemptId, userId) {
     try {
-      console.log(
-        `[getAttemptStatus] Fetching status for attemptId: ${attemptId}`,
-      );
-      const attempt = await ExamAttempt.findOne({
-        _id: attemptId,
-        userId,
-      }).populate("examId");
-
-      if (!attempt) {
-        console.log(
-          `[getAttemptStatus] Attempt not found for attemptId: ${attemptId}`,
-        );
-        throw new Error("Attempt not found");
-      }
-
-      console.log(`[getAttemptStatus] Raw attempt status: ${attempt.status}`);
+      const attempt = await ExamAttempt.findOne({ _id: attemptId, userId });
+      if (!attempt) throw new Error("Attempt not found");
+      const exam = await fetchExam(attempt.examId);
 
       const currentSubject = attempt.getCurrentSubjectAttempt();
-      console.log(
-        `[getAttemptStatus] Current subject from getCurrentSubjectAttempt(): ${currentSubject?.subjectIndex}, isCompleted: ${currentSubject?.isCompleted}`,
-      );
-
       const timeRemaining = attempt.getTimeRemainingForCurrentSubject();
       let currentSubjectIndex = currentSubject?.subjectIndex;
-
-      if (
-        currentSubjectIndex === undefined &&
-        attempt.status === "in_progress"
-      ) {
+      if (currentSubjectIndex === undefined && attempt.status === "in_progress") {
         currentSubjectIndex = 0;
       }
-      console.log(
-        `[getAttemptStatus] Returning currentSubjectIndex: ${currentSubjectIndex}`,
-      );
 
       return {
         attemptId: attempt._id,
@@ -126,9 +112,8 @@ class ExamAttemptService {
         currentSubject: currentSubjectIndex ?? null,
         timeRemaining,
         totalSubjects: attempt.subjectAttempts.length,
-        completedSubjects: attempt.subjectAttempts.filter((s) => s.isCompleted)
-          .length,
-        exam: attempt.examId,
+        completedSubjects: attempt.subjectAttempts.filter((s) => s.isCompleted).length,
+        exam,
       };
     } catch (error) {
       throw error;
@@ -214,108 +199,68 @@ class ExamAttemptService {
 
   async submitAllAnswers(attemptId, userId, subjectIndex, answers) {
     try {
-      // 1. Fetch all required documents once
-      const attempt = await ExamAttempt.findOne({
-        _id: attemptId,
-        userId,
-      }).populate("examId");
-      if (!attempt) {
-        throw new Error("Attempt not found");
-      }
-      if (attempt.status !== "in_progress") {
-        throw new Error("Exam is not in progress");
-      }
-      const result = await Result.findOne({ attemptId: attempt._id });
-      if (!result) {
-        throw new Error("Result not found for the attempt");
-      }
+      // 1. Fetch attempt + result in parallel; exam comes from Redis cache
+      const [attempt, result] = await Promise.all([
+        ExamAttempt.findOne({ _id: attemptId, userId }),
+        Result.findOne({ attemptId }),
+      ]);
+      if (!attempt) throw new Error("Attempt not found");
+      if (attempt.status !== "in_progress") throw new Error("Exam is not in progress");
+      if (!result) throw new Error("Result not found for the attempt");
+      const exam = await fetchExam(attempt.examId);
 
       const subjectAttempt = attempt.subjectAttempts.find(
         (s) => s.subjectIndex === subjectIndex,
       );
-      if (!subjectAttempt) {
-        throw new Error("Subject not found");
-      }
+      if (!subjectAttempt) throw new Error("Subject not found");
 
-      // 2. Handle grace period for timed-out subjects
+      // 2. Grace period for timed-out subjects
       if (subjectAttempt.isCompleted) {
-        const now = new Date();
-        const timeSinceCompletion = now - (subjectAttempt.endTime || now); // in ms
+        const timeSinceCompletion = Date.now() - (subjectAttempt.endTime || Date.now());
         if (timeSinceCompletion > 10000) {
-          // 10-second grace period
-          throw new Error(
-            "Subject is not available for answering as it was completed some time ago.",
-          );
+          throw new Error("Subject is not available for answering as it was completed some time ago.");
         }
-        console.log(
-          `Accepting answers for recently timed-out subject ${subjectIndex}`,
-        );
       }
 
-      const exam = attempt.examId;
-
-      // Create a map for faster lookups
+      // 3. Build O(1) lookup maps
       const questionResultMap = new Map();
       result.questionResults.forEach((qr) => {
-        if (qr.subjectIndex === subjectIndex) {
-          questionResultMap.set(qr.questionIndex, qr);
-        }
+        if (qr.subjectIndex === subjectIndex) questionResultMap.set(qr.questionIndex, qr);
       });
+      const existingAnswerMap = new Map(
+        subjectAttempt.answers.map((a, i) => [a.questionIndex, i]),
+      );
 
-      // 3. Process all answers in memory
-      for (const submittedAnswer of answers) {
-        const { questionIndex, answer } = submittedAnswer;
-
-        // Update the answer in the ExamAttempt document
-        const existingAnswerIndex = subjectAttempt.answers.findIndex(
-          (a) => a.questionIndex === questionIndex,
-        );
-        if (existingAnswerIndex >= 0) {
-          subjectAttempt.answers[existingAnswerIndex].answer = answer;
+      // 4. Process all answers in memory
+      for (const { questionIndex, answer } of answers) {
+        const existingIdx = existingAnswerMap.get(questionIndex);
+        if (existingIdx !== undefined) {
+          subjectAttempt.answers[existingIdx].answer = answer;
         } else {
-          subjectAttempt.answers.push({
-            questionIndex,
-            subjectIndex,
-            answer,
-            timeSpent: 0,
-          });
+          subjectAttempt.answers.push({ questionIndex, subjectIndex, answer, timeSpent: 0 });
         }
 
-        // Update the corresponding answer in the Result document
         const questionResult = questionResultMap.get(questionIndex);
-
         if (questionResult) {
           questionResult.userAnswer = answer;
-          const question =
-            exam.subjects[subjectIndex]?.questions[questionIndex];
+          const question = exam.subjects[subjectIndex]?.questions[questionIndex];
           if (question) {
-            // Perform auto-grading for MCQs, similar to updateResult
             if (questionResult.questionType === "mcq-single") {
-              const correctOptionIndex = questionResult.correctAnswer[0];
-              const correctOptionText = question.options[correctOptionIndex];
+              const correctOptionText = question.options[questionResult.correctAnswer[0]];
               questionResult.isCorrect = answer === correctOptionText;
-              questionResult.marksObtained = questionResult.isCorrect
-                ? questionResult.maxMarks
-                : 0;
+              questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             } else if (questionResult.questionType === "mcq-multiple") {
-              const userAnswers = Array.isArray(answer) ? answer.sort() : [];
-              const correctOptionTexts = questionResult.correctAnswer
-                .map((index) => question.options[index])
-                .sort();
-              questionResult.isCorrect =
-                JSON.stringify(userAnswers) ===
-                JSON.stringify(correctOptionTexts);
-              questionResult.marksObtained = questionResult.isCorrect
-                ? questionResult.maxMarks
-                : 0;
+              const userAnswers = Array.isArray(answer) ? [...answer].sort() : [];
+              const correctOptionTexts = questionResult.correctAnswer.map((i) => question.options[i]).sort();
+              questionResult.isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctOptionTexts);
+              questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             }
           }
         }
       }
 
-      // 4. Save both documents once after all updates
-      await attempt.save();
-      await result.save();
+      // 5. Save both documents in parallel
+      await Promise.all([attempt.save(), result.save()]);
 
       return { success: true };
     } catch (error) {
@@ -325,115 +270,86 @@ class ExamAttemptService {
 
   async submitAndAdvance(attemptId, userId, subjectIndex, answers) {
     try {
-      const attempt = await ExamAttempt.findOne({
-        _id: attemptId,
-        userId,
-      }).populate("examId");
-      if (!attempt) {
-        throw new Error("Attempt not found");
-      }
-      if (attempt.status !== "in_progress") {
-        throw new Error("Exam is not in progress");
-      }
-      const result = await Result.findOne({ attemptId: attempt._id });
-      if (!result) {
-        throw new Error("Result not found for the attempt");
-      }
+      // 1. Fetch attempt + result in parallel; exam comes from Redis cache
+      const [attempt, result] = await Promise.all([
+        ExamAttempt.findOne({ _id: attemptId, userId }),
+        Result.findOne({ attemptId }),
+      ]);
+      if (!attempt) throw new Error("Attempt not found");
+      if (attempt.status !== "in_progress") throw new Error("Exam is not in progress");
+      if (!result) throw new Error("Result not found for the attempt");
+      const exam = await fetchExam(attempt.examId);
+      if (!exam) throw new Error("Exam not found");
 
       const subjectAttempt = attempt.subjectAttempts.find(
         (s) => s.subjectIndex === subjectIndex,
       );
-      if (!subjectAttempt) {
-        throw new Error("Subject not found");
-      }
+      if (!subjectAttempt) throw new Error("Subject not found");
 
-      // We don't check for isCompleted here, because we are about to complete it.
-
-      const exam = attempt.examId;
-
-      // Create a map for faster lookups
+      // 2. Build O(1) lookup maps
       const questionResultMap = new Map();
       result.questionResults.forEach((qr) => {
-        if (qr.subjectIndex === subjectIndex) {
-          questionResultMap.set(qr.questionIndex, qr);
-        }
+        if (qr.subjectIndex === subjectIndex) questionResultMap.set(qr.questionIndex, qr);
       });
+      const existingAnswerMap = new Map(
+        subjectAttempt.answers.map((a, i) => [a.questionIndex, i]),
+      );
 
-      // Process all answers in memory
-      for (const submittedAnswer of answers) {
-        const { questionIndex, answer } = submittedAnswer;
-
-        // Update the answer in the ExamAttempt document
-        const existingAnswerIndex = subjectAttempt.answers.findIndex(
-          (a) => a.questionIndex === questionIndex,
-        );
-        if (existingAnswerIndex >= 0) {
-          subjectAttempt.answers[existingAnswerIndex].answer = answer;
+      // 3. Process all answers in memory
+      for (const { questionIndex, answer } of answers) {
+        const existingIdx = existingAnswerMap.get(questionIndex);
+        if (existingIdx !== undefined) {
+          subjectAttempt.answers[existingIdx].answer = answer;
         } else {
-          subjectAttempt.answers.push({
-            questionIndex,
-            subjectIndex,
-            answer,
-            timeSpent: 0,
-          });
+          subjectAttempt.answers.push({ questionIndex, subjectIndex, answer, timeSpent: 0 });
         }
 
-        // Update the corresponding answer in the Result document
         const questionResult = questionResultMap.get(questionIndex);
-
         if (questionResult) {
           questionResult.userAnswer = answer;
-          const question =
-            exam.subjects[subjectIndex]?.questions[questionIndex];
+          const question = exam.subjects[subjectIndex]?.questions[questionIndex];
           if (question) {
-            // Perform auto-grading for MCQs, similar to updateResult
             if (questionResult.questionType === "mcq-single") {
-              const correctOptionIndex = questionResult.correctAnswer[0];
-              const correctOptionText = question.options[correctOptionIndex];
+              const correctOptionText = question.options[questionResult.correctAnswer[0]];
               questionResult.isCorrect = answer === correctOptionText;
-              questionResult.marksObtained = questionResult.isCorrect
-                ? questionResult.maxMarks
-                : 0;
+              questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             } else if (questionResult.questionType === "mcq-multiple") {
-              const userAnswers = Array.isArray(answer) ? answer.sort() : [];
-              const correctOptionTexts = questionResult.correctAnswer
-                .map((index) => question.options[index])
-                .sort();
-              questionResult.isCorrect =
-                JSON.stringify(userAnswers) ===
-                JSON.stringify(correctOptionTexts);
-              questionResult.marksObtained = questionResult.isCorrect
-                ? questionResult.maxMarks
-                : 0;
+              const userAnswers = Array.isArray(answer) ? [...answer].sort() : [];
+              const correctOptionTexts = questionResult.correctAnswer.map((i) => question.options[i]).sort();
+              questionResult.isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctOptionTexts);
+              questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             }
           }
         }
       }
 
-      // Mark the current subject as completed
+      // 4. Mark current subject complete and start next
       subjectAttempt.isCompleted = true;
       subjectAttempt.endTime = new Date();
       subjectAttempt.timeRemaining = 0;
 
-      // Find the next subject
-      const nextSubjectAttempt = attempt.subjectAttempts.find(
-        (subject) => !subject.isCompleted,
-      );
+      const nextSubjectAttempt = attempt.subjectAttempts.find((s) => !s.isCompleted);
+      if (nextSubjectAttempt) nextSubjectAttempt.startTime = new Date();
 
-      if (nextSubjectAttempt) {
-        // If there's a next subject, update its start time to now
-        nextSubjectAttempt.startTime = new Date();
-      }
+      // 5. Save both documents in parallel
+      await Promise.all([attempt.save(), result.save()]);
 
-      await attempt.save();
-      await result.save();
+      // 6. Return new status directly — caller skips a separate fetchExamStatus request
+      const currentSubjectIndex = nextSubjectAttempt ? nextSubjectAttempt.subjectIndex : null;
+      const timeRemaining = attempt.getTimeRemainingForCurrentSubject();
 
-      if (!nextSubjectAttempt) {
-        // If no next subject, all subjects are completed
-        console.log("[submitAndAdvance] All subjects completed.");
-      }
-
-      return { success: true };
+      return {
+        success: true,
+        newStatus: {
+          attemptId: attempt._id,
+          status: attempt.status,
+          currentSubject: currentSubjectIndex,
+          timeRemaining,
+          totalSubjects: attempt.subjectAttempts.length,
+          completedSubjects: attempt.subjectAttempts.filter((s) => s.isCompleted).length,
+          exam,
+        },
+      };
     } catch (error) {
       throw error;
     }
@@ -735,79 +651,29 @@ class ExamAttemptService {
 
   async advanceSubject(attemptId, userId) {
     try {
-      console.log(
-        `[advanceSubject] Attempting to advance subject for attemptId: ${attemptId}, userId: ${userId}`,
-      );
       const attempt = await ExamAttempt.findOne({ _id: attemptId, userId });
-      if (!attempt) {
-        console.log(
-          `[advanceSubject] Attempt not found for attemptId: ${attemptId}`,
-        );
-        throw new Error("Attempt not found");
-      }
-
-      console.log(`[advanceSubject] Attempt found. Status: ${attempt.status}`);
-      if (attempt.status !== "in_progress") {
-        console.log(
-          `[advanceSubject] Exam not in progress. Status: ${attempt.status}`,
-        );
-        throw new Error("Exam is not in progress");
-      }
+      if (!attempt) throw new Error("Attempt not found");
+      if (attempt.status !== "in_progress") throw new Error("Exam is not in progress");
 
       const currentSubjectAttempt = attempt.getCurrentSubjectAttempt();
-      console.log(
-        `[advanceSubject] Current subject before advance: ${currentSubjectAttempt?.subjectIndex}, isCompleted: ${currentSubjectAttempt?.isCompleted}`,
-      );
+      if (!currentSubjectAttempt) throw new Error("No active subject to advance from.");
 
-      if (!currentSubjectAttempt) {
-        console.log(`[advanceSubject] No active subject to advance from.`);
-        throw new Error("No active subject to advance from.");
-      }
-
-      // Guard against race conditions from rapid, successive calls.
-      const now = new Date();
-      const subjectUptime = (now - currentSubjectAttempt.startTime) / 1000; // in seconds
+      // Guard against race conditions from rapid successive calls
+      const subjectUptime = (Date.now() - currentSubjectAttempt.startTime) / 1000;
       if (subjectUptime < 3 && currentSubjectAttempt.subjectIndex > 0) {
-        // 3 seconds threshold, and not the first subject
-        console.log(
-          `[advanceSubject] Subject ${currentSubjectAttempt.subjectIndex} just started. Ignoring duplicate advance request.`,
-        );
         return { success: true, message: "Subject already advanced." };
       }
 
-      // Mark the current subject as completed
       currentSubjectAttempt.isCompleted = true;
       currentSubjectAttempt.endTime = new Date();
-      currentSubjectAttempt.timeRemaining = 0; // Ensure time remaining is 0 for completed subject
-      console.log(
-        `[advanceSubject] Marked subject ${currentSubjectAttempt.subjectIndex} as completed.`,
-      );
+      currentSubjectAttempt.timeRemaining = 0;
 
-      // Find the next subject
-      const nextSubjectAttempt = attempt.subjectAttempts.find(
-        (subject) => !subject.isCompleted,
-      );
-      console.log(
-        `[advanceSubject] Next subject found: ${nextSubjectAttempt?.subjectIndex}`,
-      );
+      const nextSubjectAttempt = attempt.subjectAttempts.find((s) => !s.isCompleted);
+      if (nextSubjectAttempt) nextSubjectAttempt.startTime = new Date();
 
-      if (nextSubjectAttempt) {
-        // If there's a next subject, update its start time to now
-        nextSubjectAttempt.startTime = new Date();
-      }
-
-      await attempt.save(); // Single save operation
-      console.log(`[advanceSubject] Attempt saved after advancing subject.`);
-
-      if (!nextSubjectAttempt) {
-        // If no next subject, all subjects are completed
-        console.log(`[advanceSubject] All subjects completed.`);
-      }
-
-      console.log(`[advanceSubject] Subject advanced successfully.`);
+      await attempt.save();
       return { success: true };
     } catch (error) {
-      console.error(`[advanceSubject] Error: ${error.message}`);
       throw error;
     }
   }

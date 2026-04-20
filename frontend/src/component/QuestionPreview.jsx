@@ -36,8 +36,7 @@ const QuestionPreview = ({ content }) => {
   return (
     <div
       ref={previewRef}
-      style={{ width: "100%", overflowX: "auto" }}
-      className={"custom-scrollbar"}
+      style={{ width: "100%", overflowX: "visible" }}
       dangerouslySetInnerHTML={{ __html: sanitizedContent }}
     />
   );

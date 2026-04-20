@@ -118,9 +118,9 @@ const LiveExam = () => {
     timeoutHandled.current = false;
   }, [attempt?.currentSubject]);
 
-  // Timer countdown
+  // Timer countdown — paused while submitting so new subject timer starts from full value
   useEffect(() => {
-    if (attempt?.status !== "in_progress") {
+    if (attempt?.status !== "in_progress" || isSubmitting) {
       return;
     }
 
@@ -135,90 +135,53 @@ const LiveExam = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [attempt?.currentSubject, attempt?.status]);
+  }, [attempt?.currentSubject, attempt?.status, isSubmitting]);
 
-  const submitCurrentSubjectAnswers = useCallback(async () => {
-    if (!attempt) return;
-    const { exam, currentSubject: currentSubjectIndex } = attempt;
-    const currentSubject = exam.subjects[currentSubjectIndex];
-
-    const answersToSubmit = [];
-    currentSubject.questions.forEach((question, qIndex) => {
-      const answer = answers[qIndex] !== undefined ? answers[qIndex] : null;
-      answersToSubmit.push({
-        questionIndex: qIndex,
-        answer: answer,
-        type: question.type,
-      });
-    });
-
+  // Build FormData for the current subject's answers — single source of truth
+  const buildAnswerFormData = useCallback(() => {
+    if (!attempt) return null;
+    const { exam, currentSubject: idx } = attempt;
+    const subject = exam.subjects[idx];
     const formData = new FormData();
-    const plainAnswersPayload = [];
-    const imageFilesToUpload = [];
+    const plainAnswers = [];
 
-    answersToSubmit.forEach((ans) => {
-      if (ans.type === "image" && Array.isArray(ans.answer)) {
+    subject.questions.forEach((question, qIndex) => {
+      const answer = answers[qIndex] !== undefined ? answers[qIndex] : null;
+      if (question.type === "image" && Array.isArray(answer)) {
         const fileNames = [];
-        ans.answer.forEach((file) => {
+        answer.forEach((file) => {
           if (file instanceof File) {
-            imageFilesToUpload.push(file);
+            formData.append("answer", file);
             fileNames.push(file.name);
           }
         });
-        plainAnswersPayload.push({ ...ans, answer: fileNames });
+        plainAnswers.push({ questionIndex: qIndex, answer: fileNames, type: question.type });
       } else {
-        plainAnswersPayload.push(ans);
+        plainAnswers.push({ questionIndex: qIndex, answer, type: question.type });
       }
     });
 
-    if (imageFilesToUpload.length > 0) {
-      imageFilesToUpload.forEach((file) => {
-        formData.append("answer", file);
-      });
+    formData.append("answers", JSON.stringify({ subjectIndex: idx, answers: plainAnswers }));
+    return formData;
+  }, [attempt, answers]);
+
+  // Used only for final exam submit (submit-all-answers + submit in sequence)
+  const submitCurrentSubjectAnswers = useCallback(async () => {
+    if (!attempt) return;
+    const formData = buildAnswerFormData();
+    const response = await fetch(
+      `${API_URL}/exam-attempts/${attemptId}/submit-all-answers`,
+      { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData },
+    );
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type");
+      const message = contentType?.includes("application/json")
+        ? (await response.json()).message || "Failed to submit answers."
+        : `Failed to submit answers. Status: ${response.status}`;
+      showSnackbar(message);
+      throw new Error(message);
     }
-
-    const bodyPayload = {
-      subjectIndex: currentSubjectIndex,
-      answers: plainAnswersPayload,
-    };
-
-    formData.append("answers", JSON.stringify(bodyPayload));
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-    };
-
-    try {
-      const response = await fetch(
-        `${API_URL}/exam-attempts/${attemptId}/submit-all-answers`,
-        {
-          method: "POST",
-          headers,
-          body: formData,
-        },
-      );
-
-      if (!response.ok) {
-        let message;
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-          const errorData = await response.json();
-          message = errorData.message || "Failed to submit answers.";
-        } else {
-          const textError = await response.text();
-          console.error("Server returned non-JSON response:", textError);
-          message = `Failed to submit answers. Server returned an unexpected response. Status: ${response.status}`;
-        }
-        throw new Error(message);
-      }
-    } catch (error) {
-      console.error("Failed to submit answers for the subject", error);
-      showSnackbar(
-        error.message || "Failed to submit answers. Please try again.",
-      );
-      throw error; // Re-throw to be caught by callers
-    }
-  }, [attempt, answers, attemptId, token, showSnackbar]);
+  }, [attempt, attemptId, token, showSnackbar, buildAnswerFormData]);
 
   // Auto-submit on timeout
   useEffect(() => {
@@ -240,70 +203,24 @@ const LiveExam = () => {
           showSnackbar("Time's up! Exam submitted automatically.", "info");
           navigate(`/user/exam/results/${attemptId}`);
         } else {
-          // Not the last subject, so submit and advance.
-          const { exam, currentSubject: currentSubjectIndex } = attempt;
-          const currentSubject = exam.subjects[currentSubjectIndex];
-          const answersToSubmit = currentSubject.questions.map(
-            (question, qIndex) => ({
-              questionIndex: qIndex,
-              answer: answers[qIndex] !== undefined ? answers[qIndex] : null,
-              type: question.type,
-            }),
-          );
-
-          const formData = new FormData();
-          const plainAnswersPayload = [];
-          const imageFilesToUpload = [];
-
-          answersToSubmit.forEach((ans) => {
-            if (ans.type === "image" && Array.isArray(ans.answer)) {
-              const fileNames = [];
-              ans.answer.forEach((file) => {
-                if (file instanceof File) {
-                  imageFilesToUpload.push(file);
-                  fileNames.push(file.name);
-                }
-              });
-              plainAnswersPayload.push({ ...ans, answer: fileNames });
-            } else {
-              plainAnswersPayload.push(ans);
-            }
-          });
-
-          if (imageFilesToUpload.length > 0) {
-            imageFilesToUpload.forEach((file) => {
-              formData.append("answer", file);
-            });
-          }
-
-          const bodyPayload = {
-            subjectIndex: currentSubjectIndex,
-            answers: plainAnswersPayload,
-          };
-
-          formData.append("answers", JSON.stringify(bodyPayload));
-
+          // Not the last subject — submit answers + advance in one request
+          const formData = buildAnswerFormData();
           const advanceResponse = await fetch(
             `${API_URL}/exam-attempts/${attemptId}/submit-and-advance`,
-            {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}` },
-              body: formData,
-            },
+            { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData },
           );
-
           if (!advanceResponse.ok) {
-            const errorData = await advanceResponse.json();
-            throw new Error(
-              errorData.message ||
-                "Failed to advance to next subject on timeout",
-            );
+            const errorData = await advanceResponse.json().catch(() => ({}));
+            throw new Error(errorData.message || "Failed to advance to next subject on timeout");
           }
-          showSnackbar(
-            "Time's up! Moving to next subject automatically.",
-            "info",
-          );
-          await fetchExamStatus();
+          showSnackbar("Time's up! Moving to next subject automatically.", "info");
+          const advData = await advanceResponse.json();
+          if (advData.data?.newStatus) {
+            setAttempt(advData.data.newStatus);
+            setAnswers({});
+          } else {
+            await fetchExamStatus();
+          }
         }
       } catch (error) {
         showSnackbar(
@@ -328,16 +245,17 @@ const LiveExam = () => {
     attempt,
     answers,
     isSubmitting,
+    buildAnswerFormData,
     fetchExamStatus,
     attemptId,
     navigate,
     token,
   ]);
 
-  // Time sync with server
+  // Time sync with server — skip during submission to avoid stomping fresh subject timeRemaining
   useEffect(() => {
     const syncTime = setInterval(async () => {
-      if (attempt && attempt.status === "in_progress") {
+      if (attempt && attempt.status === "in_progress" && !isSubmitting) {
         try {
           const response = await fetch(
             `${API_URL}/exam-attempts/${attemptId}/sync-time`,
@@ -368,7 +286,7 @@ const LiveExam = () => {
     }, 30000); // Sync with server every 30 seconds
 
     return () => clearInterval(syncTime);
-  }, [attempt, attemptId, token, fetchExamStatus]);
+  }, [attempt, attemptId, token, fetchExamStatus, isSubmitting]);
 
   const handleAnswerChange = (questionIndex, value, type) => {
     if (type === "mcq-multiple") {
@@ -390,34 +308,30 @@ const LiveExam = () => {
     confirmCallbackRef.current = async () => {
       setIsSubmitting(true);
       try {
-        await submitCurrentSubjectAnswers();
-
-        // Call backend to advance to the next subject
-        const advanceResponse = await fetch(
-          `${API_URL}/exam-attempts/${attemptId}/advance-subject`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+        // Single request: submit + advance + get new subject state in one round trip
+        const formData = buildAnswerFormData();
+        const response = await fetch(
+          `${API_URL}/exam-attempts/${attemptId}/submit-and-advance`,
+          { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData },
         );
-
-        if (!advanceResponse.ok) {
-          const errorData = await advanceResponse.json();
-          throw new Error(
-            errorData.message || "Failed to advance to next subject",
-          );
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.message || "Failed to submit and advance");
         }
-
-        await fetchExamStatus(); // Fetch the updated attempt status with the new subject
+        const data = await response.json();
+        // Use status returned directly — no separate fetchExamStatus needed
+        if (data.data?.newStatus) {
+          setAttempt(data.data.newStatus);
+          setAnswers({});
+        } else {
+          await fetchExamStatus();
+        }
         showSnackbar("Subject submitted and moved to next.", "success");
       } catch (error) {
-        console.error("Failed to move to next subject", error);
-        // Error is already shown by submitCurrentSubjectAnswers
+        showSnackbar(error.message || "Failed to move to next subject.");
       } finally {
         setIsSubmitting(false);
-        setAwaitingConfirmation(false); // Reset after submission attempt
+        setAwaitingConfirmation(false);
       }
     };
     setConfirmDialogOpen(true);
@@ -455,35 +369,46 @@ const LiveExam = () => {
     switch (question.type) {
       case "mcq-single":
         return (
-          <div>
-            {question.options.map((option, index) => (
-              <label className="flex items-start cursor-pointer space-x-2">
-                <input
-                  type="radio"
-                  name={`question-${qIndex}`}
-                  value={option}
-                  checked={answer === option}
-                  onChange={(e) =>
-                    handleAnswerChange(qIndex, e.target.value, question.type)
-                  }
-                  className="form-radio mt-1 h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
-                />
-                <div className="flex items-center space-x-1">
-                  <span className="font-semibold">
-                    {String.fromCharCode(65 + index)}.
-                  </span>
-                  <QuestionPreview content={option} />
-                </div>
-              </label>
-            ))}
+          <div className="space-y-2">
+            {question.options.map((option, index) => {
+              const isSelected = answer === option;
+              return (
+                <label
+                  key={index}
+                  className={`flex items-start cursor-pointer gap-3 px-4 py-3 rounded-xl border transition ${
+                    isSelected
+                      ? "border-orange-400 bg-orange-50"
+                      : "border-gray-200 hover:border-orange-200 hover:bg-orange-50/40"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`question-${qIndex}`}
+                    value={option}
+                    checked={isSelected}
+                    onChange={(e) =>
+                      handleAnswerChange(qIndex, e.target.value, question.type)
+                    }
+                    className="mt-1 h-4 w-4 accent-orange-500 shrink-0"
+                  />
+                  <div className="flex items-start gap-1.5 min-w-0">
+                    <span className="font-semibold shrink-0 text-gray-500">
+                      {String.fromCharCode(65 + index)}.
+                    </span>
+                    <QuestionPreview content={option} />
+                  </div>
+                </label>
+              );
+            })}
           </div>
         );
       case "short":
         return (
           <textarea
-            className="w-full p-2 border rounded"
-            rows="4"
+            className="w-full p-3 border border-gray-300 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition"
+            rows="6"
             value={answer || ""}
+            placeholder="Type your answer here..."
             onChange={(e) =>
               handleAnswerChange(qIndex, e.target.value, question.type)
             }
@@ -584,31 +509,52 @@ const LiveExam = () => {
     },
   );
 
+  const answeredCount = formattedAnswersForPalette.filter(
+    (a) => a !== undefined && a !== null && a !== "" && !(Array.isArray(a) && a.length === 0)
+  ).length;
+  const totalQuestions = currentSubject.questions.length;
+  const isLowTime = timeRemaining <= 300;
+
   return (
-    <div className="bg-orange-100  shadow-inner rounded-2xl p-3 grid grid-cols-1 gap-4 ">
-      <div className="bg-gray-50 shadow-inner rounded-2xl py-3 flex flex-col items-center justify-center ">
-        <h2 className="text-xl pt-5 primaryTextColor">{exam.title}</h2>
-        <h2
-          className="p-5"
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(exam.description),
-          }}
-        ></h2>
-        <div className="primaryTextColor rounded top-15 md:top-20 fixed bg-gray-50 ">
-          <div className={"px-3 py-3"}>
-            Time Remaining: {Math.floor(timeRemaining / 60)}:
-            {(timeRemaining % 60).toString().padStart(2, "0")}
-          </div>
+    <div className="max-w-4xl mx-auto px-4 py-6 grid grid-cols-1 gap-4">
+      {/* Sticky exam header bar */}
+      <div className="sticky top-0 z-40 bg-white border border-gray-200 rounded-2xl shadow-md px-5 py-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-col">
+          <span className="font-bold text-base primaryTextColor">{exam.title}</span>
+          <span className="text-xs text-gray-500">
+            Subject {currentSubjectIndex + 1} of {exam.subjects.length}: {currentSubject.title}
+          </span>
+        </div>
+        <div
+          className={`font-mono font-bold text-xl px-4 py-1 rounded-full ${
+            isLowTime ? "bg-red-100 text-red-600 animate-pulse" : "bg-orange-100 primaryTextColor"
+          }`}
+        >
+          ⏱ {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, "0")}
+        </div>
+        <div className="text-sm text-gray-600 text-right">
+          <span className="font-semibold text-green-600">{answeredCount}</span>
+          <span className="text-gray-400"> / </span>
+          <span className="font-semibold">{totalQuestions}</span>
+          <span className="text-gray-500 ml-1">answered</span>
         </div>
       </div>
 
-      <div>
-        <QuestionPalette
-          questions={currentSubject.questions}
-          answers={formattedAnswersForPalette}
-          subjectName={currentSubject.title}
-        />
-      </div>
+      {/* Exam description */}
+      {exam.description && (
+        <div className="bg-gray-50 shadow-inner rounded-2xl py-4 px-5">
+          <div
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(exam.description) }}
+          />
+        </div>
+      )}
+
+      <QuestionPalette
+        questions={currentSubject.questions}
+        answers={formattedAnswersForPalette}
+        subjectName={currentSubject.title}
+      />
 
       <SubjectDescription description={currentSubject.description} />
 
@@ -616,31 +562,30 @@ const LiveExam = () => {
         {currentSubject.questions.map((question, qIndex) => (
           <div
             key={qIndex}
-            className="mb-2 p-4 bg-white shadow-inner rounded-2xl"
+            className="mb-3 p-5 bg-white shadow-sm border border-gray-100 rounded-2xl"
           >
-            <h4 className="text-lg font-semibold mb-2 ">
-              {qIndex + 1}:
-              <span className="primaryTextColor ml-2 ">
+            <h4 className="text-base font-semibold mb-3">
+              <span className="text-gray-500 mr-1">{qIndex + 1}.</span>
+              <span className="primaryTextColor">
                 <QuestionPreview content={question.text} />
               </span>
               {question.marks > 0 && (
-                <span className="ml-2 font-normal text-sm text-gray-500">
-                  (Marks: {question.marks})
+                <span className="ml-2 font-normal text-sm text-gray-400">
+                  ({question.marks} mark{question.marks > 1 ? "s" : ""})
                 </span>
               )}
             </h4>
-
             <div>{renderQuestion(question, qIndex)}</div>
           </div>
         ))}
       </div>
 
-      <div className={"flex flex-col items-center justify-center"}>
+      <div className="flex flex-col items-center justify-center pb-6">
         {isLastSubject ? (
           <button
             onClick={handleCompleteExam}
             disabled={isSubmitting}
-            className="primaryBgColor accentTextColor cursor-pointer py-2 px-4 rounded disabled:bg-gray-400"
+            className="primaryBgColor accentTextColor cursor-pointer py-3 px-8 rounded-xl text-base font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Submitting..." : "Submit Exam"}
           </button>
@@ -648,7 +593,7 @@ const LiveExam = () => {
           <button
             onClick={handleNextSubject}
             disabled={isSubmitting}
-            className="primaryBgColor accentTextColor cursor-pointer py-2 px-4 rounded disabled:bg-gray-400"
+            className="primaryBgColor accentTextColor cursor-pointer py-3 px-8 rounded-xl text-base font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Submitting..." : "Submit & Next Subject"}
           </button>
