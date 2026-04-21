@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { Box, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
+import React, { useState, lazy, Suspense } from "react";
+import { Box, TextField, ToggleButton, ToggleButtonGroup, Tooltip, CircularProgress } from "@mui/material";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import CodeIcon from "@mui/icons-material/Code";
 import { Editor } from "primereact/editor";
-import QuestionEditorWithLatex from "../QuestionEditorWithLatex.jsx";
+
+const QuestionEditorWithLatex = lazy(() => import("../QuestionEditorWithLatex.jsx"));
 
 const stripHtml = (html) => (html || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 
@@ -68,10 +69,12 @@ export default function SwitchableEditor({
           sx={{ "& .MuiInputBase-root": { alignItems: "flex-start" } }}
         />
       ) : useLatex ? (
-        <QuestionEditorWithLatex
-          value={value || ""}
-          onTextChange={(e) => onChange(e.htmlValue || "")}
-        />
+        <Suspense fallback={<Box sx={{ display: "flex", justifyContent: "center", p: 2 }}><CircularProgress size={24} /></Box>}>
+          <QuestionEditorWithLatex
+            value={value || ""}
+            onTextChange={(e) => onChange(e.htmlValue || "")}
+          />
+        </Suspense>
       ) : (
         <Editor
           value={value || ""}
