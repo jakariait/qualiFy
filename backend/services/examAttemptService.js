@@ -57,12 +57,12 @@ class ExamAttemptService {
 
       await examAttempt.save();
 
-      // Create initial result record
+      // Create initial result record with empty question results (lazy load later)
       const result = new Result({
         attemptId: examAttempt._id,
         examId,
         userId,
-        questionResults: this.createQuestionResults(exam, examAttempt._id),
+        questionResults: [],
       });
 
       await result.save();
@@ -101,6 +101,12 @@ class ExamAttemptService {
         currentSubjectIndex = 0;
       }
 
+      // Only return questions for the current subject (for performance)
+      const subjects = exam.subjects.map((sub, idx) => ({
+        ...sub,
+        questions: idx === currentSubjectIndex ? sub.questions : [],
+      }));
+
       return {
         attemptId: attempt._id,
         status: attempt.status,
@@ -108,7 +114,7 @@ class ExamAttemptService {
         timeRemaining,
         totalSubjects: attempt.subjectAttempts.length,
         completedSubjects: attempt.subjectAttempts.filter((s) => s.isCompleted).length,
-        exam,
+        exam: { ...exam, subjects },
       };
     } catch (error) {
       throw error;
@@ -174,15 +180,6 @@ class ExamAttemptService {
 
       await attempt.save();
 
-      // Update result
-      await this.updateResult(
-        attemptId,
-        subjectIndex,
-        questionIndex,
-        answer,
-        timeSpent,
-      );
-
       return {
         success: true,
         timeRemaining: attempt.getTimeRemainingForCurrentSubject(),
@@ -226,8 +223,10 @@ class ExamAttemptService {
         subjectAttempt.answers.map((a, i) => [a.questionIndex, i]),
       );
 
+      const subject = exam.subjects[subjectIndex];
+
       // 4. Process all answers in memory
-      for (const { questionIndex, answer } of answers) {
+      for (const { questionIndex, answer, type } of answers) {
         const existingIdx = existingAnswerMap.get(questionIndex);
         if (existingIdx !== undefined) {
           subjectAttempt.answers[existingIdx].answer = answer;
@@ -235,18 +234,38 @@ class ExamAttemptService {
           subjectAttempt.answers.push({ questionIndex, subjectIndex, answer, timeSpent: 0 });
         }
 
-        const questionResult = questionResultMap.get(questionIndex);
+        // Lazy create question result if not exists
+        let questionResult = questionResultMap.get(questionIndex);
+        if (!questionResult && subject?.questions?.[questionIndex]) {
+          const question = subject.questions[questionIndex];
+          questionResult = {
+            questionIndex,
+            subjectIndex,
+            questionType: question.type,
+            questionText: question.text,
+            correctAnswer: question.correctAnswers,
+            maxMarks: question.marks,
+            userAnswer: null,
+            isCorrect: null,
+            marksObtained: 0,
+            timeSpent: 0,
+          };
+          result.questionResults.push(questionResult);
+          questionResultMap.set(questionIndex, questionResult);
+        }
+
         if (questionResult) {
           questionResult.userAnswer = answer;
-          const question = exam.subjects[subjectIndex]?.questions[questionIndex];
+          const question = subject?.questions?.[questionIndex];
           if (question) {
             if (questionResult.questionType === "mcq-single") {
-              const correctOptionText = question.options[questionResult.correctAnswer[0]];
+              const correctOptionIndex = questionResult.correctAnswer?.[0];
+              const correctOptionText = question.options?.[correctOptionIndex];
               questionResult.isCorrect = answer === correctOptionText;
               questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             } else if (questionResult.questionType === "mcq-multiple") {
               const userAnswers = Array.isArray(answer) ? [...answer].sort() : [];
-              const correctOptionTexts = questionResult.correctAnswer.map((i) => question.options[i]).sort();
+              const correctOptionTexts = (questionResult.correctAnswer || []).map((i) => question.options?.[i]).filter(Boolean).sort();
               questionResult.isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctOptionTexts);
               questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             }
@@ -265,7 +284,7 @@ class ExamAttemptService {
 
   async submitAndAdvance(attemptId, userId, subjectIndex, answers) {
     try {
-      // 1. Fetch attempt + result in parallel; exam comes from Redis cache
+      // 1. Fetch attempt + result in parallel
       const [attempt, result] = await Promise.all([
         ExamAttempt.findOne({ _id: attemptId, userId }),
         Result.findOne({ attemptId }),
@@ -290,6 +309,8 @@ class ExamAttemptService {
         subjectAttempt.answers.map((a, i) => [a.questionIndex, i]),
       );
 
+      const subject = exam.subjects[subjectIndex];
+
       // 3. Process all answers in memory
       for (const { questionIndex, answer } of answers) {
         const existingIdx = existingAnswerMap.get(questionIndex);
@@ -299,18 +320,38 @@ class ExamAttemptService {
           subjectAttempt.answers.push({ questionIndex, subjectIndex, answer, timeSpent: 0 });
         }
 
-        const questionResult = questionResultMap.get(questionIndex);
+        // Lazy create question result if not exists
+        let questionResult = questionResultMap.get(questionIndex);
+        if (!questionResult && subject?.questions?.[questionIndex]) {
+          const question = subject.questions[questionIndex];
+          questionResult = {
+            questionIndex,
+            subjectIndex,
+            questionType: question.type,
+            questionText: question.text,
+            correctAnswer: question.correctAnswers,
+            maxMarks: question.marks,
+            userAnswer: null,
+            isCorrect: null,
+            marksObtained: 0,
+            timeSpent: 0,
+          };
+          result.questionResults.push(questionResult);
+          questionResultMap.set(questionIndex, questionResult);
+        }
+
         if (questionResult) {
           questionResult.userAnswer = answer;
-          const question = exam.subjects[subjectIndex]?.questions[questionIndex];
+          const question = subject?.questions?.[questionIndex];
           if (question) {
             if (questionResult.questionType === "mcq-single") {
-              const correctOptionText = question.options[questionResult.correctAnswer[0]];
+              const correctOptionIndex = questionResult.correctAnswer?.[0];
+              const correctOptionText = question.options?.[correctOptionIndex];
               questionResult.isCorrect = answer === correctOptionText;
               questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             } else if (questionResult.questionType === "mcq-multiple") {
               const userAnswers = Array.isArray(answer) ? [...answer].sort() : [];
-              const correctOptionTexts = questionResult.correctAnswer.map((i) => question.options[i]).sort();
+              const correctOptionTexts = (questionResult.correctAnswer || []).map((i) => question.options?.[i]).filter(Boolean).sort();
               questionResult.isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctOptionTexts);
               questionResult.marksObtained = questionResult.isCorrect ? questionResult.maxMarks : 0;
             }
