@@ -182,7 +182,7 @@ function App() {
         <Route element={<UserProtectedRoute />}>
           <Route path="/resource-viewer/:id" element={<ResourceViewerPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/pre-book" element={<PrebookPage/>} />
+          <Route path="/pre-book" element={<PrebookPage />} />
           <Route path="/user/home" element={<UserHomePage />} />
           <Route path="/user/orders" element={<UserAllOrdersPage />} />
           <Route
@@ -195,7 +195,10 @@ function App() {
             element={<ChangePasswordPage />}
           />
           <Route path="/user/courses/:id/exams" element={<LiveExamPage />} />
-          <Route path="/user/notice/:productId" element={<CourseExamNoticePage />} />
+          <Route
+            path="/user/notice/:productId"
+            element={<CourseExamNoticePage />}
+          />
 
           <Route
             path="/user/exam/attempt/:attemptId"
@@ -221,10 +224,7 @@ function App() {
             path="/admin/product-service"
             element={<ManageProductServicePage />}
           />
-          <Route
-            path="/admin/notice"
-            element={<NoticeForCourseExamPage/>}
-          />
+          <Route path="/admin/notice" element={<NoticeForCourseExamPage />} />
           <Route
             path="/admin/free-resource"
             element={<FreeResourceUploadPage />}
