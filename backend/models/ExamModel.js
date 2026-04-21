@@ -44,6 +44,8 @@ const ExamSchema = new mongoose.Schema(
     durationMin: { type: Number, default: 0 }, // auto-calculated from subjects
     totalMarks: { type: Number, default: 0 }, // auto-calculated from questions
     totalQuestions: { type: Number, default: 0 }, // auto-calculated from questions
+
+    backup: { type: Object }, // JSON backup of exam data
   },
   { timestamps: true, versionKey: false },
 );

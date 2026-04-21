@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useAuthUserStore from "../../store/AuthUserStore.js";
 import ExamCardSkeleton from "./ExamCardSkeleton.jsx";
-import { Snackbar, Alert, Pagination } from "@mui/material";
+import { Snackbar, Alert, Pagination, TextField, InputAdornment, Box } from "@mui/material";
 import ExamStartDialog from "./ExamStartDialog.jsx";
 import { Link } from "react-router-dom";
+import SearchIcon from "@mui/icons-material/Search";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -17,6 +18,8 @@ const LiveExamList = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const limit = 10;
 
   const [snackbar, setSnackbar] = useState({
@@ -37,43 +40,50 @@ const LiveExamList = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  useEffect(() => {
-    const fetchExams = async () => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({ page, limit });
-        const response = await fetch(
-          `${API_URL}/exams/product/${id}?${params}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+  const fetchExams = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ page, limit });
+      if (search) params.append("search", search);
+      const response = await fetch(
+        `${API_URL}/exams/product/${id}?${params}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch exams");
-        }
-        const data = await response.json();
-        if (Array.isArray(data.exams)) {
-          setExams(data.exams);
-          if (data.totalPages) setTotalPages(data.totalPages);
-          if (data.total !== undefined) setTotal(data.total);
-        } else {
-          showSnackbar("Received invalid data from server");
-        }
-      } catch (err) {
-        showSnackbar(err.message);
-      } finally {
-        setLoading(false);
+        },
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch exams");
       }
-    };
+      const data = await response.json();
+      if (Array.isArray(data.exams)) {
+        setExams(data.exams);
+        if (data.totalPages) setTotalPages(data.totalPages);
+        if (data.total !== undefined) setTotal(data.total);
+      } else {
+        showSnackbar("Received invalid data from server");
+      }
+    } catch (err) {
+      showSnackbar(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [id, token, page, search]);
 
+  useEffect(() => {
     if (id) {
       fetchExams();
     }
-  }, [id, token, page]);
+  }, [id, fetchExams]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearch(searchInput);
+    setPage(1);
+  };
 
   useEffect(() => {
     const fetchUserAttempts = async () => {
@@ -151,6 +161,25 @@ const LiveExamList = () => {
       <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-2xl font-semibold">
         Live Exams
       </h1>
+
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="mb-6">
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search exams..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ maxWidth: 400 }}
+        />
+      </form>
 
       <div className="grid md:grid-cols-2 gap-6">
         {loading

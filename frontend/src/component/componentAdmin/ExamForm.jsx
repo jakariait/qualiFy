@@ -59,7 +59,7 @@ import useAuthAdminStore from "../../store/AuthAdminStore.js";
 import StickyActionBar from "./StickyActionBar.jsx";
 import SortableSubjectItem from "./SortableSubjectItem.jsx";
 import VirtualQuestionList from "./VirtualQuestionList.jsx";
-import useAutoSave from "../../hooks/useAutoSave.js";
+
 
 export default function ExamForm({ initialData = {}, onSuccess }) {
   const { token } = useAuthAdminStore();
@@ -92,22 +92,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
 
-  // ── Auto-save: metadata only ──────────────────────────────────────────────
-  const metaSnapshot = useMemo(() => ({
-    title: form.title,
-    description: form.description,
-    status: form.status,
-    productIds: form.productIds,
-    isFree: form.isFree,
-  }), [form.title, form.description, form.status, form.productIds, form.isFree]);
-
-  const autoSaveMeta = useCallback(async (meta) => {
-    await axios.patch(`${API_URL}/exams/${initialData._id}/meta`, meta, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  }, [initialData?._id, token, API_URL]);
-
-  const { saveStatus } = useAutoSave(metaSnapshot, autoSaveMeta, 3000, !!initialData?._id);
+  
 
   // ── Data fetching ─────────────────────────────────────────────────────────
   const fetchExamBasicInfo = async (signal) => {
@@ -147,6 +132,26 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
             counts[idx] = sub.questionsPagination?.total || 0;
           });
           setSubjectsQuestionsCount(counts);
+        }
+
+        // Calculate totals from subjects data
+        let totalQ = 0, totalM = 0, totalT = 0;
+        (data.subjects || []).forEach((sub) => {
+          totalT += sub.timeLimitMin || 0;
+          if (sub.questions && sub.questions.length > 0) {
+            totalQ += sub.questions.length;
+            totalM += sub.questions.reduce((sum, q) => sum + (q.marks || 0), 0);
+          }
+        });
+
+        // Update totals in pagination if not already set
+        if (totalQ > 0 || totalM > 0 || totalT > 0) {
+          setSubjectsPagination(prev => ({
+            ...prev,
+            totalQuestions: data.pagination.subjects.totalQuestions || totalQ || prev.totalQuestions,
+            totalMarks: data.pagination.subjects.totalMarks || totalM || prev.totalMarks,
+            totalTime: data.pagination.subjects.totalTime || totalT || prev.totalTime,
+          }));
         }
       } catch (err) {
         if (axios.isCancel(err)) return;
@@ -193,10 +198,12 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
   // ── Subject / question loading ────────────────────────────────────────────
   const loadSubjectQuestions = async (sIndex) => {
     if (!initialData?._id || questionsLoadMore[sIndex]?.loaded) return;
+    const subject = form.subjects?.[sIndex];
+    const subjectId = subject?._id;
     setQuestionsLoadMore(prev => ({ ...prev, [sIndex]: { loading: true, loaded: true } }));
     try {
       const res = await axios.get(
-        `${API_URL}/exams/${initialData._id}/questions?subjectIndex=${sIndex}&questionsPage=1&questionsLimit=10`,
+        `${API_URL}/exams/${initialData._id}/questions?subjectIndex=${subjectId || sIndex}&questionsPage=1&questionsLimit=10`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setForm(prev => {
@@ -208,6 +215,9 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
         ...prev,
         [sIndex]: { page: 1, hasMore: res.data.pagination?.hasMore, loading: false, loaded: true },
       }));
+      if (res.data.pagination?.total) {
+        setSubjectsQuestionsCount(prev => ({ ...prev, [sIndex]: res.data.pagination.total }));
+      }
     } catch (err) {
       console.error("Error loading questions:", err);
       setQuestionsLoadMore(prev => ({ ...prev, [sIndex]: { loading: false, loaded: false } }));
@@ -265,11 +275,12 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
   const loadMoreQuestions = async (sIndex) => {
     const subject = form.subjects?.[sIndex];
     if (!subject || questionsLoadMore[sIndex]?.loading) return;
+    const subjectId = subject?._id;
     setQuestionsLoadMore(prev => ({ ...prev, [sIndex]: { loading: true } }));
     try {
       const nextPage = (questionsLoadMore[sIndex]?.page || 1) + 1;
       const res = await axios.get(
-        `${API_URL}/exams/${initialData._id}/questions?subjectIndex=${sIndex}&questionsPage=${nextPage}&questionsLimit=10`,
+        `${API_URL}/exams/${initialData._id}/questions?subjectIndex=${subjectId || sIndex}&questionsPage=${nextPage}&questionsLimit=10`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setForm(prev => {
@@ -469,24 +480,38 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
             {initialData?._id ? "Edit Exam" : "Create New Exam"}
           </Typography>
 
-          {/* Summary bar */}
-          <div className="p-4 mb-6 bg-blue-500 text-white rounded-lg shadow">
-            <div className="gap-4 items-center">
-              {initialData?._id ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-                  <div className="flex items-center gap-2"><span>📚</span><h6 className="text-lg font-semibold">{subjectsPagination.total} Subjects</h6></div>
-                  <div className="flex items-center gap-2"><span>❓</span><h6 className="text-lg font-semibold">{subjectsPagination.totalQuestions} Questions</h6></div>
-                  <div className="flex items-center gap-2"><span>🎯</span><h6 className="text-lg font-semibold">{subjectsPagination.totalMarks} Marks</h6></div>
-                  <div className="flex items-center gap-2"><span>⏱️</span><h6 className="text-lg font-semibold">{subjectsPagination.totalTime} min</h6></div>
+          {/* Summary bar - show total questions from database, marks from loaded */}
+          {(() => {
+            let totalQ = 0, totalM = 0, totalT = 0;
+            Object.values(subjectsQuestionsCount).forEach(count => {
+              totalQ += count || 0;
+            });
+            (form.subjects || []).forEach((sub) => {
+              totalT += sub.timeLimitMin || 0;
+              if (sub.questions && sub.questions.length > 0) {
+                totalM += sub.questions.reduce((sum, q) => sum + (q.marks || 0), 0);
+              }
+            });
+            return (
+              <div className="p-4 mb-6 bg-blue-500 text-white rounded-lg shadow">
+                <div className="gap-4 items-center">
+                  {initialData?._id ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+                      <div className="flex items-center gap-2"><span>📚</span><h6 className="text-lg font-semibold">{subjectsPagination.total} Subjects</h6></div>
+                      <div className="flex items-center gap-2"><span>❓</span><h6 className="text-lg font-semibold">{totalQ || subjectsPagination.totalQuestions} Questions</h6></div>
+                      <div className="flex items-center gap-2"><span>🎯</span><h6 className="text-lg font-semibold">{totalM || subjectsPagination.totalMarks} Marks</h6></div>
+                      <div className="flex items-center gap-2"><span>⏱️</span><h6 className="text-lg font-semibold">{totalT || subjectsPagination.totalTime} min</h6></div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+                      <div className="flex items-center gap-2"><span>🎯</span><h6 className="text-lg font-semibold">Total Marks: {totalMarks}</h6></div>
+                      <div className="flex items-center gap-2"><span>⏱️</span><h6 className="text-lg font-semibold">Total Time: {totalTime} minutes</h6></div>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-                  <div className="flex items-center gap-2"><span>🎯</span><h6 className="text-lg font-semibold">Total Marks: {totalMarks}</h6></div>
-                  <div className="flex items-center gap-2"><span>⏱️</span><h6 className="text-lg font-semibold">Total Time: {totalTime} minutes</h6></div>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
+            );
+          })()}
 
           <form id="exam-form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
@@ -569,18 +594,24 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                 <Box sx={{ pl: 4 }}>
                   {(form.subjects || []).map((subject, sIndex) => {
                     const subjectId = subject._id?.toString() || subject._tempId || `sub-${sIndex}`;
-                    const hasQuestionsLoaded = questionsLoadMore[sIndex]?.loaded || (subject.questions?.length > 0);
+                    const hasQuestionsLoaded = questionsLoadMore[sIndex]?.loaded;
                     const isLoadingQuestions = questionsLoadMore[sIndex]?.loading;
+                    const hasMoreQuestions = questionsLoadMore[sIndex]?.hasMore;
                     const expandedSet = expandedQuestions[sIndex] || new Set();
                     const searchFilter = questionSearches[sIndex] || "";
                     const questionSortableIds = (subject.questions || []).map(q => q._id?.toString() || q._tempId || `q-${Math.random()}`);
 
+                    const handleSubjectExpand = () => {
+                      if (!hasQuestionsLoaded && !isLoadingQuestions && initialData?._id) {
+                        loadSubjectQuestions(sIndex);
+                      }
+                    };
+
                     return (
                       <SortableSubjectItem key={subjectId} id={subjectId}>
-                        <Accordion sx={{ mb: 2 }}>
+                        <Accordion sx={{ mb: 2 }} onChange={handleSubjectExpand}>
                           <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
-                            onClick={() => !hasQuestionsLoaded && loadSubjectQuestions(sIndex)}
                           >
                             <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
                               <Typography variant="h6">
@@ -760,9 +791,9 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
                             })}
 
                             <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                              {initialData?._id && subject.questionsPagination?.hasMore && (
+                              {initialData?._id && hasMoreQuestions && (
                                 <Button size="small" variant="outlined" onClick={() => loadMoreQuestions(sIndex)} disabled={questionsLoadMore[sIndex]?.loading}>
-                                  {questionsLoadMore[sIndex]?.loading ? "Loading..." : "Load More Questions"}
+                                  {questionsLoadMore[sIndex]?.loading ? "Loading..." : `Load More Questions (${subjectsQuestionsCount[sIndex] - (subject.questions?.length || 0)} remaining)`}
                                 </Button>
                               )}
                               <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => addQuestion(sIndex)}>
@@ -799,7 +830,7 @@ export default function ExamForm({ initialData = {}, onSuccess }) {
         </CardContent>
       </Card>
 
-      <StickyActionBar loading={loading} saveStatus={saveStatus} isEditing={!!initialData?._id} onSubmit={handleSubmit} />
+      <StickyActionBar loading={loading} isEditing={!!initialData?._id} onSubmit={handleSubmit} />
 
       <Snackbar
         open={snackbar.open}

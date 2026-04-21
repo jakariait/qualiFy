@@ -498,7 +498,36 @@ const LiveExam = () => {
     !currentSubject.questions ||
     currentSubject.questions.length === 0
   ) {
-    return <div>This subject has no questions.</div>;
+    // Subject exists but has no questions — show a clear message with option to skip
+    const isLastSubject = currentSubjectIndex >= exam.subjects.length - 1;
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col items-center justify-center gap-6 mt-10">
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm px-8 py-10 text-center max-w-md w-full">
+          <div className="text-4xl mb-4">📭</div>
+          <h3 className="text-lg font-bold primaryTextColor mb-2">
+            {currentSubject?.title || `Subject ${currentSubjectIndex + 1}`}
+          </h3>
+          <p className="text-gray-500 mb-6">This subject has no questions. You can skip it and continue.</p>
+          {isLastSubject ? (
+            <button
+              onClick={handleCompleteExam}
+              disabled={isSubmitting}
+              className="primaryBgColor accentTextColor cursor-pointer py-3 px-8 rounded-xl text-base font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Exam"}
+            </button>
+          ) : (
+            <button
+              onClick={handleNextSubject}
+              disabled={isSubmitting}
+              className="primaryBgColor accentTextColor cursor-pointer py-3 px-8 rounded-xl text-base font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Advancing..." : "Skip to Next Subject →"}
+            </button>
+          )}
+        </div>
+      </div>
+    );
   }
 
   const isLastSubject = currentSubjectIndex >= exam.subjects.length - 1;

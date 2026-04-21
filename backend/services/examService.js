@@ -1,6 +1,5 @@
 const Exam = require("../models/ExamModel");
 const mongoose = require("mongoose");
-const { invalidateExam } = require("../utils/redisClient");
 
 const createExam = async (data) => {
   const exam = new Exam(data);
@@ -88,10 +87,17 @@ const getExamById = async (id, options = {}) => {
 
   const totalSubjects = exam.subjects?.length || 0;
 
-  // Use pre-computed fields stored by the pre('save') hook instead of re-iterating all questions
-  const totalQuestions = exam.totalQuestions || 0;
-  const totalMarks = exam.totalMarks || 0;
-  const totalTime = exam.durationMin || 0;
+  // Calculate from actual data to ensure accuracy (backup restore may not have pre-computed values)
+  let totalQuestions = 0;
+  let totalMarks = 0;
+  let totalTime = 0;
+  (exam.subjects || []).forEach((sub) => {
+    totalTime += sub.timeLimitMin || 0;
+    if (sub.questions && sub.questions.length > 0) {
+      totalQuestions += sub.questions.length;
+      totalMarks += sub.questions.reduce((sum, q) => sum + (q.marks || 0), 0);
+    }
+  });
 
   return {
     ...exam.toObject(),
@@ -113,9 +119,38 @@ const getExamById = async (id, options = {}) => {
 const updateExam = async (id, data) => {
   const exam = await Exam.findById(id);
   if (!exam) return null;
-  Object.assign(exam, data);
+
+  // Update basic fields
+  if (data.title !== undefined) exam.title = data.title;
+  if (data.description !== undefined) exam.description = data.description;
+  if (data.status !== undefined) exam.status = data.status;
+  if (data.productIds !== undefined) exam.productIds = data.productIds;
+  if (data.isFree !== undefined) exam.isFree = data.isFree;
+
+  // Merge subjects - preserve existing questions if not provided in update
+  if (data.subjects && Array.isArray(data.subjects)) {
+    const existingSubjectsMap = new Map(exam.subjects.map(s => [s._id?.toString(), s]));
+
+    exam.subjects = data.subjects.map(newSub => {
+      const existingSub = newSub._id ? existingSubjectsMap.get(newSub._id.toString()) : null;
+      if (existingSub) {
+        // Merge: use new values but preserve questions if new ones are empty
+        return {
+          ...existingSub.toObject ? existingSub.toObject() : existingSub,
+          title: newSub.title,
+          description: newSub.description,
+          timeLimitMin: newSub.timeLimitMin,
+          questions: (newSub.questions && newSub.questions.length > 0)
+            ? newSub.questions
+            : existingSub.questions,
+        };
+      }
+      // New subject
+      return newSub;
+    });
+  }
+
   await exam.save();
-  await invalidateExam(id.toString());
   return exam;
 };
 
@@ -152,13 +187,18 @@ const reorderQuestions = async (examId, subjectId, orderedIds) => {
   return exam;
 };
 
-const getExamsByProductId = async (productId, page = 1, limit = 10) => {
+const getExamsByProductId = async (productId, page = 1, limit = 10, search = "") => {
   const filter = { productIds: productId, status: "published" };
+
+  if (search && search.trim()) {
+    filter.title = { $regex: search.trim(), $options: "i" };
+  }
+
   const skip = (page - 1) * limit;
   const [exams, total] = await Promise.all([
     Exam.find(filter)
       .select("title totalMarks durationMin")
-      .sort({ title: 1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
     Exam.countDocuments(filter),
@@ -219,12 +259,22 @@ const getSubjectsByExamId = async (examId, subjectsPage = 1, subjectsLimit = 5, 
 
 const getSubjectQuestions = async (examId, subjectIndex, questionsPage = 1, questionsLimit = 10) => {
   const exam = await Exam.findById(examId);
-  if (!exam || !exam.subjects || !exam.subjects[subjectIndex]) return null;
-  
-  const subject = exam.subjects[subjectIndex];
+  if (!exam || !exam.subjects) return null;
+
+  // Support both numeric index and subjectId lookup
+  let subject;
+  if (typeof subjectIndex === 'string' && subjectIndex.length > 5) {
+    // Likely a subjectId (ObjectId string)
+    subject = exam.subjects.find(s => s._id?.toString() === subjectIndex);
+  } else {
+    // Numeric index
+    subject = exam.subjects[parseInt(subjectIndex)];
+  }
+  if (!subject) return null;
+
   const questionsSkip = (questionsPage - 1) * questionsLimit;
   const paginatedQuestions = subject.questions?.slice(questionsSkip, questionsSkip + questionsLimit) || [];
-  
+
   return {
     questions: paginatedQuestions,
     pagination: {
@@ -234,6 +284,38 @@ const getSubjectQuestions = async (examId, subjectIndex, questionsPage = 1, ques
       hasMore: (questionsPage * questionsLimit) < (subject.questions?.length || 0)
     }
   };
+};
+
+const uploadBackup = async (id, backupData) => {
+  const exam = await Exam.findByIdAndUpdate(
+    id,
+    { backup: backupData },
+    { new: true }
+  );
+  return exam;
+};
+
+const restoreFromBackup = async (id) => {
+  const exam = await Exam.findById(id);
+  if (!exam || !exam.backup) return null;
+  
+  const { backup } = exam;
+  Object.assign(exam, {
+    title: backup.title,
+    description: backup.description,
+    status: backup.status,
+    productIds: backup.productIds,
+    isFree: backup.isFree,
+    subjects: backup.subjects,
+  });
+  await exam.save();
+  await invalidateExam(id.toString());
+  return exam;
+};
+
+const getBackup = async (id) => {
+  const exam = await Exam.findById(id).select("backup");
+  return exam?.backup || null;
 };
 
 module.exports = {
@@ -249,4 +331,7 @@ module.exports = {
   reorderQuestions,
   getExamsByProductId,
   getFreeExams,
+  uploadBackup,
+  restoreFromBackup,
+  getBackup,
 };

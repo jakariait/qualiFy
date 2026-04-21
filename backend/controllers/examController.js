@@ -85,10 +85,10 @@ const getMoreSubjects = asyncHandler(async (req, res) => {
 // Get more questions for a subject
 const getSubjectQuestions = asyncHandler(async (req, res) => {
   try {
-    const subjectIndex = parseInt(req.query.subjectIndex) || 0;
+    const subjectIndex = req.query.subjectIndex;
     const questionsPage = parseInt(req.query.questionsPage) || 1;
     const questionsLimit = parseInt(req.query.questionsLimit) || 10;
-    
+
     const result = await examService.getSubjectQuestions(
       req.params.id,
       subjectIndex,
@@ -133,10 +133,12 @@ const getExamsByProductId = asyncHandler(async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
     const { exams, total, totalPages } = await examService.getExamsByProductId(
       req.params.productId,
       page,
       limit,
+      search,
     );
     res.status(200).json({
       message: "Exams retrieved successfully",
@@ -196,6 +198,36 @@ const reorderQuestions = asyncHandler(async (req, res) => {
   }
 });
 
+const uploadBackup = asyncHandler(async (req, res) => {
+  try {
+    const exam = await examService.uploadBackup(req.params.id, req.body);
+    if (!exam) return res.status(404).json({ message: "Exam not found" });
+    res.status(200).json({ message: "Backup uploaded successfully", exam });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to upload backup", error: error.message });
+  }
+});
+
+const restoreFromBackup = asyncHandler(async (req, res) => {
+  try {
+    const exam = await examService.restoreFromBackup(req.params.id);
+    if (!exam) return res.status(404).json({ message: "Exam or backup not found" });
+    res.status(200).json({ message: "Exam restored from backup successfully", exam });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to restore from backup", error: error.message });
+  }
+});
+
+const getBackup = asyncHandler(async (req, res) => {
+  try {
+    const backup = await examService.getBackup(req.params.id);
+    if (!backup) return res.status(404).json({ message: "Backup not found" });
+    res.status(200).json({ backup });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get backup", error: error.message });
+  }
+});
+
 module.exports = {
   createExam,
   getAllExams,
@@ -209,4 +241,7 @@ module.exports = {
   reorderQuestions,
   getExamsByProductId,
   getFreeExams,
+  uploadBackup,
+  restoreFromBackup,
+  getBackup,
 };

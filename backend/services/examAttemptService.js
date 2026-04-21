@@ -2,15 +2,10 @@ const ExamAttempt = require("../models/ExamAttemptModel");
 const Exam = require("../models/ExamModel");
 const Result = require("../models/Result");
 const User = require("../models/UserModel");
-const { getExam, setExam } = require("../utils/redisClient");
 
-// Fetch exam from Redis cache, falling back to MongoDB
+// Fetch exam from MongoDB directly (skip Redis cache for exam attempts to ensure fresh data)
 async function fetchExam(examId) {
-  const cached = await getExam(examId.toString());
-  if (cached) return cached;
-  const exam = await Exam.findById(examId).lean();
-  if (exam) await setExam(examId.toString(), exam);
-  return exam;
+  return Exam.findById(examId).lean();
 }
 
 class ExamAttemptService {

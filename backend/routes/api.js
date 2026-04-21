@@ -718,6 +718,9 @@ router.delete("/exams/:id", adminProtect, examController.deleteExam);
 router.patch("/exams/:id/meta", adminProtect, examController.patchExamMeta);
 router.patch("/exams/:id/subjects/reorder", adminProtect, examController.reorderSubjects);
 router.patch("/exams/:id/subjects/:subjectId/questions/reorder", adminProtect, examController.reorderQuestions);
+router.post("/exams/:id/backup", adminProtect, examController.uploadBackup);
+router.get("/exams/:id/backup", adminProtect, examController.getBackup);
+router.post("/exams/:id/restore", adminProtect, examController.restoreFromBackup);
 
 // Exam Attempt Routes (User)
 router.post(
