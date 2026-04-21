@@ -7,11 +7,15 @@ const createExam = async (data) => {
   return exam;
 };
 
-const getAllExams = async (page = 1, limit = 10) => {
+const getAllExams = async (page = 1, limit = 10, search = "") => {
+  const filter = {};
+  if (search && search.trim()) {
+    filter.title = { $regex: search.trim(), $options: "i" };
+  }
   const skip = (page - 1) * limit;
   const [exams, total] = await Promise.all([
-    Exam.find().select("-subjects").sort({ createdAt: -1 }).skip(skip).limit(limit),
-    Exam.countDocuments(),
+    Exam.find(filter).select("-subjects").sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Exam.countDocuments(filter),
   ]);
   return { exams, total, page, limit, totalPages: Math.ceil(total / limit) };
 };

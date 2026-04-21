@@ -18,7 +18,8 @@ const getAllExams = asyncHandler(async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const { exams, total, totalPages } = await examService.getAllExams(page, limit);
+    const search = req.query.search || "";
+    const { exams, total, totalPages } = await examService.getAllExams(page, limit, search);
     const examsWithoutSubjects = exams.map((exam) => {
       const { subjects, ...examData } = exam.toObject ? exam.toObject() : exam;
       return examData;

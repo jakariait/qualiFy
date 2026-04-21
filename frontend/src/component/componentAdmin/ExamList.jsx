@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import {
   Button,
@@ -10,10 +10,15 @@ import {
   DialogActions,
   Pagination,
   Skeleton,
+  TextField,
+  InputAdornment,
+  Box,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import useAuthAdminStore from "../../store/AuthAdminStore.js";
 import RequirePermission from "./RequirePermission.jsx";
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 
 export default function ExamList() {
   const { token } = useAuthAdminStore();
@@ -29,16 +34,18 @@ export default function ExamList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const limit = 10;
 
   const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
-  const fetchExams = async (currentPage = page) => {
+  const fetchExams = useCallback(async (currentPage = page) => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_URL}/exams`, {
-        params: { page: currentPage, limit },
+        params: { page: currentPage, limit, search },
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -52,11 +59,23 @@ export default function ExamList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, search]);
 
   useEffect(() => {
     fetchExams(page);
-  }, [page]);
+  }, [page, fetchExams]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearch(searchInput);
+    setPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    setSearch("");
+    setPage(1);
+  };
 
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -100,6 +119,37 @@ export default function ExamList() {
           Create Exam
         </button>
       </div>
+
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="mb-4">
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          <TextField
+            size="small"
+            placeholder="Search exams..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              endAdornment: searchInput && (
+                <InputAdornment position="end">
+                  <ClearIcon
+                    sx={{ cursor: "pointer" }}
+                    onClick={clearSearch}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ maxWidth: 300 }}
+          />
+          <Button type="submit" variant="contained" size="small">
+            Search
+          </Button>
+        </Box>
+      </form>
 
       <div className="space-y-3">
         {loading
