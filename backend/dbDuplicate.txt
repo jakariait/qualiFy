@@ -1,6 +1,6 @@
 // Replace these with your values
-const sourceDB = 'yourSourceDB';
-const targetDB = 'yourTargetDB';
+const sourceDB = 'mongodb+srv://jakariait:Jg0njUydl1srGwDE@jakaria.kd2ej.mongodb.net/qualiFy';
+const targetDB = 'mongodb://adminUser:G7p!9vR2%40xQ1_sL8@72.61.124.159:27017/qualiFy?authSource=admin';
 
 const collections = db.getSiblingDB(sourceDB).getCollectionNames();
 
