@@ -217,4 +217,121 @@ const sendOrderEmail = async (order) => {
   );
 };
 
-module.exports = { sendOrderEmail };
+const sendDeliveredEmail = async (order) => {
+  const {
+    shippingInfo: { fullName, email, address, mobileNo },
+    orderNo,
+    orderDate,
+    totalAmount,
+  } = order;
+
+  const formattedDate = new Date(orderDate).toLocaleString();
+
+  const htmlTemplate = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);max-width:600px;width:100%;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#FF4501;padding:28px 32px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;letter-spacing:2px;font-weight:700;">qualiFy</h1>
+              <p style="margin:6px 0 0;color:#ffffff;font-size:13px;">Order Delivered</p>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:28px 32px 0;">
+              <p style="margin:0;font-size:16px;color:#333333;">Hi <strong>${fullName}</strong>,</p>
+              <p style="margin:8px 0 0;font-size:14px;color:#555555;line-height:1.6;">
+                Great news! Your order has been delivered successfully. We hope you enjoy your purchase!
+              </p>
+            </td>
+          </tr>
+
+          <!-- Order Meta -->
+          <tr>
+            <td style="padding:20px 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff8f6;border-radius:6px;border:1px solid #ffe0d6;">
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #ffe0d6;">
+                    <span style="font-size:12px;color:#888888;text-transform:uppercase;letter-spacing:1px;">Order Number</span><br/>
+                    <strong style="font-size:15px;color:#FF4501;">#${orderNo}</strong>
+                  </td>
+                  <td style="padding:14px 18px;border-bottom:1px solid #ffe0d6;">
+                    <span style="font-size:12px;color:#888888;text-transform:uppercase;letter-spacing:1px;">Delivery Date</span><br/>
+                    <strong style="font-size:15px;color:#FF4501;">${formattedDate}</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;">
+                    <span style="font-size:12px;color:#888888;text-transform:uppercase;letter-spacing:1px;">Total Amount</span><br/>
+                    <strong style="font-size:15px;color:#FF4501;">Tk. ${totalAmount.toFixed(2)}</strong>
+                  </td>
+                  <td style="padding:14px 18px;">
+                    <span style="font-size:12px;color:#888888;text-transform:uppercase;letter-spacing:1px;">Status</span><br/>
+                    <strong style="font-size:15px;color:#FF4501;">Delivered</strong>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Delivery Info -->
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#FF4501;text-transform:uppercase;letter-spacing:1px;">Delivery Address</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff8f6;border-radius:6px;border:1px solid #ffe0d6;">
+                <tr>
+                  <td style="padding:14px 18px;font-size:13px;color:#444444;line-height:1.8;">
+                    <strong>${fullName}</strong><br/>
+                    ${address}<br/>
+                    ${mobileNo}<br/>
+                    ${email}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Message -->
+          <tr>
+            <td style="padding:0 32px 28px;">
+              <p style="margin:0;font-size:14px;color:#555555;line-height:1.6;">
+                If you have any questions about your order or need assistance, please don't hesitate to contact us.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#fff5f2;padding:20px 32px;text-align:center;border-top:1px solid #ffe0d6;">
+              <p style="margin:0;font-size:13px;color:#888888;">Thank you for shopping with <strong>qualiFy</strong>!</p>
+              <p style="margin:6px 0 0;font-size:12px;color:#aaaaaa;">If you have any questions, reply to this email or contact our support.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  await sendEmailMessage(
+    email,
+    htmlTemplate,
+    `Order Delivered - #${orderNo}`,
+    true,
+    "qualiFy <order@qualifybd.com>",
+  );
+};
+
+module.exports = { sendOrderEmail, sendDeliveredEmail };

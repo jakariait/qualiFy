@@ -1,6 +1,6 @@
 const User = require("../models/UserModel"); // Import the User model
 const orderService = require("../services/orderService");
-const { sendOrderEmail } = require("../utility/sendOrderEmail");
+const { sendOrderEmail, sendDeliveredEmail } = require("../utility/sendOrderEmail");
 
 const createOrder = async (req, res) => {
   try {
@@ -88,12 +88,32 @@ const updateOrder = async (req, res) => {
   const { orderId } = req.params;
   const updateData = req.body;
   try {
-    const updatedOrder = await orderService.updateOrder(orderId, updateData);
-    if (!updatedOrder) {
+    const existingOrder = await orderService.getOrderById(orderId);
+    if (!existingOrder) {
       return res
         .status(404)
         .json({ success: false, message: "Order not found" });
     }
+
+    const isDeliveredStatusChange =
+      updateData.orderStatus === "delivered" &&
+      existingOrder.orderStatus !== "delivered";
+
+    const result = await orderService.updateOrder(orderId, updateData);
+    if (!result) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    const updatedOrder = result.updatedOrder || result;
+
+    if (isDeliveredStatusChange) {
+      sendDeliveredEmail(updatedOrder).catch((err) => {
+        console.error("Failed to send delivered email:", err.message);
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Order updated successfully",
