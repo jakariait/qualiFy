@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 
-const sourceURI = "mongodb+srv://jakariait:Jg0njUydl1srGwDE@jakaria.kd2ej.mongodb.net";
-const targetURI = "mongodb://adminUser:G7p!9vR2%40xQ1_sL8@72.61.124.159:27017";
+const sourceURI = "";
+const targetURI = "";
 
 const dbName = "qualiFy";
 
