@@ -70,8 +70,9 @@ const ProductList = ({ products, loading }) => {
             return (
               <div
                 key={product.slug}
-                className="relative shadow rounded-lg transition-transform transform hover:scale-[1.02] hover:shadow-lg duration-300"
+                className="relative shadow rounded-lg transition-transform transform hover:scale-[1.02] hover:shadow-lg duration-300 flex flex-col justify-between"
               >
+                <div>
                 <Link to={`/product/${product.slug}`}>
                   <ImageComponent
                     imageName={product.thumbnailImage}
@@ -220,6 +221,7 @@ const ProductList = ({ products, loading }) => {
                 )}
 
                 {/* Quantity & Buy Now Buttons */}
+                </div>
                 <div className="flex flex-col gap-2 p-2">
                   {/* Buttons */}
                   <div className="flex gap-2">
