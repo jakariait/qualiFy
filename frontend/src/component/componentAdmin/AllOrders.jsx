@@ -35,7 +35,7 @@ import { Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Tooltip } from "@mui/material";
 import axios from "axios";
-import { Snackbar, Alert } from "@mui/material";
+import { Snackbar, Alert, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import useOrderStore from "../../store/useOrderStore.js";
 import OrderStatusSelector from "./OrderStatusSelector.jsx";
@@ -92,6 +92,17 @@ const AllOrders = ({
   useEffect(() => {
     fetchAllOrders(status, 1, itemsPerPage);
   }, []);
+
+  // Fetch Pathao status for all orders with tracking numbers on load
+  useEffect(() => {
+    if (allOrders.length > 0 && !orderListLoading) {
+      allOrders.forEach((order) => {
+        if (order.trackingNumber && !refreshStatus[order._id]) {
+          refreshCourierStatus(order.trackingNumber, order._id);
+        }
+      });
+    }
+  }, [allOrders, orderListLoading]);
 
   const handleOpenDialog = (id) => {
     setDeleteId(id);
@@ -366,22 +377,17 @@ const AllOrders = ({
               <TableRow>
                 {[
                   "Order No",
-                  "Order Date & Time",
+                  "Date",
                   "Customer",
-                  "Mobile No",
+                  "Mobile",
                   "Status",
-                  "Courier Status",
-                  "Payment Status",
-                  "Total Amount",
+                  "Courier",
+                  "Payment",
+                  "Amount",
                   "Actions",
                 ].map((header, i) => (
                   <TableCell key={i}>
-                    <Skeleton
-                      variant="text"
-                      width={120}
-                      height={30}
-                      align="center"
-                    />
+                    <Skeleton variant="text" width={100} height={30} />
                   </TableCell>
                 ))}
               </TableRow>
@@ -495,7 +501,7 @@ const AllOrders = ({
                           }
                           onClick={() => handleSortRequest("orderStatus")}
                         >
-                          Courier Status
+                          Payment Status
                         </TableSortLabel>
                       </TableCell>
                       <TableCell>
@@ -506,7 +512,7 @@ const AllOrders = ({
                           }
                           onClick={() => handleSortRequest("paymentStatus")}
                         >
-                          Payment Status
+                          Courier Status
                         </TableSortLabel>
                       </TableCell>
                       <TableCell>
@@ -542,61 +548,6 @@ const AllOrders = ({
                           />
                         </TableCell>
                         <TableCell>
-                          {order.trackingNumber ? (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  px: 1.5,
-                                  py: 0.5,
-                                  borderRadius: 1,
-                                  bgcolor: getCourierStatusColor(
-                                    order.courierStatus ||
-                                      refreshStatus[order._id]?.status,
-                                  ),
-                                  color: "white",
-                                  fontSize: "0.75rem",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                {order.courierStatus ||
-                                  refreshStatus[order._id]?.statusText ||
-                                  "Pending"}
-                              </Box>
-                              <Tooltip title="Refresh Status">
-                                <IconButton
-                                  size="small"
-                                  onClick={() =>
-                                    refreshCourierStatus(
-                                      order.trackingNumber,
-                                      order._id,
-                                    )
-                                  }
-                                >
-                                  <RefreshIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          ) : (
-                            <Tooltip title="Send to Pathao">
-                              <IconButton
-                                onClick={() => handleSendToPathao(order)}
-                                color="secondary"
-                                size="small"
-                              >
-                                <LocalShippingIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </TableCell>
-                        <TableCell>
                           <Chip
                             label={
                               order.paymentStatus.charAt(0).toUpperCase() +
@@ -613,17 +564,6 @@ const AllOrders = ({
                               minWidth: "100px",
                               height: "32px",
                               borderRadius: "4px",
-                              backgroundColor:
-                                order.paymentStatus === "paid"
-                                  ? "#4caf50"
-                                  : "#f44336",
-                              color: "#ffffff",
-                              "&:hover": {
-                                backgroundColor:
-                                  order.paymentStatus === "paid"
-                                    ? "#388e3c"
-                                    : "#d32f2f",
-                              },
                               "& .MuiChip-label": {
                                 textTransform: "capitalize",
                                 fontSize: "0.875rem",
@@ -648,7 +588,7 @@ const AllOrders = ({
                                   py: 0.5,
                                   borderRadius: 1,
                                   bgcolor: getCourierStatusColor(
-                                    refreshStatus[order._id]?.status,
+                                    refreshStatus[order._id]?.status || "Pending",
                                   ),
                                   color: "white",
                                   fontSize: "0.75rem",
@@ -661,8 +601,7 @@ const AllOrders = ({
                                     sx={{ color: "white" }}
                                   />
                                 ) : (
-                                  refreshStatus[order._id]?.statusText ||
-                                  "Click to Refresh"
+                                  refreshStatus[order._id]?.statusText || "Pending"
                                 )}
                               </Box>
                               <Tooltip title="Refresh Status">
@@ -691,6 +630,9 @@ const AllOrders = ({
                               </IconButton>
                             </Tooltip>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          ৳{Number(order.totalAmount).toLocaleString()}
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: "flex", gap: 1 }}>
