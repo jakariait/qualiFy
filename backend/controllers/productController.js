@@ -91,6 +91,12 @@ const createProduct = async (req, res) => {
       else if (val === "false") productData.isPreBooked = false;
       else delete productData.isPreBooked;
     }
+    if (typeof productData.chargeDelivery === "string") {
+      const val = productData.chargeDelivery.toLowerCase();
+      if (val === "true") productData.chargeDelivery = true;
+      else if (val === "false") productData.chargeDelivery = false;
+      else delete productData.chargeDelivery;
+    }
 
     // Normalize number fields
     if (typeof productData.bookingNumber === "string") {
@@ -196,6 +202,12 @@ const updateProduct = async (req, res) => {
       if (val === "true") productData.isPreBooked = true;
       else if (val === "false") productData.isPreBooked = false;
       else delete productData.isPreBooked;
+    }
+    if (typeof productData.chargeDelivery === "string") {
+      const val = productData.chargeDelivery.toLowerCase();
+      if (val === "true") productData.chargeDelivery = true;
+      else if (val === "false") productData.chargeDelivery = false;
+      else delete productData.chargeDelivery;
     }
 
     // Normalize number fields

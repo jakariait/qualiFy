@@ -16,6 +16,8 @@ const productSchema = new mongoose.Schema(
       index: true,
     },
 
+
+
     longDesc: { type: String, trim: true },
 
     // Shared
@@ -53,6 +55,10 @@ const productSchema = new mongoose.Schema(
     finalStock: {
       type: Number,
       min: 0,
+    },
+    chargeDelivery: {
+      type: Boolean,
+      default: true,
     },
 
     // Book-specific
