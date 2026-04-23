@@ -334,14 +334,14 @@ const ProductAddToCart = ({ product }) => {
             </div>
           )}
 
-          {product.modelTest > 0 && (
+          {product.modelTest && (
             <div className="flex items-center gap-1">
               <ClipboardCheck className="w-4 h-4 text-purple-600" />
               <span>Model Test: {product.modelTest}</span>
             </div>
           )}
 
-          {product.liveDoubtSolutionsSession > 0 && (
+          {product.liveDoubtSolutionsSession && (
             <div className="flex items-center gap-1">
               <MessageSquare className="w-4 h-4 text-purple-600" />
               <span>
