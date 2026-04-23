@@ -45,6 +45,9 @@ const {
   getSteadfastOrderStatusByInvoice,
 } = require("../controllers/steadfastController");
 
+const pathaoController = require("../controllers/pathaoController");
+const pathaoConfigController = require("../controllers/pathaoConfigController");
+
 // Admin
 const { adminProtect } = require("../middlewares/authAdminMiddleware");
 const checkPermission = require("../middlewares/checkPermissionMiddleware");
@@ -707,7 +710,11 @@ router.get("/exams", adminProtect, examController.getAllExams);
 router.get("/exams/free", examController.getFreeExams);
 router.get("/exams/:id", adminProtect, examController.getExamById);
 router.get("/exams/:id/subjects", adminProtect, examController.getMoreSubjects);
-router.get("/exams/:id/questions", adminProtect, examController.getSubjectQuestions);
+router.get(
+  "/exams/:id/questions",
+  adminProtect,
+  examController.getSubjectQuestions,
+);
 router.get(
   "/exams/product/:productId",
   userProtect,
@@ -716,11 +723,23 @@ router.get(
 router.put("/exams/:id", adminProtect, examController.updateExam);
 router.delete("/exams/:id", adminProtect, examController.deleteExam);
 router.patch("/exams/:id/meta", adminProtect, examController.patchExamMeta);
-router.patch("/exams/:id/subjects/reorder", adminProtect, examController.reorderSubjects);
-router.patch("/exams/:id/subjects/:subjectId/questions/reorder", adminProtect, examController.reorderQuestions);
+router.patch(
+  "/exams/:id/subjects/reorder",
+  adminProtect,
+  examController.reorderSubjects,
+);
+router.patch(
+  "/exams/:id/subjects/:subjectId/questions/reorder",
+  adminProtect,
+  examController.reorderQuestions,
+);
 router.post("/exams/:id/backup", adminProtect, examController.uploadBackup);
 router.get("/exams/:id/backup", adminProtect, examController.getBackup);
-router.post("/exams/:id/restore", adminProtect, examController.restoreFromBackup);
+router.post(
+  "/exams/:id/restore",
+  adminProtect,
+  examController.restoreFromBackup,
+);
 
 // Exam Attempt Routes (User)
 router.post(
@@ -892,6 +911,81 @@ router.get(
   prebookController.getPrebookCountByProductId,
 );
 router.put("/pre-book/:id", prebookController.updatePrebook);
-router.delete("/pre-book/:id",adminProtect, prebookController.deletePrebook);
+router.delete("/pre-book/:id", adminProtect, prebookController.deletePrebook);
+
+// Pathao Config Routes
+router.get(
+  "/pathao-config",
+  adminProtect,
+  checkPermission("pathao_api"),
+  pathaoConfigController.getPathaoConfigController,
+);
+router.patch(
+  "/pathao-config",
+  adminProtect,
+  checkPermission("pathao_api"),
+  pathaoConfigController.updatePathaoConfigController,
+);
+
+// Pathao Config Routes
+router.get(
+  "/pathao-config",
+  adminProtect,
+  checkPermission("pathao_api"),
+  pathaoConfigController.getPathaoConfigController,
+);
+router.patch(
+  "/pathao-config",
+  adminProtect,
+  checkPermission("pathao_api"),
+  pathaoConfigController.updatePathaoConfigController,
+);
+
+// Pathao Courier Routes
+router.get(
+  "/pathao/cities",
+  adminProtect,
+  pathaoController.getCitiesController,
+);
+router.get(
+  "/pathao/zones/:cityId",
+  adminProtect,
+  pathaoController.getZonesController,
+);
+router.get(
+  "/pathao/areas/:zoneId",
+  adminProtect,
+  pathaoController.getAreasController,
+);
+router.get(
+  "/pathao/stores",
+  adminProtect,
+  pathaoController.getStoresController,
+);
+router.post(
+  "/pathao/stores",
+  adminProtect,
+  pathaoController.createStoreController,
+);
+router.post(
+  "/pathao/orders",
+  // adminProtect,
+  pathaoController.createOrderController,
+);
+router.post(
+  "/pathao/orders/bulk",
+  adminProtect,
+  pathaoController.createBulkOrderController,
+);
+router.get(
+  "/pathao/orders/:consignmentId",
+  adminProtect,
+  pathaoController.getOrderInfoController,
+);
+router.post(
+  "/pathao/price-plan",
+  adminProtect,
+  pathaoController.calculatePriceController,
+);
 
 module.exports = router;
