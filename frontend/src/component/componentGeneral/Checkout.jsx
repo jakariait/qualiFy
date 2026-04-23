@@ -30,9 +30,6 @@ const Checkout = () => {
 
   const isBook = cartContainsBooks(cart);
 
-  const isExamOnly =
-    cart.length > 0 && cart.every((item) => item.productType === "exam");
-
   const { user } = useAuthUserStore();
 
   // Coupon
@@ -93,6 +90,9 @@ const Checkout = () => {
     fetchAmount();
   }, []);
 
+  // Check if any cart item has chargeDelivery disabled
+  const hasDeliveryCharge = cart.every((item) => item.chargeDelivery !== false);
+
   // Price Calculations
   const totalAmount = cart.reduce((total, item) => {
     // Removed variantId, so no variant price logic
@@ -105,10 +105,11 @@ const Checkout = () => {
 
   const formattedTotalAmount = (amount) => Number(amount).toLocaleString();
 
-  const actualShippingCost =
-    freeDelivery > 1 && totalAmount >= freeDelivery
+  const actualShippingCost = hasDeliveryCharge
+    ? freeDelivery > 1 && totalAmount >= freeDelivery
       ? 0
-      : selectedShipping.value;
+      : selectedShipping.value
+    : 0;
 
   let discount = appliedCoupon?.discountAmount || 0;
 
@@ -132,7 +133,6 @@ const Checkout = () => {
 
     fetchVatAmount();
   }, []);
-
 
   // Data Layer for Initiate Checkout
 
@@ -250,9 +250,8 @@ const Checkout = () => {
           <div className="space-y-8">
             <AddressForm user={user} onAddressChange={handleAddressChange} />
 
-            {!isExamOnly && (
-              <ShippingOptions onShippingChange={setSelectedShipping} />
-            )}
+            <ShippingOptions onShippingChange={setSelectedShipping} chargeDelivery={hasDeliveryCharge} />
+
             <DeliveryMethod
               freeDelivery={freeDelivery}
               formattedTotalAmount={formattedTotalAmount}

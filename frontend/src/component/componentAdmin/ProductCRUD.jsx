@@ -70,6 +70,7 @@ const ProductCRUD = () => {
 		recommendedFor: "", // New field
 		modelTest: "", // New field
 		liveDoubtSolutionsSession: "", // New field
+		chargeDelivery: true, // Delivery charge toggle
 	});
 
 	const [modules, setModules] = useState([]);
@@ -214,6 +215,7 @@ const ProductCRUD = () => {
 			recommendedFor: "", // Initialize recommendedFor
 			modelTest: "", // Initialize modelTest
 			liveDoubtSolutionsSession: "", // Initialize liveDoubtSolutionsSession
+			chargeDelivery: true, // Initialize chargeDelivery
 		});
 		setModules([]);
 		setRemovedPreviewPdf(false);
@@ -341,6 +343,7 @@ const ProductCRUD = () => {
 			recommendedFor: product.recommendedFor || "",
 			modelTest: product.modelTest || "",
 			liveDoubtSolutionsSession: product.liveDoubtSolutionsSession || "",
+			chargeDelivery: product.chargeDelivery !== undefined ? product.chargeDelivery : true,
 		});
 		setModules(
 			product.modules?.map((mod) => ({
@@ -420,6 +423,7 @@ const ProductCRUD = () => {
 			formData.append("recommendedFor", form.recommendedFor);
 			formData.append("modelTest", form.modelTest);
 			formData.append("liveDoubtSolutionsSession", form.liveDoubtSolutionsSession);
+			formData.append("chargeDelivery", form.chargeDelivery);
 
 			// Create a version of modules with unique keys for file uploads
 			const modulesWithKeys = modules.map((mod, mIdx) => ({
@@ -704,6 +708,18 @@ const ProductCRUD = () => {
 							required
 						/>
 					)}
+
+					{/* Charge Delivery Toggle */}
+					<FormControl margin="normal" fullWidth>
+						<label className="inline-flex items-center gap-2">
+							<input
+								type="checkbox"
+								checked={form.chargeDelivery}
+								onChange={(e) => setForm((f) => ({ ...f, chargeDelivery: e.target.checked }))}
+							/>
+							<span>Charge Delivery Fee</span>
+						</label>
+					</FormControl>
 
 					{form.type === "book" && (
 						<>

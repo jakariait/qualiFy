@@ -63,12 +63,15 @@ const AdminNewOrderCreate = () => {
   // Check if any product has free shipping
   const hasFreeShippingProduct = orderItems.some((item) => item.freeShipping);
 
+  // No shipping charge when all items have chargeDelivery disabled
+  const hasDeliveryChargeProduct = orderItems.every((item) => item.chargeDelivery !== false);
+
   // No shipping charge when all items are exams (same logic as Checkout.jsx)
   const isExamOnly =
     orderItems.length > 0 &&
     orderItems.every((item) => item.productType === "exam");
 
-  const noShippingCharge = hasFreeShippingProduct || isExamOnly;
+  const noShippingCharge = hasFreeShippingProduct || isExamOnly || !hasDeliveryChargeProduct;
 
   // Shipping & Payment
   const [shippingOptions, setShippingOptions] = useState([]);
@@ -263,6 +266,7 @@ const AdminNewOrderCreate = () => {
       price,
       freeShipping: selectedProduct.freeShipping || false,
       productType: selectedProduct.type || "",
+      chargeDelivery: selectedProduct.chargeDelivery,
     };
 
     setOrderItems([...orderItems, newItem]);
@@ -281,14 +285,18 @@ const AdminNewOrderCreate = () => {
       (item) => item.freeShipping === true,
     );
 
+    const hasDeliveryCharge = orderItems.every(
+      (item) => item.chargeDelivery !== false,
+    );
+
     const subtotal = orderItems.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0,
     );
 
     // Use 'value' instead of 'deliveryCharge' - shipping model uses 'value' field
-    // If any product has freeShipping, delivery charge is 0
-    const deliveryCharge = hasFreeShipping ? 0 : selectedShipping?.value || 0;
+    // If any product has freeShipping or chargeDelivery=false, delivery charge is 0
+    const deliveryCharge = hasFreeShipping || !hasDeliveryCharge ? 0 : selectedShipping?.value || 0;
     const discount = parseFloat(specialDiscount) || 0;
 
     // Calculate amount after discounts (matching Checkout.jsx logic)
@@ -601,6 +609,17 @@ const AdminNewOrderCreate = () => {
                               (Free Shipping)
                             </span>
                           )}
+                          {option.chargeDelivery === false && (
+                            <span
+                              style={{
+                                marginLeft: 8,
+                                color: "blue",
+                                fontSize: "0.75rem",
+                              }}
+                            >
+                              (No Delivery Charge)
+                            </span>
+                          )}
                         </li>
                       )}
                       renderInput={(params) => (
@@ -732,6 +751,8 @@ const AdminNewOrderCreate = () => {
                         value={
                           isExamOnly
                             ? "No Shipping (Exam Only)"
+                            : !hasDeliveryChargeProduct
+                            ? "No Delivery Charge"
                             : "Free Shipping"
                         }
                         InputProps={{
@@ -865,6 +886,10 @@ const AdminNewOrderCreate = () => {
                     {isExamOnly ? (
                       <span style={{ color: "green", fontWeight: "bold" }}>
                         ৳0 (Exam)
+                      </span>
+                    ) : !hasDeliveryChargeProduct ? (
+                      <span style={{ color: "blue", fontWeight: "bold" }}>
+                        No Charge
                       </span>
                     ) : noShippingCharge ? (
                       <span style={{ color: "green", fontWeight: "bold" }}>

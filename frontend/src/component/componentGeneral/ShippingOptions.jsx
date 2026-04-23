@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const ShippingOptions = ({ onShippingChange }) => {
+const ShippingOptions = ({ onShippingChange, chargeDelivery = true }) => {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const [shipping, setShipping] = useState([]);
@@ -58,7 +58,11 @@ const ShippingOptions = ({ onShippingChange }) => {
         Select Shipping Option
       </h1>
 
-      {loading ? (
+      {!chargeDelivery ? (
+        <div className="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50">
+          <p className="text-green-600 font-medium">No delivery charge for this order</p>
+        </div>
+      ) : loading ? (
         <div className="text-gray-500">Loading shipping options...</div>
       ) : message && shipping.length === 0 ? (
         <div className="text-red-500">{message}</div>

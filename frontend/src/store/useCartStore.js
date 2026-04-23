@@ -28,7 +28,8 @@ const useCartStore = create((set, get) => ({
         discountPrice: item.discountPrice,
         quantity: item.quantity,
         thumbnail: item.thumbnail,
-        productType: item.productType, // <-- add here
+        productType: item.productType,
+        chargeDelivery: item.chargeDelivery,
       }));
 
       saveCart(serverCartItems);
@@ -70,7 +71,8 @@ const useCartStore = create((set, get) => ({
           quantity,
           thumbnail: product.thumbnailImage,
           slug: product.slug,
-          productType: product.type, // <-- add here
+          productType: product.type,
+          chargeDelivery: product.chargeDelivery,
         });
       }
 
@@ -87,7 +89,7 @@ const useCartStore = create((set, get) => ({
               ? product.finalDiscount
               : 0;
 
-        await axios.post(
+await axios.post(
           `${apiUrl}/addToCart`,
           {
             productId: product.id,
@@ -98,7 +100,8 @@ const useCartStore = create((set, get) => ({
             quantity,
             thumbnail: product.thumbnailImage,
             slug: product.slug,
-            productType: product.type, // <-- add here
+            productType: product.type,
+            chargeDelivery: product.chargeDelivery,
           },
           { headers: { Authorization: `Bearer ${token}` } },
         );
@@ -191,7 +194,8 @@ const useCartStore = create((set, get) => ({
             quantity: item.quantity,
             thumbnail: item.thumbnail,
             slug: item.slug,
-            productType: item.productType, // <-- add here
+            productType: item.productType,
+            chargeDelivery: item.chargeDelivery,
           },
           {
             headers: {
@@ -216,7 +220,8 @@ const useCartStore = create((set, get) => ({
         quantity: item.quantity,
         thumbnail: item.thumbnail,
         slug: item.product?.slug,
-        productType: item.productType, // <-- add here
+        productType: item.productType,
+        chargeDelivery: item.chargeDelivery,
       }));
 
       saveCart(serverCartItems);
