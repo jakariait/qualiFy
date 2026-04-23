@@ -93,6 +93,8 @@ import CourseExamNoticePage from "./pagesUser/CourseExamNoticePage.jsx";
 import NoticeForCourseExamPage from "./pagesAdmin/NoticeForCourseExamPage.jsx";
 import PageViewTracker from "./component/componentGeneral/PageViewTracker.jsx";
 import PrebookPage from "./pagesUser/PrebookPage.jsx";
+import AdminPathaoConfig from "./component/componentAdmin/AdminPathaoConfig.jsx";
+import PathaoConfigPage from "./pagesAdmin/PathaoConfigPage.jsx";
 
 function App() {
   const { GeneralInfoListRequest, GeneralInfoList } = GeneralInfoStore();
@@ -303,6 +305,7 @@ function App() {
           <Route path="/admin/scroll-text" element={<MarqueeAdminPage />} />
           <Route path="/admin/homepage-seo" element={<AdminMetaPage />} />
           <Route path="/admin/bkash-config" element={<BKashConfigPage />} />
+          <Route path="/admin/pathao-config" element={<PathaoConfigPage />} />
 
           <Route path="/admin/dashboard" element={<DashboardPage />} />
           <Route path="/admin/adminlist" element={<AdminListPage />} />

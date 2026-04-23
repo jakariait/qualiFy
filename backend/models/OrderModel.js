@@ -142,6 +142,18 @@ const orderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    courierName: {
+      type: String,
+      default: "",
+    },
+    courierStatus: {
+      type: String,
+      default: "",
+    },
+    trackingNumber: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true, versionKey: false },
 );

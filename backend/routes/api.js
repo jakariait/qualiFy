@@ -969,8 +969,13 @@ router.post(
 );
 router.post(
   "/pathao/orders",
-  // adminProtect,
+  adminProtect,
   pathaoController.createOrderController,
+);
+router.get(
+  "/pathao/issue-token",
+  adminProtect,
+  pathaoController.issueTokenController,
 );
 router.post(
   "/pathao/orders/bulk",
@@ -981,6 +986,11 @@ router.get(
   "/pathao/orders/:consignmentId",
   adminProtect,
   pathaoController.getOrderInfoController,
+);
+router.get(
+  "/pathao/orders/:consignmentId/status",
+  adminProtect,
+  pathaoController.getOrderStatusController,
 );
 router.post(
   "/pathao/price-plan",

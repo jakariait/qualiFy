@@ -392,6 +392,16 @@ export default function SidebarMenu() {
                         </Link>
                       </li>
                     </RequirePermission>
+                    <RequirePermission permission="pathao_api" fallback={true}>
+                      <li>
+                        <Link
+                          to="/admin/pathao-config"
+                          className={"flex items-center gap-2"}
+                        >
+                          <span>Pathao</span>
+                        </Link>
+                      </li>
+                    </RequirePermission>
                   </ul>
                 </AccordionDetails>
               </Accordion>

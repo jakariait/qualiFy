@@ -29,6 +29,8 @@ import { Skeleton } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Tooltip } from "@mui/material";
@@ -38,6 +40,7 @@ import { useNavigate } from "react-router-dom";
 import useOrderStore from "../../store/useOrderStore.js";
 import OrderStatusSelector from "./OrderStatusSelector.jsx";
 import RequirePermission from "./RequirePermission.jsx";
+import SendToPathao from "./SendToPathao.jsx";
 
 const AllOrders = ({
   allOrders,
@@ -67,6 +70,11 @@ const AllOrders = ({
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  // Pathao dialog state
+  const [openPathaoDialog, setOpenPathaoDialog] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [refreshStatus, setRefreshStatus] = useState({});
 
   // Local search input state (separate from the store's searchQuery)
   const [searchInput, setSearchInput] = useState("");
@@ -169,6 +177,23 @@ const AllOrders = ({
     return 0;
   };
 
+  // Helper to get courier status color
+  const getCourierStatusColor = (status) => {
+    const colorMap = {
+      Pending: "#FFA726",
+      Picked: "#42A5F5",
+      "In Transit": "#29B6F6",
+      "Ready For Delivery": "#26A69A",
+      "Out For Delivery": "#66BB6A",
+      "Partial Delivered": "#FFA726",
+      Delivered: "#4CAF50",
+      Cancelled: "#EF5350",
+      Returned: "#AB47BC",
+      Lost: "#D32F2F",
+    };
+    return colorMap[status] || "#9E9E9E";
+  };
+
   // Sorting the orders (search is now handled server-side)
   const sortedOrders = sortData(allOrders);
 
@@ -208,6 +233,58 @@ const AllOrders = ({
 
   const handleSuccess = () => {
     fetchAllOrders(status, currentPage, itemsPerPage);
+  };
+
+  // Manual refresh function for courier status
+  const refreshCourierStatus = async (trackingNumber, orderId) => {
+    try {
+      setRefreshStatus((prev) => ({ ...prev, [orderId]: { loading: true } }));
+
+      const res = await axios.get(
+        `${apiUrl}/pathao/orders/${trackingNumber}/status`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (res.data.success) {
+        setRefreshStatus((prev) => ({
+          ...prev,
+          [orderId]: {
+            status: res.data.data.status,
+            statusText: res.data.data.statusText,
+            updatedAt: res.data.data.updatedAt,
+            loading: false,
+          },
+        }));
+      } else {
+        setRefreshStatus((prev) => ({
+          ...prev,
+          [orderId]: {
+            status: "Unknown",
+            statusText: "Unknown",
+            loading: false,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch courier status:", error);
+      setRefreshStatus((prev) => ({
+        ...prev,
+        [orderId]: { status: "Error", statusText: "Error", loading: false },
+      }));
+    }
+  };
+
+  // Handle Send to Pathao
+  const handleSendToPathao = (order) => {
+    setSelectedOrder(order);
+    setOpenPathaoDialog(true);
+  };
+
+  const handleClosePathaoDialog = () => {
+    setOpenPathaoDialog(false);
+    setSelectedOrder(null);
   };
 
   return (
@@ -292,9 +369,8 @@ const AllOrders = ({
                   "Order Date & Time",
                   "Customer",
                   "Mobile No",
-                  "Courier",
-                  "Courier Status",
                   "Status",
+                  "Courier Status",
                   "Payment Status",
                   "Total Amount",
                   "Actions",
@@ -410,7 +486,7 @@ const AllOrders = ({
                           Mobile No
                         </TableSortLabel>
                       </TableCell>
-
+                      <TableCell>Status</TableCell>
                       <TableCell>
                         <TableSortLabel
                           active={orderBy === "orderStatus"}
@@ -419,7 +495,7 @@ const AllOrders = ({
                           }
                           onClick={() => handleSortRequest("orderStatus")}
                         >
-                          Status
+                          Courier Status
                         </TableSortLabel>
                       </TableCell>
                       <TableCell>
@@ -466,6 +542,61 @@ const AllOrders = ({
                           />
                         </TableCell>
                         <TableCell>
+                          {order.trackingNumber ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  px: 1.5,
+                                  py: 0.5,
+                                  borderRadius: 1,
+                                  bgcolor: getCourierStatusColor(
+                                    order.courierStatus ||
+                                      refreshStatus[order._id]?.status,
+                                  ),
+                                  color: "white",
+                                  fontSize: "0.75rem",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {order.courierStatus ||
+                                  refreshStatus[order._id]?.statusText ||
+                                  "Pending"}
+                              </Box>
+                              <Tooltip title="Refresh Status">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    refreshCourierStatus(
+                                      order.trackingNumber,
+                                      order._id,
+                                    )
+                                  }
+                                >
+                                  <RefreshIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          ) : (
+                            <Tooltip title="Send to Pathao">
+                              <IconButton
+                                onClick={() => handleSendToPathao(order)}
+                                color="secondary"
+                                size="small"
+                              >
+                                <LocalShippingIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <Chip
                             label={
                               order.paymentStatus.charAt(0).toUpperCase() +
@@ -501,7 +632,65 @@ const AllOrders = ({
                           />
                         </TableCell>
                         <TableCell>
-                          Tk. {order.totalAmount?.toFixed(2)}
+                          {order.trackingNumber ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  px: 1.5,
+                                  py: 0.5,
+                                  borderRadius: 1,
+                                  bgcolor: getCourierStatusColor(
+                                    refreshStatus[order._id]?.status,
+                                  ),
+                                  color: "white",
+                                  fontSize: "0.75rem",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {refreshStatus[order._id]?.loading ? (
+                                  <CircularProgress
+                                    size={14}
+                                    sx={{ color: "white" }}
+                                  />
+                                ) : (
+                                  refreshStatus[order._id]?.statusText ||
+                                  "Click to Refresh"
+                                )}
+                              </Box>
+                              <Tooltip title="Refresh Status">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    refreshCourierStatus(
+                                      order.trackingNumber,
+                                      order._id,
+                                    )
+                                  }
+                                  disabled={refreshStatus[order._id]?.loading}
+                                >
+                                  <RefreshIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          ) : (
+                            <Tooltip title="Send to Pathao">
+                              <IconButton
+                                onClick={() => handleSendToPathao(order)}
+                                color="secondary"
+                                size="small"
+                              >
+                                <LocalShippingIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: "flex", gap: 1 }}>
@@ -513,6 +702,7 @@ const AllOrders = ({
                                 <VisibilityIcon />
                               </IconButton>
                             </Tooltip>
+
                             <RequirePermission
                               permission="delete_orders"
                               fallback={true}
@@ -591,6 +781,16 @@ const AllOrders = ({
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      {/* Send to Pathao Dialog */}
+      {selectedOrder && (
+        <SendToPathao
+          order={selectedOrder}
+          open={openPathaoDialog}
+          onClose={handleClosePathaoDialog}
+          onSuccess={() => fetchAllOrders(status, currentPage, itemsPerPage)}
+        />
+      )}
     </div>
   );
 };
