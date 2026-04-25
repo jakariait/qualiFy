@@ -73,154 +73,154 @@ const ProductList = ({ products, loading }) => {
                 className="relative shadow rounded-lg transition-transform transform hover:scale-[1.02] hover:shadow-lg duration-300 flex flex-col justify-between"
               >
                 <div>
-                <Link to={`/product/${product.slug}`}>
-                  <ImageComponent
-                    imageName={product.thumbnailImage}
-                    altName={product.name}
-                    skeletonHeight={250}
-                  />
-                </Link>
+                  <Link to={`/product/${product.slug}`}>
+                    <ImageComponent
+                      imageName={product.thumbnailImage}
+                      altName={product.name}
+                      skeletonHeight={250}
+                    />
+                  </Link>
 
-                <Link to={`/product/${product.slug}`}>
-                  <div className="text-center heading primaryTextColor mt-2 mb-1 hover:underline">
-                    {product.name}
-                  </div>
-                </Link>
+                  <Link to={`/product/${product.slug}`}>
+                    <div className="text-center heading primaryTextColor mt-2 mb-1 hover:underline">
+                      {product.name}
+                    </div>
+                  </Link>
 
-                <div className="flex gap-2 justify-center">
-                  {product.finalDiscount > 0 ? (
-                    <>
-                      <div className="line-through text-gray-500">
+                  <div className="flex gap-2 justify-center">
+                    {product.finalDiscount > 0 ? (
+                      <>
+                        <div className="line-through text-gray-500">
+                          Tk. {formatPrice(product.finalPrice)}
+                        </div>
+                        <div className="text-red-800 font-semibold">
+                          Tk. {formatPrice(product.finalDiscount)}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-black font-semibold">
                         Tk. {formatPrice(product.finalPrice)}
                       </div>
-                      <div className="text-red-800 font-semibold">
-                        Tk. {formatPrice(product.finalDiscount)}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-black font-semibold">
-                      Tk. {formatPrice(product.finalPrice)}
+                    )}
+                  </div>
+
+                  {/* Course info */}
+                  {product.type === "course" && (
+                    <div className="mt-2 p-2 primaryTextColor flex flex-col  gap-1">
+                      {product.isPreBooked && (
+                        <div>
+                          {product.enrolledStudents && (
+                            <div className="flex items-center gap-1">
+                              <PrebookCountBadge
+                                productId={product._id}
+                                prebook={product.bookingNumber}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {!product.isPreBooked && (
+                        <div>
+                          {product.enrolledStudents && (
+                            <div className="flex items-center gap-1">
+                              <OrderCountBadge
+                                productId={product._id}
+                                enrolledStudents={product.enrolledStudents}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {product.modelTest > 0 && (
+                        <div className="flex items-center gap-1">
+                          <ClipboardCheck className="w-4 h-4 text-purple-600" />
+                          <span>Model Test: {product.modelTest}</span>
+                        </div>
+                      )}
+
+                      {product.liveDoubtSolutionsSession > 0 && (
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="w-4 h-4 text-purple-600" />
+                          <span>
+                            Live Doubt solving Session:{" "}
+                            {product.liveDoubtSolutionsSession}
+                          </span>
+                        </div>
+                      )}
+                      {product.lessons && (
+                        <div className="flex items-center gap-1">
+                          <BookOpen className="w-4 h-4 text-green-600" />
+                          <span>Lessons: {product.lessons}</span>
+                        </div>
+                      )}
+                      {product.classStartDate && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4 text-yellow-600" />
+                          <span>Start Date: {product.classStartDate}</span>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
 
-                {/* Course info */}
-                {product.type === "course" && (
-                  <div className="mt-2 p-2 primaryTextColor flex flex-col items-center gap-1">
-                    {product.isPreBooked && (
-                      <div>
-                        {product.enrolledStudents && (
-                          <div className="flex items-center gap-1">
-                            <PrebookCountBadge
-                              productId={product._id}
-                              prebook={product.bookingNumber}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {!product.isPreBooked && (
-                      <div>
-                        {product.enrolledStudents && (
-                          <div className="flex items-center gap-1">
-                            <OrderCountBadge
-                              productId={product._id}
-                              enrolledStudents={product.enrolledStudents}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
+                  {/*Book Specific Info*/}
+                  {product.type === "book" && (
+                    <div className="primaryTextColor p-2 flex flex-col  gap-1 mt-3">
+                      {product.isPreBooked && (
+                        <div>
+                          {product.enrolledStudents && (
+                            <div className="flex items-center gap-1">
+                              <PrebookCountBadge
+                                productId={product._id}
+                                prebook={product.bookingNumber}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {product.numberOfPages > 0 && (
+                        <div className="flex items-center gap-1">
+                          <FileText className="w-4 h-4 text-purple-600" />
+                          <span>Number of Pages: {product.numberOfPages}</span>
+                        </div>
+                      )}
 
-                    {product.modelTest > 0 && (
-                      <div className="flex items-center gap-1">
-                        <ClipboardCheck className="w-4 h-4 text-purple-600" />
-                        <span>Model Test: {product.modelTest}</span>
-                      </div>
-                    )}
+                      {product.numberOfChapters > 0 && (
+                        <div className="flex items-center gap-1">
+                          <BookOpen className="w-4 h-4 text-purple-600" />
+                          <span>
+                            Number of Chapters: {product.numberOfChapters}
+                          </span>
+                        </div>
+                      )}
 
-                    {product.liveDoubtSolutionsSession > 0 && (
-                      <div className="flex items-center gap-1">
-                        <MessageSquare className="w-4 h-4 text-purple-600" />
-                        <span>
-                          Live Doubt solving Session:{" "}
-                          {product.liveDoubtSolutionsSession}
-                        </span>
-                      </div>
-                    )}
-                    {product.lessons && (
-                      <div className="flex items-center gap-1">
-                        <BookOpen className="w-4 h-4 text-green-600" />
-                        <span>Lessons: {product.lessons}</span>
-                      </div>
-                    )}
-                    {product.classStartDate && (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4 text-yellow-600" />
-                        <span>Start Date: {product.classStartDate}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      {product.recommendedFor && (
+                        <div className="flex items-center gap-1">
+                          <ThumbsUp className="w-4 h-4 text-purple-600" />
+                          <span>Recommend For: {product.recommendedFor}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                {/*Book Specific Info*/}
-                {product.type === "book" && (
-                  <div className="primaryTextColor flex flex-col items-center gap-1 mt-3">
-                    {product.isPreBooked && (
-                      <div>
-                        {product.enrolledStudents && (
-                          <div className="flex items-center gap-1">
-                            <PrebookCountBadge
-                              productId={product._id}
-                              prebook={product.bookingNumber}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {product.numberOfPages > 0 && (
-                      <div className="flex items-center gap-1">
-                        <FileText className="w-4 h-4 text-purple-600" />
-                        <span>Number of Pages: {product.numberOfPages}</span>
-                      </div>
-                    )}
+                  {product.type === "exam" && (
+                    <div
+                      className={
+                        "primaryTextColor flex flex-col items-center gap-1 mt-3"
+                      }
+                    >
+                      {product.isPreBooked && (
+                        <div>
+                          <PrebookCountBadge
+                            productId={product._id}
+                            prebook={product.bookingNumber}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                    {product.numberOfChapters > 0 && (
-                      <div className="flex items-center gap-1">
-                        <BookOpen className="w-4 h-4 text-purple-600" />
-                        <span>
-                          Number of Chapters: {product.numberOfChapters}
-                        </span>
-                      </div>
-                    )}
-
-                    {product.recommendedFor && (
-                      <div className="flex items-center gap-1">
-                        <ThumbsUp className="w-4 h-4 text-purple-600" />
-                        <span>Recommend For: {product.recommendedFor}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {product.type === "exam" && (
-                  <div
-                    className={
-                      "primaryTextColor flex flex-col items-center gap-1 mt-3"
-                    }
-                  >
-                    {product.isPreBooked && (
-                      <div>
-                        <PrebookCountBadge
-                          productId={product._id}
-                          prebook={product.bookingNumber}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Quantity & Buy Now Buttons */}
+                  {/* Quantity & Buy Now Buttons */}
                 </div>
                 <div className="flex flex-col gap-2 p-2">
                   {/* Buttons */}

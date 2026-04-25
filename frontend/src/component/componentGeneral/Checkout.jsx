@@ -17,6 +17,7 @@ import OrderSummary from "./OrderSummary.jsx";
 import CheckoutHeader from "./CheckoutHeader.jsx";
 import PaymentMethod from "./PaymentMethod.jsx";
 import OrderTimeline from "./OrderTimeline.jsx";
+import CheckoutPageProductSuggestion from "./CheckoutPageProductSuggestion.jsx";
 
 const Checkout = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -303,6 +304,7 @@ const Checkout = () => {
             </button>
           </div>
         </div>
+        <CheckoutPageProductSuggestion/>
       </form>
       <Snackbar
         open={snackbar.open}
