@@ -1,211 +1,111 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useParams } from "react-router-dom";
-import useAuthUserStore from "../../store/AuthUserStore.js";
-import DOMPurify from "dompurify";
+import { Alert, Skeleton } from "@mui/material";
+import { Link } from "react-router-dom";
 
-import ExamResultsSkeleton from "./ExamResultsSkeleton.jsx";
-import QuestionPreview from "../QuestionPreview.jsx";
+const LoadingSkeleton = () => (
+  <div className="shadow rounded-lg p-3">
+    <h1 className="text-lg mb-4 font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
+      <Skeleton width="150px" />
+    </h1>
+    <div className="grid grid-cols-2 gap-2">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="p-4 shadow rounded space-y-2">
+          <Skeleton variant="text" width="80%" />
+          <Skeleton variant="text" width="60%" />
+          <Skeleton variant="text" width="40%" />
+          <div className="flex items-center justify-center pt-4">
+            <Skeleton variant="rectangular" width={100} height={36} />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-const ExamResults = () => {
-  const { attemptId } = useParams();
-  const { token } = useAuthUserStore();
-  const [results, setResults] = useState(null);
+export default function ExamResults() {
+  const { examId } = useParams();
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchResults = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        const response = await fetch(
-          `${API_URL}/exam-attempts/${attemptId}/results`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to fetch results");
-        }
-        const data = await response.json();
-        if (data.success) {
-          setResults(data.data);
+        const token = localStorage.getItem("token"); // adjust if using auth store
+        const res = await axios.get(`${API_URL}/results/exam/${examId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data.success) {
+          setResults(res.data.data);
         } else {
-          throw new Error(data.message || "Failed to fetch results");
+          setError("No results found");
         }
       } catch (err) {
-        setError(err.message);
+        console.error(err.response || err);
+        setError("Failed to fetch results");
       } finally {
         setLoading(false);
       }
     };
 
-    if (token) {
-      fetchResults();
-    }
-  }, [attemptId, token]);
+    fetchResults();
+  }, [examId, API_URL]);
 
-  if (loading) return <ExamResultsSkeleton />;
-  if (error) return <div>Error: {error}</div>;
-  if (!results) return <div>No results found.</div>;
+  if (loading) return <LoadingSkeleton />;
 
-  const { attempt, result, exam } = results;
-
+  if (error)
+    return (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        {error}
+      </Alert>
+    );
 
   return (
-    <div className="bg-gray-50 shadow-inner rounded-2xl p-3">
-      <div className="flex flex-col items-center justify-center mb-4">
-        <h1 className="text-3xl primaryTextColor font-bold ">Exam Results</h1>
-        <h2 className="text-2xl font-semibold">{exam.title}</h2>
-        <p
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(exam.description),
-          }}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-50 shadow-inner rounded-2xl p-3 flex flex-col items-center justify-center">
-          <h3 className="text-xl primaryTextColor font-bold">Summary</h3>
-          <p>
-            <strong>Status:</strong>{" "}
-            {attempt.status.charAt(0).toUpperCase() + attempt.status.slice(1)}
-          </p>
-          <p>
-            <strong>Total Marks:</strong> {result.totalMarks}
-          </p>
-          <p>
-            <strong>Obtained Marks:</strong> {result.obtainedMarks}
-          </p>
-          <p>
-            <strong>Percentage:</strong> {result.percentage?.toFixed(2)}%
-          </p>
-        </div>
-        <div className="bg-gray-50 shadow-inner rounded-2xl p-3 flex flex-col items-center justify-center">
-          <h3 className="text-xl primaryTextColor font-bold">MCQ Stats</h3>
-          <p>
-            <strong>Correct:</strong> {result.mcqResults.correct}
-          </p>
-          <p>
-            <strong>Wrong:</strong> {result.mcqResults.wrong}
-          </p>
-          <p>
-            <strong>Total:</strong> {result.mcqResults.total}
-          </p>
-        </div>
-      </div>
-
-      <div className={"bg-gray-50 shadow-inner rounded-2xl p-3"}>
-        <h3 className="text-xl font-bold primaryTextColor text-center mb-2">
-          Detailed Results
-        </h3>
-        {result.questionResults.map((qResult, index) => (
-          <div
-            key={index}
-            className="bg-gray-50 shadow-inner rounded-2xl py-4 p-3"
-          >
-            <div className="font-semibold primaryTextColor">
-              <QuestionPreview content={qResult.questionText} />
-            </div>
-
-            <div className="flex flex-col space-x-2">
-              <strong>Your Answer:</strong>
-              {qResult.questionType === "image" ? (
-                qResult.userAnswer && (Array.isArray(qResult.userAnswer) ? qResult.userAnswer.length > 0 : qResult.userAnswer) ? (
-                  <div>
-                    {(Array.isArray(qResult.userAnswer) ? qResult.userAnswer : [qResult.userAnswer]).map((imageName, index) => (
-                      <a
-                        key={index}
-                        href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/${imageName}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="primaryTextColor underline mr-4"
-                      >
-                        View Image {index + 1}
-                      </a>
-                    ))}
-                  </div>
-                ) : (
-                  <span>No image uploaded</span>
-                )
-              ) : (
-                <QuestionPreview content={qResult.userAnswer || ""} />
-              )}
-            </div>
-
+    <div className="shadow rounded-lg p-3">
+      <h1 className="text-lg mb-4 font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
+        Exam Results
+      </h1>
+      <div className="grid grid-cols-2 gap-2">
+        {results.map((result) => (
+          <div key={result._id} className="p-4 shadow rounded space-y-1">
             <p>
-              {qResult.questionType === "mcq-single" && (
-                <div className="flex items-center space-x-2">
-                  <strong>Correct Answer:</strong>
-                  <div className="flex-1">
-                    <QuestionPreview
-                      content={(() => {
-                        let displayCorrectAnswer = JSON.stringify(
-                          qResult.correctAnswer,
-                        );
-                        const subject = exam.subjects[qResult.subjectIndex];
-                        const question =
-                          subject?.questions[qResult.questionIndex];
-
-                        if (
-                          question &&
-                          Array.isArray(qResult.correctAnswer) &&
-                          question.options
-                        ) {
-                          displayCorrectAnswer = qResult.correctAnswer
-                            .map((idx) => question.options[idx])
-                            .join(", ");
-                        }
-
-                        return displayCorrectAnswer;
-                      })()}
-                    />
-                  </div>
-                </div>
-              )}
+              <strong>User:</strong>{" "}
+              {result.userId
+                ? `${result.userId.fullName} (${result.userId.email})`
+                : "User not found"}
             </p>
 
             <p>
-              <strong>Status:</strong>{" "}
-              {qResult.questionType === "mcq-single" ? (
-                qResult.isCorrect ? (
-                  <span className="text-green-500">Correct</span>
-                ) : (
-                  <span className="text-red-500">Incorrect</span>
-                )
-              ) : qResult.isCorrect === null ? (
-                <span className="text-yellow-500">Pending Review</span>
-              ) : qResult.reviewedAt ? (
-                <span className="text-blue-500">Marks Given</span>
-              ) : qResult.isCorrect === true ? (
-                <span className="text-green-500">Correct</span>
-              ) : (
-                <span className="text-red-500">Incorrect</span>
-              )}
+              <strong>Total Marks:</strong> {result.totalMarks} |{" "}
+              <strong>Obtained:</strong> {result.obtainedMarks} |{" "}
+              <p>
+                <strong>Percentage:</strong> {result.percentage?.toFixed(2)} %
+              </p>
             </p>
+
             <p>
-              <strong>Marks Obtained:</strong> {qResult.marksObtained} /{" "}
-              {qResult.maxMarks}
+              <strong>Status:</strong> {result.status}
             </p>
-            {(() => {
-              const subject = exam.subjects[qResult.subjectIndex];
-              const question = subject?.questions[qResult.questionIndex];
-              if (question && question.solution) {
-                return (
-                  <p>
-                    <strong>Solution:</strong>{" "}
-                    <QuestionPreview content={question.solution} />
-                  </p>
-                );
-              }
-              return null;
-            })()}
+
+            <Link
+              className={"flex items-center justify-center pt-4"}
+              to={`/admin/user-results/${result._id}`}
+            >
+              <button className="primaryBgColor cursor-pointer accentTextColor px-4 py-2 rounded">
+                View Details
+              </button>
+            </Link>
           </div>
         ))}
       </div>
     </div>
   );
-};
-
-export default ExamResults;
+}

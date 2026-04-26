@@ -161,10 +161,13 @@ ResultSchema.methods.calculateStatistics = function () {
 	});
 
 	// Update status based on review progress
-	if (this.pendingReviewCount === 0 && this.reviewedCount > 0) {
+	// Only short/image questions require manual review — if none pending, finalize
+	if (this.pendingReviewCount === 0) {
 		this.status = "finalized";
 	} else if (this.reviewedCount > 0) {
 		this.status = "partially_reviewed";
+	} else {
+		this.status = "pending_manual_review";
 	}
 
 	// Ensure marksObtained is consistent with isCorrect for all questions

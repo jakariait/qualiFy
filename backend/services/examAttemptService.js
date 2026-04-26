@@ -238,19 +238,21 @@ class ExamAttemptService {
         let questionResult = questionResultMap.get(questionIndex);
         if (!questionResult && subject?.questions?.[questionIndex]) {
           const question = subject.questions[questionIndex];
-          questionResult = {
+          // Include userAnswer directly so Mixed type is set before the push
+          result.questionResults.push({
             questionIndex,
             subjectIndex,
             questionType: question.type,
             questionText: question.text,
             correctAnswer: question.correctAnswers,
             maxMarks: question.marks,
-            userAnswer: null,
+            userAnswer: answer,
             isCorrect: null,
             marksObtained: 0,
             timeSpent: 0,
-          };
-          result.questionResults.push(questionResult);
+          });
+          // Use the Mongoose subdocument reference for subsequent grading logic
+          questionResult = result.questionResults[result.questionResults.length - 1];
           questionResultMap.set(questionIndex, questionResult);
         }
 
@@ -272,6 +274,10 @@ class ExamAttemptService {
           }
         }
       }
+
+      // Mark as modified so Mongoose persists Mixed-type field changes
+      attempt.markModified("subjectAttempts");
+      result.markModified("questionResults");
 
       // 5. Save both documents in parallel
       await Promise.all([attempt.save(), result.save()]);
@@ -324,19 +330,21 @@ class ExamAttemptService {
         let questionResult = questionResultMap.get(questionIndex);
         if (!questionResult && subject?.questions?.[questionIndex]) {
           const question = subject.questions[questionIndex];
-          questionResult = {
+          // Include userAnswer directly so Mixed type is set before the push
+          result.questionResults.push({
             questionIndex,
             subjectIndex,
             questionType: question.type,
             questionText: question.text,
             correctAnswer: question.correctAnswers,
             maxMarks: question.marks,
-            userAnswer: null,
+            userAnswer: answer,
             isCorrect: null,
             marksObtained: 0,
             timeSpent: 0,
-          };
-          result.questionResults.push(questionResult);
+          });
+          // Use the Mongoose subdocument reference for subsequent grading logic
+          questionResult = result.questionResults[result.questionResults.length - 1];
           questionResultMap.set(questionIndex, questionResult);
         }
 
@@ -359,6 +367,9 @@ class ExamAttemptService {
         }
       }
 
+      // Mark questionResults as modified so Mongoose persists Mixed-type field changes
+      result.markModified("questionResults");
+
       // 4. Mark current subject complete and start next
       subjectAttempt.isCompleted = true;
       subjectAttempt.endTime = new Date();
@@ -366,6 +377,10 @@ class ExamAttemptService {
 
       const nextSubjectAttempt = attempt.subjectAttempts.find((s) => !s.isCompleted);
       if (nextSubjectAttempt) nextSubjectAttempt.startTime = new Date();
+
+      // Mark as modified so Mongoose persists Mixed-type field changes
+      attempt.markModified("subjectAttempts");
+      result.markModified("questionResults");
 
       // 5. Save both documents in parallel
       await Promise.all([attempt.save(), result.save()]);
