@@ -110,7 +110,9 @@ export default function ExamResults() {
   return (
     <div className="shadow rounded-lg p-3">
       <h1 className="text-lg mb-4 font-semibold border-l-4 pl-2 primaryBorderColor primaryTextColor">
-        Exam Results
+        {results[0]?.examId?.title
+          ? `Exam Results — ${results[0].examId.title}`
+          : "Exam Results"}
       </h1>
       <div className="grid grid-cols-2 gap-2">
         {results.map((result, idx) => {
