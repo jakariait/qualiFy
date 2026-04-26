@@ -13,6 +13,7 @@ const LiveExamList = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userAttempts, setUserAttempts] = useState([]);
+  const [retakeExamIds, setRetakeExamIds] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
   const [page, setPage] = useState(1);
@@ -110,7 +111,21 @@ const LiveExamList = () => {
       }
     };
 
+    const fetchRetakePermissions = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_URL}/user/retake-permissions`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          setRetakeExamIds(data.data);
+        }
+      } catch (_) {}
+    };
+
     fetchUserAttempts();
+    fetchRetakePermissions();
   }, [token]);
 
   const handleStartExam = async (examId) => {
@@ -192,6 +207,7 @@ const LiveExamList = () => {
                   attempt.exam && String(attempt.exam._id) === String(exam._id),
               );
               const hasAttempted = !!userAttempt;
+              const canRetake = hasAttempted && retakeExamIds.includes(String(exam._id));
 
               return (
                 <div
@@ -205,12 +221,22 @@ const LiveExamList = () => {
                     <span>Duration: {exam.durationMin} Mins</span>
                   </div>
                   {hasAttempted ? (
-                    <Link
-                      to={`/user/exam/result/${exam._id}`}
-                      className="block text-center w-full bg-blue-500 accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
-                    >
-                      View Results
-                    </Link>
+                    <div className="flex flex-col gap-2 mt-4">
+                      <Link
+                        to={`/user/exam/result/${exam._id}`}
+                        className="block text-center w-full bg-blue-500 accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300"
+                      >
+                        View Results
+                      </Link>
+                      {canRetake && (
+                        <button
+                          onClick={() => handleStartExamClick(exam)}
+                          className="w-full border-2 primaryBorderColor primaryTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300"
+                        >
+                          Retake Exam
+                        </button>
+                      )}
+                    </div>
                   ) : (
                     <button
                       onClick={() => handleStartExamClick(exam)}

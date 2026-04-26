@@ -35,6 +35,7 @@ const freeClassController = require("../controllers/freeClass.controller");
 const examController = require("../controllers/examController");
 const examAttemptController = require("../controllers/examAttemptController");
 const resultController = require("../controllers/resultController");
+const retakeController = require("../controllers/retakeController");
 const courseExamNoticeController = require("../controllers/courseExamNoticeController");
 const noticeController = require("../controllers/noticeController");
 const prebookController = require("../controllers/prebookController");
@@ -811,6 +812,14 @@ router.post(
   examAttemptController.submitAndAdvance,
 );
 
+// Retake Routes (Admin)
+router.post("/admin/retake", adminProtect, retakeController.grantRetake);
+router.delete("/admin/retake/:permissionId", adminProtect, retakeController.revokeRetake);
+router.get("/admin/exams/:examId/retake-permissions", adminProtect, retakeController.getRetakePermissions);
+
+// Retake Routes (User)
+router.get("/user/retake-permissions", userProtect, retakeController.getUserRetakePermissions);
+
 // Result Routes (Admin)
 router.get(
   "/results/exam/:examId",
@@ -819,6 +828,7 @@ router.get(
 );
 router.get("/results", adminProtect, resultController.getAllResults);
 router.get("/results/:resultId", resultController.getResultById);
+router.delete("/results/:resultId", adminProtect, resultController.deleteResult);
 router.post(
   "/results/:resultId/review-question",
   adminProtect,

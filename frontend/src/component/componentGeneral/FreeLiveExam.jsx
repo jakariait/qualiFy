@@ -11,6 +11,7 @@ const FreeLiveExamList = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userAttempts, setUserAttempts] = useState([]);
+  const [retakeExamIds, setRetakeExamIds] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
 
@@ -61,9 +62,7 @@ const FreeLiveExamList = () => {
       if (!token) return;
       try {
         const response = await fetch(`${API_URL}/user/exam-attempts`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
         if (!response.ok) {
@@ -72,17 +71,29 @@ const FreeLiveExamList = () => {
         if (data.success && Array.isArray(data.data)) {
           setUserAttempts(data.data);
         } else {
-          showSnackbar(
-            data.message || "Received invalid user attempts data from server",
-          );
+          showSnackbar(data.message || "Received invalid user attempts data from server");
         }
       } catch (err) {
         showSnackbar(err.message);
       }
     };
 
+    const fetchRetakePermissions = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_URL}/user/retake-permissions`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          setRetakeExamIds(data.data);
+        }
+      } catch (_) {}
+    };
+
     fetchExams();
     fetchUserAttempts();
+    fetchRetakePermissions();
   }, [token]);
 
   const handleStartExam = async (examId) => {
@@ -167,7 +178,7 @@ const FreeLiveExamList = () => {
                 attempt.exam && String(attempt.exam._id) === String(exam._id),
             );
             const hasAttempted = !!userAttempt;
-            const attemptId = userAttempt ? userAttempt.id : null;
+            const canRetake = hasAttempted && retakeExamIds.includes(String(exam._id));
 
             return (
               <div
@@ -181,12 +192,22 @@ const FreeLiveExamList = () => {
                   <span>Duration: {exam.durationMin} Mins</span>
                 </div>
                 {hasAttempted ? (
-                  <Link
-                    to={`/user/exam/result/${exam._id}`}
-                    className="block text-center w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300 mt-4"
-                  >
-                    View Results
-                  </Link>
+                  <div className="flex flex-col gap-2 mt-4">
+                    <Link
+                      to={`/user/exam/result/${exam._id}`}
+                      className="block text-center w-full primaryBgColor accentTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300"
+                    >
+                      View Results
+                    </Link>
+                    {canRetake && (
+                      <button
+                        onClick={() => handleStartExamClick(exam)}
+                        className="w-full border-2 primaryBorderColor primaryTextColor cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-300"
+                      >
+                        Retake Exam
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <button
                     onClick={() => handleStartExamClick(exam)}

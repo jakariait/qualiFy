@@ -86,6 +86,24 @@ class ResultController {
     }
   }
 
+  // Delete a result and its attempt (dev/admin use)
+  async deleteResult(req, res) {
+    try {
+      const { resultId } = req.params;
+      const result = await Result.findById(resultId);
+      if (!result) {
+        return res.status(404).json({ success: false, message: "Result not found" });
+      }
+      await Promise.all([
+        Result.findByIdAndDelete(resultId),
+        ExamAttempt.findByIdAndDelete(result.attemptId),
+      ]);
+      res.status(200).json({ success: true, message: "Result and attempt deleted." });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
   // Review and grade a question
   async reviewQuestion(req, res) {
     try {

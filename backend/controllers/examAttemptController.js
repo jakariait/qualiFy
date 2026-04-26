@@ -1,4 +1,6 @@
 const examAttemptService = require("../services/examAttemptService");
+const ExamAttempt = require("../models/ExamAttemptModel");
+const RetakePermission = require("../models/RetakePermissionModel");
 
 class ExamAttemptController {
 	// Start a new exam attempt
@@ -7,16 +9,29 @@ class ExamAttemptController {
 			const { examId } = req.params;
 			const userId = req.user.id;
 
-			const existingAttempt = await require("../models/ExamAttemptModel").findOne({
-				examId: examId,
-				userId: userId,
-			});
-
-			if (existingAttempt) {
+			// Block if there is an active in-progress attempt
+			const inProgressAttempt = await ExamAttempt.findOne({ examId, userId, status: "in_progress" });
+			if (inProgressAttempt) {
 				return res.status(403).json({
 					success: false,
-					message: "You have already attempted this exam.",
+					message: "You have an ongoing exam attempt. Please complete it first.",
 				});
+			}
+
+			// If a previous attempt exists, require a retake permission
+			const previousAttempt = await ExamAttempt.findOne({ examId, userId });
+			if (previousAttempt) {
+				const retakePermission = await RetakePermission.findOne({ examId, userId, used: false });
+				if (!retakePermission) {
+					return res.status(403).json({
+						success: false,
+						message: "You have already attempted this exam.",
+					});
+				}
+				// Consume the retake permission
+				retakePermission.used = true;
+				retakePermission.usedAt = new Date();
+				await retakePermission.save();
 			}
 
 			const clientInfo = {
