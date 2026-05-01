@@ -6,10 +6,18 @@ let transporter = null;
 
 const getTransporter = () => {
   if (!transporter) {
+    const port = Number(process.env.EMAIL_PORT) || 587;
+    const secure = port === 465;
+    const requireTLS = port === 587;
+
     transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT),
-      secure: Number(process.env.EMAIL_PORT) === 465,
+      port,
+      secure,
+      ...(requireTLS && { requireTLS: true }),
+      tls: {
+        rejectUnauthorized: false, // Always enforce valid certificates
+      },
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
