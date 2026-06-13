@@ -25,9 +25,7 @@ import axios from "axios";
 import useAuthAdminStore from "../../store/AuthAdminStore";
 import ImageComponent from "../componentGeneral/ImageComponent.jsx";
 
-import { saveAs } from "file-saver";
 import RequirePermission from "./RequirePermission.jsx";
-import ExcelJS from "exceljs";
 
 const CustomerList = () => {
   const { token } = useAuthAdminStore();
@@ -124,41 +122,44 @@ const CustomerList = () => {
     }
   };
 
-  const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Customers");
-
-    worksheet.columns = [
-      { header: "SL No", key: "sl", width: 8 },
-      { header: "Name", key: "name", width: 20 },
-      { header: "Email", key: "email", width: 25 },
-      { header: "Phone", key: "phone", width: 15 },
-      { header: "Joined Date", key: "joined", width: 15 },
-      { header: "Deletion Requested", key: "deletion", width: 18 },
-      { header: "Requested At", key: "requestedAt", width: 25 },
+  const handleExportCSV = () => {
+    const headers = [
+      "SL No",
+      "Name",
+      "Email",
+      "Phone",
+      "Joined Date",
+      "Deletion Requested",
+      "Requested At",
     ];
 
-    filteredCustomers.forEach((cus, index) => {
-      worksheet.addRow({
-        sl: index + 1,
-        name: cus.fullName || "N/A",
-        email: cus.email || "N/A",
-        phone: cus.phone || "N/A",
-        joined: cus.createdAt
-          ? new Date(cus.createdAt).toLocaleDateString()
-          : "N/A",
-        deletion: cus.accountDeletion?.requested ? "Yes" : "No",
-        requestedAt: cus.accountDeletion?.requestedAt
-          ? new Date(cus.accountDeletion.requestedAt).toLocaleString()
-          : "N/A",
-      });
-    });
+    const rows = filteredCustomers.map((cus, index) => [
+      index + 1,
+      cus.fullName || "N/A",
+      cus.email || "N/A",
+      cus.phone || "N/A",
+      cus.createdAt
+        ? new Date(cus.createdAt).toLocaleDateString()
+        : "N/A",
+      cus.accountDeletion?.requested ? "Yes" : "No",
+      cus.accountDeletion?.requestedAt
+        ? new Date(cus.accountDeletion.requestedAt).toLocaleString()
+        : "N/A",
+    ]);
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, "customers.xlsx");
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "customers.csv";
+    link.click();
+    URL.revokeObjectURL(link.href);
   };
 
   const paginatedCustomers = filteredCustomers.slice(
@@ -178,9 +179,9 @@ const CustomerList = () => {
           className={
             "primaryBgColor accentTextColor cursor-pointer px-4 py-2 rounded-lg"
           }
-          onClick={handleExportExcel}
+          onClick={handleExportCSV}
         >
-          Download As Excel
+          Download As CSV
         </button>
       </div>
 
