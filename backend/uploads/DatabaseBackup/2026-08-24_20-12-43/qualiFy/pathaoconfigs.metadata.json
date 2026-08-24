@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"bdbe36b5463e4263b02cf1b54dc78e19","collectionName":"pathaoconfigs","type":"collection"}
