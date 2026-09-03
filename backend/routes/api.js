@@ -987,6 +987,11 @@ router.get(
   adminProtect,
   pathaoController.issueTokenController,
 );
+router.get(
+  "/pathao/refresh-token",
+  adminProtect,
+  pathaoController.refreshTokenController,
+);
 router.post(
   "/pathao/orders/bulk",
   adminProtect,

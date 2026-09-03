@@ -29,6 +29,7 @@ const issueToken = async (config) => {
       refreshToken: refresh_token,
       tokenType: token_type,
       expiresIn: expires_in,
+      tokenIssuedAt: new Date(),
     });
 
     return {
@@ -64,6 +65,7 @@ const refreshToken = async (config) => {
       refreshToken: refresh_token,
       tokenType: token_type,
       expiresIn: expires_in,
+      tokenIssuedAt: new Date(),
     });
 
     return {
@@ -89,9 +91,19 @@ const getValidToken = async () => {
     return result.success ? result.access_token : null;
   }
 
-  // Check if token might be expired (refresh if expires within 1 hour)
-  const bufferTime = 3600; // 1 hour in seconds
-  if (config.expiresIn && config.expiresIn < bufferTime) {
+  // Calculate remaining time based on when token was issued
+  if (config.tokenIssuedAt && config.expiresIn) {
+    const issuedAt = new Date(config.tokenIssuedAt).getTime();
+    const expiresAt = issuedAt + config.expiresIn * 1000;
+    const remainingMs = expiresAt - Date.now();
+    const bufferTime = 3600 * 1000; // 1 hour in milliseconds
+
+    if (remainingMs < bufferTime) {
+      const result = await refreshToken(config);
+      return result.success ? result.access_token : null;
+    }
+  } else if (!config.tokenIssuedAt && config.accessToken) {
+    // Legacy token without issuance time - refresh it to be safe
     const result = await refreshToken(config);
     return result.success ? result.access_token : null;
   }
@@ -100,7 +112,7 @@ const getValidToken = async () => {
 };
 
 // API Helper - Make authenticated request
-const makeRequest = async (endpoint, method = "GET", data = null) => {
+const makeRequest = async (endpoint, method = "GET", data = null, isRetry = false) => {
   const token = await getValidToken();
   if (!token) {
     throw new Error("Failed to get valid Pathao access token");
@@ -127,10 +139,19 @@ const makeRequest = async (endpoint, method = "GET", data = null) => {
       ...response.data,
     };
   } catch (error) {
-    console.error(`Pathao API Error [${endpoint}]:`, error.response?.data || error.message);
+    const errorData = error.response?.data;
+    // If unauthorized and not already a retry, refresh token and try again
+    if (error.response?.status === 401 && !isRetry) {
+      const freshConfig = await getConfig();
+      const result = await refreshToken(freshConfig);
+      if (result.success) {
+        return await makeRequest(endpoint, method, data, true);
+      }
+    }
+    console.error(`Pathao API Error [${endpoint}]:`, errorData || error.message);
     return {
       success: false,
-      error: error.response?.data || error.message,
+      error: errorData || error.message,
     };
   }
 };
@@ -215,6 +236,12 @@ exports.getOrderInfo = async (consignmentId) => {
 exports.issueNewToken = async () => {
   const config = await getConfig();
   return await issueToken(config);
+};
+
+// Force refresh token
+exports.forceRefreshToken = async () => {
+  const config = await getConfig();
+  return await refreshToken(config);
 };
 
 // Get config helper

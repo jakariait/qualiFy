@@ -237,6 +237,33 @@ const issueTokenController = async (req, res) => {
   }
 };
 
+// Force refresh token (for admin)
+const refreshTokenController = async (req, res) => {
+  try {
+    const result = await pathaoService.forceRefreshToken();
+    if (result.success) {
+      res.status(200).json({
+        status: "success",
+        message: "Token refreshed successfully",
+        data: {
+          expires_in: result.expires_in,
+        },
+      });
+    } else {
+      res.status(500).json({
+        status: "error",
+        message: "Failed to refresh token",
+        error: result.error,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message || "Something went wrong",
+    });
+  }
+};
+
 module.exports = {
   getCitiesController,
   getZonesController,
@@ -249,4 +276,5 @@ module.exports = {
   getOrderStatusController,
   calculatePriceController,
   issueTokenController,
+  refreshTokenController,
 };
